@@ -6,6 +6,7 @@ import {
   riskRegister,
   erpSignals,
   crmSignals,
+  externalNews,
   portfolioMetrics,
   type Portfolio,
 } from '@/lib/simulated-data'
@@ -31,6 +32,16 @@ export interface PropagationStep {
 }
 
 export type ImpactLevel = 'High' | 'Medium' | 'Low'
+
+export type AlertSignalType = 'risk' | 'news' | 'erp' | 'crm'
+
+export interface AlertLink {
+  id: string
+  title: string
+  source: string
+  type: AlertSignalType
+  detail?: string   // one-line context pulled from the source record
+}
 
 export interface ImpactedUnit {
   name: string
@@ -62,6 +73,7 @@ export interface Action {
   ifActedExposureM: number     // residual exposure AED M if acted (for delta calc)
   recommendation: string[]
   aiConfidence: number         // 0–1
+  triggeredBy: AlertLink[]     // linked alerts derived from triggerIds + live data
   impactPercent: number        // impactValue / TOTAL_PORTFOLIO_VALUE_M × 100
   impactedUnits: ImpactedUnit[]  // cross-portfolio impact derived from propagation
   priorityScore: number        // 0–100 weighted composite score
@@ -95,8 +107,8 @@ function trendScore(worseningTrend: number): number {
   return Math.round(worseningTrend * 100)
 }
 
-type RawAction = Omit<Action, 'priorityScore' | 'impactPercent' | 'status' | 'daysOverdue' | 'escalated'>
-// impactedUnits is set manually per action; scoring/accountability/percent are computed
+type RawAction = Omit<Action, 'priorityScore' | 'impactPercent' | 'triggeredBy' | 'status' | 'daysOverdue' | 'escalated'>
+// impactedUnits is set manually; scoring/percent/triggeredBy/accountability are computed
 
 function computeScores(actions: RawAction[]): Action[] {
   const impacts   = actions.map(a => a.impactValue)
@@ -132,7 +144,10 @@ function computeScores(actions: RawAction[]): Action[] {
       ((a.impactValue / TOTAL_PORTFOLIO_VALUE_M) * 100).toFixed(1)
     )
 
-    return { ...a, priorityScore, impactPercent, status, daysOverdue, escalated }
+    // ── Alert links ────────────────────────────────────────────────
+    const triggeredBy = buildAlertLinks(a.triggerIds)
+
+    return { ...a, priorityScore, impactPercent, triggeredBy, status, daysOverdue, escalated }
   })
 }
 
@@ -175,6 +190,80 @@ export const STATUS_LABEL: Record<ActionStatus, string> = {
 const getRisk = (id: string) => riskRegister.find(r => r.id === id)!
 const getERP  = (id: string) => erpSignals.find(s => s.id === id)!
 const getCRM  = (id: string) => crmSignals.find(s => s.id === id)!
+const getNews = (id: string) => externalNews.find(n => n.id === id)!
+
+// ─── Alert link builder ───────────────────────────────────────────────────────
+// Maps trigger IDs (R-xxx, N-xxx, ERP-xxx, CRM-xxx) to AlertLink objects
+// by reading directly from the source data arrays — no hardcoded strings.
+
+function buildAlertLinks(triggerIds: string[]): AlertLink[] {
+  return triggerIds.map(id => {
+    if (id.startsWith('R-')) {
+      const r = getRisk(id)
+      return {
+        id,
+        title: r.title,
+        source: `Risk Register · ${r.category}`,
+        type: 'risk' as AlertSignalType,
+        detail: `Score ${r.score}/25 · ${r.trend} · Owner: ${r.owner}`,
+      }
+    }
+    if (id.startsWith('N-')) {
+      const n = getNews(id)
+      return {
+        id,
+        title: n.headline,
+        source: n.source,
+        type: 'news' as AlertSignalType,
+        detail: `Severity: ${n.aiClassification.severity} · AI confidence ${Math.round(n.aiClassification.confidence * 100)}%`,
+      }
+    }
+    if (id.startsWith('ERP-')) {
+      const e = getERP(id)
+      return {
+        id,
+        title: e.description,
+        source: `Oracle Fusion ERP · ${e.type}`,
+        type: 'erp' as AlertSignalType,
+        detail: `Value: ${e.value}${e.unit} · Threshold: ${e.threshold}${e.unit} · ${e.severity.toUpperCase()}`,
+      }
+    }
+    if (id.startsWith('CRM-')) {
+      const c = getCRM(id)
+      return {
+        id,
+        title: c.description,
+        source: `Salesforce CRM · ${c.metric}`,
+        type: 'crm' as AlertSignalType,
+        detail: `${c.value} vs ${c.benchmark} benchmark · ${c.severity.toUpperCase()}`,
+      }
+    }
+    return { id, title: id, source: 'Unknown', type: 'risk' as AlertSignalType }
+  })
+}
+
+// ─── Signal type display helpers ──────────────────────────────────────────────
+
+export const SIGNAL_TYPE_COLOR: Record<AlertSignalType, string> = {
+  risk: 'var(--risk-critical)',
+  news: 'var(--risk-high)',
+  erp:  'var(--accent-primary)',
+  crm:  'var(--chart-2)',
+}
+
+export const SIGNAL_TYPE_BG: Record<AlertSignalType, string> = {
+  risk: 'rgba(255,59,59,0.1)',
+  news: 'rgba(255,140,0,0.1)',
+  erp:  'rgba(201,168,76,0.1)',
+  crm:  'rgba(74,158,255,0.1)',
+}
+
+export const SIGNAL_TYPE_LABEL: Record<AlertSignalType, string> = {
+  risk: 'Risk Register',
+  news: 'External News',
+  erp:  'ERP Signal',
+  crm:  'CRM Signal',
+}
 
 // ─── Action definitions ───────────────────────────────────────────────────────
 // Each action is fully derived from live data lookups — no magic numbers.

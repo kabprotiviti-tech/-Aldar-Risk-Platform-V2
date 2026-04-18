@@ -24,6 +24,7 @@ import {
   Send,
   TrendingDown,
   Calculator,
+  Zap,
 } from 'lucide-react'
 import {
   PRIORITY_COLOR,
@@ -33,9 +34,14 @@ import {
   STATUS_LABEL,
   IMPACT_LEVEL_COLOR,
   IMPACT_LEVEL_BG,
+  SIGNAL_TYPE_COLOR,
+  SIGNAL_TYPE_BG,
+  SIGNAL_TYPE_LABEL,
   type Action,
   type ActionPriority,
   type ActionStatus,
+  type AlertLink,
+  type AlertSignalType,
   type ImpactedUnit,
   type DataPoint,
   type PropagationStep,
@@ -334,6 +340,135 @@ function PortfolioImpact({ units }: { units: ImpactedUnit[] }) {
             <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', lineHeight: 1.5, flex: 1 }}>
               {u.reason}
             </span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// ─── Triggered by signals ─────────────────────────────────────────────────────
+
+function TriggeredBySignals({ links }: { links: AlertLink[] }) {
+  const [expanded, setExpanded] = React.useState<string | null>(null)
+
+  if (!links.length)
+    return <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>No additional data available</p>
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+      {links.map((link) => {
+        const color = SIGNAL_TYPE_COLOR[link.type]
+        const bg    = SIGNAL_TYPE_BG[link.type]
+        const isOpen = expanded === link.id
+
+        return (
+          <div
+            key={link.id}
+            onClick={() => setExpanded(isOpen ? null : link.id)}
+            style={{
+              borderRadius: '7px',
+              border: `1px solid ${isOpen ? color + '50' : 'var(--border-color)'}`,
+              backgroundColor: isOpen ? bg : 'var(--bg-card)',
+              cursor: 'pointer',
+              transition: 'border-color 0.18s, background-color 0.18s',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Row */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '9px', padding: '9px 12px' }}>
+              {/* Signal type chip */}
+              <span
+                style={{
+                  padding: '2px 7px',
+                  borderRadius: '4px',
+                  backgroundColor: bg,
+                  border: `1px solid ${color}40`,
+                  color,
+                  fontSize: '0.6rem',
+                  fontWeight: 800,
+                  letterSpacing: '0.07em',
+                  textTransform: 'uppercase',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                }}
+              >
+                {SIGNAL_TYPE_LABEL[link.type]}
+              </span>
+
+              {/* ID badge */}
+              <span
+                style={{
+                  fontSize: '0.62rem',
+                  fontWeight: 700,
+                  color: 'var(--text-muted)',
+                  backgroundColor: 'var(--bg-card)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '3px',
+                  padding: '1px 6px',
+                  flexShrink: 0,
+                  fontVariantNumeric: 'tabular-nums',
+                }}
+              >
+                {link.id}
+              </span>
+
+              {/* Title */}
+              <span
+                style={{
+                  color: 'var(--text-secondary)',
+                  fontSize: '0.77rem',
+                  fontWeight: 500,
+                  lineHeight: 1.4,
+                  flex: 1,
+                  minWidth: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: isOpen ? 'normal' : 'nowrap',
+                }}
+              >
+                {link.title}
+              </span>
+
+              {/* Expand indicator */}
+              {isOpen
+                ? <ChevronUp size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                : <ChevronDown size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />}
+            </div>
+
+            {/* Expanded detail */}
+            <AnimatePresence initial={false}>
+              {isOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.18 }}
+                  style={{ overflow: 'hidden' }}
+                >
+                  <div
+                    style={{
+                      padding: '0 12px 10px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '4px',
+                      borderTop: `1px solid ${color}25`,
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', paddingTop: '8px' }}>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.67rem', fontWeight: 600 }}>Source:</span>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.72rem' }}>{link.source}</span>
+                    </div>
+                    {link.detail && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.67rem', fontWeight: 600 }}>Detail:</span>
+                        <span style={{ color, fontSize: '0.72rem', fontWeight: 600 }}>{link.detail}</span>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )
       })}
@@ -694,6 +829,16 @@ export function ActionDetailPanel({
               }}
             >
 
+              {/* ── 0. Triggered by Signals — default OPEN ───────────────────── */}
+              <Section
+                icon={Zap}
+                title="Triggered by Signals"
+                iconColor="var(--chart-2)"
+                defaultOpen
+              >
+                <TriggeredBySignals links={action.triggeredBy} />
+              </Section>
+
               {/* ── 1. Why This Matters (Root Causes) — default OPEN ─────────── */}
               <Section
                 icon={AlertTriangle}
@@ -885,38 +1030,6 @@ export function ActionDetailPanel({
                 </div>
               </Section>
 
-              {/* ── Trigger IDs ───────────────────────────────────────────────── */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '12px 20px',
-                  flexWrap: 'wrap',
-                  borderBottom: '1px solid var(--border-color)',
-                }}
-              >
-                <span style={{ color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 600 }}>
-                  Source signals:
-                </span>
-                {action.triggerIds.map((id) => (
-                  <span
-                    key={id}
-                    style={{
-                      fontSize: '0.63rem',
-                      fontWeight: 700,
-                      color: 'var(--text-muted)',
-                      backgroundColor: 'var(--bg-card)',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: '3px',
-                      padding: '2px 7px',
-                      fontVariantNumeric: 'tabular-nums',
-                    }}
-                  >
-                    {id}
-                  </span>
-                ))}
-              </div>
 
               {/* ── CTA — Assign / Escalate ───────────────────────────────────── */}
               <div style={{ padding: '16px 20px 28px' }}>
