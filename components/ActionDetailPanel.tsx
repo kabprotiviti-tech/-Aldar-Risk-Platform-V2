@@ -592,19 +592,34 @@ export function ActionDetailPanel({
                 <PriorityBadge priority={action.priority} />
 
                 <div
+                  title={`Based on total Aldar portfolio value: AED ${(10_000).toLocaleString()}M`}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '4px',
+                    gap: '6px',
                     padding: '3px 10px',
                     borderRadius: '5px',
                     backgroundColor: `${PRIORITY_COLOR[action.priority]}15`,
                     border: `1px solid ${PRIORITY_COLOR[action.priority]}35`,
+                    cursor: 'help',
                   }}
                 >
                   <BarChart2 size={10} style={{ color: PRIORITY_COLOR[action.priority] }} />
                   <span style={{ color: PRIORITY_COLOR[action.priority], fontSize: '0.74rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
                     {action.impactLabel}
+                  </span>
+                  <span
+                    style={{
+                      color: PRIORITY_COLOR[action.priority],
+                      fontSize: '0.67rem',
+                      fontWeight: 600,
+                      opacity: 0.8,
+                      borderLeft: `1px solid ${PRIORITY_COLOR[action.priority]}40`,
+                      paddingLeft: '6px',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {action.impactPercent}% of portfolio
                   </span>
                 </div>
 

@@ -59,6 +59,7 @@ export interface Action {
   consequence: string
   recommendation: string[]
   aiConfidence: number         // 0–1
+  impactPercent: number        // impactValue / TOTAL_PORTFOLIO_VALUE_M × 100
   impactedUnits: ImpactedUnit[]  // cross-portfolio impact derived from propagation
   priorityScore: number        // 0–100 weighted composite score
   // ── Accountability fields (computed) ─────────────────────────────
@@ -67,6 +68,12 @@ export interface Action {
   daysOverdue: number          // 0 if on track
   escalated: boolean           // true if overdue > 3 days
 }
+
+// ─── Portfolio context ────────────────────────────────────────────────────────
+// Total Aldar portfolio value used as the denominator for all impact % calculations.
+// All actions reference the same base so numbers are directly comparable.
+
+export const TOTAL_PORTFOLIO_VALUE_M = 10_000   // AED millions
 
 // ─── Priority scoring ─────────────────────────────────────────────────────────
 // Formula: 0.4×normalizedImpact + 0.2×normalizedUrgency + 0.2×normalizedSeverity + 0.2×normalizedTrend
@@ -85,8 +92,8 @@ function trendScore(worseningTrend: number): number {
   return Math.round(worseningTrend * 100)
 }
 
-type RawAction = Omit<Action, 'priorityScore' | 'status' | 'daysOverdue' | 'escalated'>
-// (impactedUnits is set manually per action; only scoring/accountability fields are computed)
+type RawAction = Omit<Action, 'priorityScore' | 'impactPercent' | 'status' | 'daysOverdue' | 'escalated'>
+// impactedUnits is set manually per action; scoring/accountability/percent are computed
 
 function computeScores(actions: RawAction[]): Action[] {
   const impacts   = actions.map(a => a.impactValue)
@@ -117,7 +124,12 @@ function computeScores(actions: RawAction[]): Action[] {
     const status: ActionStatus = daysOverdue > 0 ? 'overdue' : 'open'
     const escalated = daysOverdue > 3
 
-    return { ...a, priorityScore, status, daysOverdue, escalated }
+    // ── Portfolio context ──────────────────────────────────────────
+    const impactPercent = parseFloat(
+      ((a.impactValue / TOTAL_PORTFOLIO_VALUE_M) * 100).toFixed(1)
+    )
+
+    return { ...a, priorityScore, impactPercent, status, daysOverdue, escalated }
   })
 }
 

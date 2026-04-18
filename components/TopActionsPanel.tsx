@@ -234,17 +234,16 @@ function ActionRow({
           }}
         >
           {/* Impact */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <div
+            title="Based on total Aldar portfolio value: AED 10,000M"
+            style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'help' }}
+          >
             <Zap size={11} style={{ color: 'var(--text-muted)' }} />
-            <span
-              style={{
-                color,
-                fontSize: '0.74rem',
-                fontWeight: 700,
-                fontVariantNumeric: 'tabular-nums',
-              }}
-            >
+            <span style={{ color, fontSize: '0.74rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
               {action.impactLabel}
+            </span>
+            <span style={{ color: 'var(--text-muted)', fontSize: '0.67rem' }}>
+              ({action.impactPercent}%)
             </span>
           </div>
 
