@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" fill="none">
+  <!--
+    Aldar Properties brand mark — dark / light-background variant.
+    Replace with official export when available.
+  -->
+
+  <!-- Outer diamond ring -->
+  <path
+    d="M22 2 L40 22 L22 42 L4 22 Z"
+    stroke="rgba(10,61,122,0.3)"
+    stroke-width="1"
+    fill="none"
+  />
+
+  <!-- Lower-left facet -->
+  <path d="M4 22 L22 42 L22 22 Z" fill="#0A3D7A" opacity="0.45"/>
+
+  <!-- Lower-right facet -->
+  <path d="M22 22 L22 42 L40 22 Z" fill="#0A3D7A" opacity="0.65"/>
+
+  <!-- Upper-left facet -->
+  <path d="M4 22 L22 2 L22 22 Z" fill="#0A1628" opacity="0.7"/>
+
+  <!-- Upper-right facet -->
+  <path d="M22 2 L40 22 L22 22 Z" fill="#0A1628" opacity="0.9"/>
+
+  <!-- Centre dot -->
+  <circle cx="22" cy="22" r="2" fill="#0A3D7A" opacity="0.9"/>
+</svg>

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" fill="none">
+  <!--
+    Aldar Properties brand mark — geometric pyramid / diamond form.
+    Replace this file with the official exported SVG from the brand PDF
+    (https://vazeno.files.cmp.optimizely.com/download/assets/ALDAR+logo.pdf/...)
+    when available. This placeholder follows the Aldar pyramid visual language.
+  -->
+
+  <!-- Outer diamond ring -->
+  <path
+    d="M22 2 L40 22 L22 42 L4 22 Z"
+    stroke="rgba(201,168,76,0.35)"
+    stroke-width="1"
+    fill="none"
+  />
+
+  <!-- Lower-left facet -->
+  <path d="M4 22 L22 42 L22 22 Z" fill="#C9A84C" opacity="0.45"/>
+
+  <!-- Lower-right facet -->
+  <path d="M22 22 L22 42 L40 22 Z" fill="#C9A84C" opacity="0.6"/>
+
+  <!-- Upper-left facet -->
+  <path d="M4 22 L22 2 L22 22 Z" fill="#FFFFFF" opacity="0.75"/>
+
+  <!-- Upper-right facet (brightest — light source) -->
+  <path d="M22 2 L40 22 L22 22 Z" fill="#FFFFFF" opacity="0.95"/>
+
+  <!-- Centre highlight dot -->
+  <circle cx="22" cy="22" r="2" fill="#C9A84C" opacity="0.9"/>
+</svg>
