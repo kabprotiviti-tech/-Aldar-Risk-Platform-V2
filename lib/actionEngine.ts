@@ -38,6 +38,8 @@ export interface Action {
   impactLabel: string
   owner: string
   deadline: string             // e.g. "3 days", "14 days"
+  deadlineDays: number         // parsed numeric version
+  worseningTrend: number       // 0–1 (derived from primary risk trend)
   portfolio: Portfolio
   category: string
   triggerIds: string[]         // Risk/signal IDs that triggered this
@@ -48,6 +50,54 @@ export interface Action {
   consequence: string
   recommendation: string[]
   aiConfidence: number         // 0–1
+  priorityScore: number        // 0–100 weighted composite score
+}
+
+// ─── Priority scoring ─────────────────────────────────────────────────────────
+// Formula: 0.4×normalizedImpact + 0.2×normalizedUrgency + 0.2×normalizedSeverity + 0.2×normalizedTrend
+// All components normalized to 0–100 across the action set before weighting.
+
+const IMPACT_W   = 0.4
+const URGENCY_W  = 0.2
+const SEVERITY_W = 0.2
+const TREND_W    = 0.2
+
+function severityScore(priority: ActionPriority): number {
+  return priority === 'critical' ? 100 : priority === 'high' ? 66 : 33
+}
+
+function trendScore(worseningTrend: number): number {
+  return Math.round(worseningTrend * 100)
+}
+
+function computeScores(actions: Omit<Action, 'priorityScore'>[]): Action[] {
+  const impacts      = actions.map(a => a.impactValue)
+  const deadlines    = actions.map(a => a.deadlineDays)
+  const minImpact    = Math.min(...impacts)
+  const maxImpact    = Math.max(...impacts)
+  const minDays      = Math.min(...deadlines)
+  const maxDays      = Math.max(...deadlines)
+
+  return actions.map(a => {
+    const normImpact   = maxImpact === minImpact ? 100
+      : ((a.impactValue - minImpact) / (maxImpact - minImpact)) * 100
+
+    // Fewer days remaining = higher urgency
+    const normUrgency  = maxDays === minDays ? 100
+      : ((maxDays - a.deadlineDays) / (maxDays - minDays)) * 100
+
+    const normSeverity = severityScore(a.priority)
+    const normTrend    = trendScore(a.worseningTrend)
+
+    const score = Math.round(
+      IMPACT_W   * normImpact   +
+      URGENCY_W  * normUrgency  +
+      SEVERITY_W * normSeverity +
+      TREND_W    * normTrend
+    )
+
+    return { ...a, priorityScore: score }
+  })
 }
 
 // ─── Source lookups ───────────────────────────────────────────────────────────
@@ -82,7 +132,7 @@ function buildActions(): Action[] {
   const hniImpact = r007.financialImpact + Math.round(r001.financialImpact * 0.42)
   // 42% of R-001 impact is mortgage/HNI-linked (off-plan portion)
 
-  const action1: Action = {
+  const action1: Omit<Action, 'priorityScore'> = {
     id: 'ACT-001',
     title: 'Activate HNI Buyer Retention & Mortgage Flexibility Program',
     priority: 'critical',
@@ -90,6 +140,8 @@ function buildActions(): Action[] {
     impactLabel: `AED ${hniImpact}M at risk`,
     owner: r007.owner,
     deadline: '30 days',
+    deadlineDays: 30,
+    worseningTrend: 1.0,   // R-007 trend: increasing, R-001 trend: increasing
     portfolio: 'real-estate',
     category: 'Revenue Protection',
     triggerIds: ['R-007', 'R-001'],
@@ -130,7 +182,7 @@ function buildActions(): Action[] {
   const voidWeeks = 28               // Apr–Oct = ~28 weeks
   const hospImpact = Math.round(weeklyRevPARShortfall * voidWeeks + r014.financialImpact * 0.6)
 
-  const action2: Action = {
+  const action2: Omit<Action, 'priorityScore'> = {
     id: 'ACT-002',
     title: 'Launch Corporate Long-Stay & Bridging Event Campaign — Hospitality',
     priority: 'high',
@@ -138,6 +190,8 @@ function buildActions(): Action[] {
     impactLabel: `AED ${hospImpact}M recoverable`,
     owner: r003.owner,
     deadline: '14 days',
+    deadlineDays: 14,
+    worseningTrend: 1.0,   // R-003 trend: increasing, R-014 trend: increasing
     portfolio: 'hospitality',
     category: 'Revenue Recovery',
     triggerIds: ['R-003', 'R-014', 'CRM-003'],
@@ -180,7 +234,7 @@ function buildActions(): Action[] {
   const constructionImpact = r004.financialImpact
   const savingsOpportunity = Math.round(pipelineAED * mitigableShare)
 
-  const action3: Action = {
+  const action3: Omit<Action, 'priorityScore'> = {
     id: 'ACT-003',
     title: 'Activate Fixed-Price Provisions & Multi-Source Supply Chain — Construction',
     priority: 'critical',
@@ -188,6 +242,8 @@ function buildActions(): Action[] {
     impactLabel: `AED ${constructionImpact}M exposure`,
     owner: r004.owner,
     deadline: '7 days',
+    deadlineDays: 7,
+    worseningTrend: 1.0,   // R-004 trend: increasing
     portfolio: 'real-estate',
     category: 'Cost Containment',
     triggerIds: ['R-004', 'ERP-002'],
@@ -223,7 +279,7 @@ function buildActions(): Action[] {
   }
 
   // ── Action 4: Cyber Security Emergency Response ───────────────────────────
-  const action4: Action = {
+  const action4: Omit<Action, 'priorityScore'> = {
     id: 'ACT-004',
     title: 'Emergency OT/IT Security Audit — Smart Building Infrastructure',
     priority: 'high',
@@ -231,6 +287,8 @@ function buildActions(): Action[] {
     impactLabel: `AED ${r006.financialImpact}M tail risk`,
     owner: r006.owner,
     deadline: '3 days',
+    deadlineDays: 3,
+    worseningTrend: 1.0,   // R-006 trend: increasing; N-006: critical advisory
     portfolio: 'facilities',
     category: 'Cyber Risk Mitigation',
     triggerIds: ['R-006', 'N-006'],
@@ -270,7 +328,7 @@ function buildActions(): Action[] {
   const vacancyImpact = Math.round((vacancyGap / 100) * retailGAV)
   const receivablesRisk = erp001.value  // AED 142M
 
-  const action5: Action = {
+  const action5: Omit<Action, 'priorityScore'> = {
     id: 'ACT-005',
     title: 'Retail Vacancy Repositioning & Receivables Recovery',
     priority: 'high',
@@ -278,6 +336,8 @@ function buildActions(): Action[] {
     impactLabel: `AED ${vacancyImpact + Math.round(receivablesRisk * 0.35)}M exposure`,
     owner: r009.owner,
     deadline: '45 days',
+    deadlineDays: 45,
+    worseningTrend: 0.75,  // R-009 trend: increasing (1.0), R-002 trend: stable (0.5) → avg 0.75
     portfolio: 'retail',
     category: 'Asset Performance',
     triggerIds: ['R-009', 'R-002', 'CRM-001', 'ERP-001'],
@@ -313,21 +373,23 @@ function buildActions(): Action[] {
     aiConfidence: 0.84,
   }
 
-  return [action1, action2, action3, action4, action5]
+  return computeScores([action1, action2, action3, action4, action5])
 }
 
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 export const ACTIONS: Action[] = buildActions()
 
-// Top N by priority then impact
+// Sorted descending by priorityScore (composite weighted score)
 export const TOP_ACTIONS: Action[] = [...ACTIONS]
-  .sort((a, b) => {
-    const order: Record<ActionPriority, number> = { critical: 0, high: 1, medium: 2 }
-    if (order[a.priority] !== order[b.priority]) return order[a.priority] - order[b.priority]
-    return b.impactValue - a.impactValue
-  })
+  .sort((a, b) => b.priorityScore - a.priorityScore)
   .slice(0, 5)
+
+// Rank label helper
+export function rankLabel(rank: number): string {
+  if (rank === 1) return 'Highest Priority'
+  return `#${rank}`
+}
 
 export const PRIORITY_COLOR: Record<ActionPriority, string> = {
   critical: 'var(--risk-critical)',

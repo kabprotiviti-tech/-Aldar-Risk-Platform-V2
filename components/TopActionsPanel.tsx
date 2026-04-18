@@ -13,6 +13,7 @@ import {
   TOP_ACTIONS,
   PRIORITY_COLOR,
   PRIORITY_BG,
+  rankLabel,
   type Action,
   type ActionPriority,
 } from '@/lib/actionEngine'
@@ -105,29 +106,43 @@ function ActionRow({
         }}
       />
 
-      {/* Rank badge */}
-      <div
-        style={{
-          width: '28px',
-          height: '28px',
-          borderRadius: '50%',
-          backgroundColor: PRIORITY_BG[action.priority],
-          border: `1px solid ${color}40`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-          color,
-          fontWeight: 800,
-          fontSize: '0.72rem',
-        }}
-      >
-        {rank}
+      {/* Rank badge + score stack */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
+        <div
+          style={{
+            width: '28px',
+            height: '28px',
+            borderRadius: '50%',
+            backgroundColor: PRIORITY_BG[action.priority],
+            border: `1px solid ${color}40`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color,
+            fontWeight: 800,
+            fontSize: '0.72rem',
+          }}
+        >
+          {rank}
+        </div>
+        {/* Priority score */}
+        <span
+          title="Priority score (0–100)"
+          style={{
+            fontSize: '0.58rem',
+            fontWeight: 700,
+            color: 'var(--text-muted)',
+            fontVariantNumeric: 'tabular-nums',
+            letterSpacing: '0.02em',
+          }}
+        >
+          {action.priorityScore}
+        </span>
       </div>
 
       {/* Main content */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        {/* Title + priority row */}
+        {/* Title + priority + rank label row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           <span
             style={{
@@ -141,6 +156,25 @@ function ActionRow({
           >
             {action.title}
           </span>
+          {rank === 1 && (
+            <span
+              style={{
+                fontSize: '0.6rem',
+                fontWeight: 800,
+                color: color,
+                backgroundColor: PRIORITY_BG[action.priority],
+                border: `1px solid ${color}50`,
+                borderRadius: '4px',
+                padding: '2px 7px',
+                letterSpacing: '0.07em',
+                textTransform: 'uppercase',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+              }}
+            >
+              Highest Priority
+            </span>
+          )}
           <PriorityBadge priority={action.priority} />
         </div>
 
