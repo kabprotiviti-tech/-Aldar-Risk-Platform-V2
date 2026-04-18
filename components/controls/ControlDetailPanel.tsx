@@ -23,6 +23,7 @@ import {
   Minus,
   FileText,
   Hourglass,
+  Brain,
 } from 'lucide-react'
 import {
   AUDIT_RESULT_COLOR,
@@ -36,6 +37,7 @@ import {
 } from '@/lib/controlActionBridge'
 import { PRIORITY_COLOR, PRIORITY_BG } from '@/lib/actionEngine'
 import type { Control, ControlStatus } from '@/lib/controlData'
+import { riskRegister, type Risk } from '@/lib/simulated-data'
 
 // ─── Status color map ─────────────────────────────────────────────────────────
 
@@ -142,6 +144,192 @@ function ResultDot({ result }: { result: ControlStatus }) {
   )
 }
 
+// ─── Linked Risk card (inline expandable) ────────────────────────────────────
+
+function LinkedRiskCard({
+  riskId,
+  riskTitle,
+  risk,
+}: {
+  riskId: string
+  riskTitle: string
+  risk: Risk | undefined
+}) {
+  const [expanded, setExpanded] = useState(false)
+
+  const scoreColor = !risk ? 'var(--text-muted)'
+    : risk.score >= 16 ? 'var(--risk-critical)'
+    : risk.score >= 10 ? 'var(--risk-high)'
+    : 'var(--risk-medium)'
+
+  const trendColor = !risk ? 'var(--text-muted)'
+    : risk.trend === 'increasing' ? 'var(--risk-critical)'
+    : risk.trend === 'stable' ? 'var(--text-muted)'
+    : '#22C55E'
+
+  return (
+    <div
+      style={{
+        borderRadius: '8px',
+        border: '1px solid var(--border-color)',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Section header — always shows, click to expand */}
+      <button
+        onClick={() => setExpanded(e => !e)}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '9px 12px',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          backgroundColor: 'var(--bg-secondary)',
+        }}
+      >
+        <span style={{ color: 'var(--text-muted)', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          Linked Risk
+        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.6rem' }}>
+            {expanded ? 'Hide details' : 'Click to expand ↗'}
+          </span>
+          {expanded ? <ChevronUp size={12} style={{ color: 'var(--text-muted)' }} /> : <ChevronDown size={12} style={{ color: 'var(--text-muted)' }} />}
+        </div>
+      </button>
+
+      {/* Always-visible summary row */}
+      <div
+        onClick={() => setExpanded(e => !e)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '10px',
+          padding: '8px 12px',
+          borderTop: '1px solid var(--border-color)',
+          cursor: 'pointer',
+        }}
+      >
+        <div style={{ minWidth: 0 }}>
+          <span
+            style={{
+              color: 'var(--text-muted)',
+              fontSize: '0.65rem',
+              fontWeight: 700,
+              fontVariantNumeric: 'tabular-nums',
+              marginBottom: '2px',
+              display: 'block',
+            }}
+          >
+            {riskId}
+          </span>
+          <span style={{ color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 600, lineHeight: 1.3 }}>
+            {riskTitle}
+          </span>
+        </div>
+        {risk && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+            <span style={{ color: scoreColor, fontSize: '0.85rem', fontWeight: 800 }}>{risk.score}/25</span>
+            <ExternalLink size={11} style={{ color: 'var(--text-muted)' }} />
+          </div>
+        )}
+      </div>
+
+      {/* Expanded detail */}
+      <AnimatePresence>
+        {expanded && risk && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div
+              style={{
+                padding: '10px 12px 12px',
+                borderTop: '1px solid var(--border-color)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+              }}
+            >
+              {/* Score grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
+                {[
+                  { label: 'Score',       value: `${risk.score}/25`,                   color: scoreColor },
+                  { label: 'Likelihood',  value: `${risk.likelihood}/5`,               color: 'var(--text-secondary)' },
+                  { label: 'Impact',      value: `${risk.impact}/5`,                   color: 'var(--text-secondary)' },
+                  { label: 'Exposure',    value: `AED ${risk.financialImpact}M`,        color: 'var(--accent-primary)' },
+                ].map(({ label, value, color }) => (
+                  <div
+                    key={label}
+                    style={{
+                      padding: '6px 8px',
+                      borderRadius: '5px',
+                      backgroundColor: 'var(--bg-secondary)',
+                      border: '1px solid var(--border-color)',
+                      textAlign: 'center',
+                    }}
+                  >
+                    <div style={{ color, fontSize: '0.78rem', fontWeight: 700 }}>{value}</div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.58rem', marginTop: '1px' }}>{label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Meta row */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <User size={10} style={{ color: 'var(--text-muted)' }} />
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>{risk.owner}</span>
+                </div>
+                <span
+                  style={{
+                    padding: '2px 7px',
+                    borderRadius: '4px',
+                    fontSize: '0.62rem',
+                    fontWeight: 700,
+                    color: trendColor,
+                    backgroundColor: `${trendColor}12`,
+                    border: `1px solid ${trendColor}30`,
+                    textTransform: 'capitalize',
+                  }}
+                >
+                  {risk.trend === 'increasing' ? '↑' : risk.trend === 'decreasing' ? '↓' : '→'} {risk.trend}
+                </span>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.63rem' }}>
+                  {risk.category}
+                </span>
+              </div>
+
+              {/* AI Insight */}
+              <div
+                style={{
+                  padding: '7px 9px',
+                  borderRadius: '6px',
+                  backgroundColor: 'rgba(201,168,76,0.05)',
+                  border: '1px solid rgba(201,168,76,0.15)',
+                  color: 'var(--text-muted)',
+                  fontSize: '0.7rem',
+                  lineHeight: 1.55,
+                }}
+              >
+                <Brain size={9} style={{ color: 'var(--accent-primary)', display: 'inline', marginRight: '5px' }} />
+                {risk.aiInsight}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
 // ─── Main panel ───────────────────────────────────────────────────────────────
 
 interface ControlDetailPanelProps {
@@ -154,6 +342,9 @@ export function ControlDetailPanel({ control, onClose, onActionClick }: ControlD
   const audit = control ? getAuditRecord(control.id) : undefined
   const linkedAction = control
     ? CONTROL_FAILURE_ACTIONS.find(a => a.id === `CTRL-${control.id}`)
+    : undefined
+  const linkedRisk = control
+    ? riskRegister.find(r => r.id === control.linkedRiskId)
     : undefined
 
   return (
@@ -369,29 +560,12 @@ export function ControlDetailPanel({ control, onClose, onActionClick }: ControlD
                 </Section>
               )}
 
-              {/* Linked Risk */}
-              <Section title="Linked Risk">
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
-                  <div>
-                    <span
-                      style={{
-                        color: 'var(--text-muted)',
-                        fontSize: '0.65rem',
-                        fontWeight: 700,
-                        fontVariantNumeric: 'tabular-nums',
-                        marginBottom: '2px',
-                        display: 'block',
-                      }}
-                    >
-                      {control.linkedRiskId}
-                    </span>
-                    <span style={{ color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 600 }}>
-                      {control.linkedRiskTitle}
-                    </span>
-                  </div>
-                  <ExternalLink size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-                </div>
-              </Section>
+              {/* Linked Risk — expandable inline card */}
+              <LinkedRiskCard
+                riskId={control.linkedRiskId}
+                riskTitle={control.linkedRiskTitle}
+                risk={linkedRisk}
+              />
 
               {/* Triggered Action */}
               {linkedAction && (

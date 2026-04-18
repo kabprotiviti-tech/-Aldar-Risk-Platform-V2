@@ -113,12 +113,43 @@ function MetricCard({
 
 // ─── Health bar row ───────────────────────────────────────────────────────────
 
-function HealthBar({ label, count, total, color }: { label: string; count: number; total: number; color: string }) {
+function HealthBar({
+  label,
+  count,
+  total,
+  color,
+  filterKey,
+  activeFilter,
+  onFilter,
+}: {
+  label: string
+  count: number
+  total: number
+  color: string
+  filterKey?: MetricFilter
+  activeFilter: MetricFilter
+  onFilter: (k: MetricFilter) => void
+}) {
   const pct = Math.round((count / total) * 100)
+  const isActive = filterKey !== null && activeFilter === filterKey
   return (
-    <div style={{ marginBottom: '8px' }}>
+    <div
+      onClick={() => filterKey && onFilter(isActive ? null : filterKey)}
+      style={{
+        marginBottom: '8px',
+        cursor: filterKey ? 'pointer' : 'default',
+        padding: filterKey ? '4px 6px' : '0',
+        borderRadius: '5px',
+        backgroundColor: isActive ? `${color}08` : 'transparent',
+        border: isActive ? `1px solid ${color}25` : '1px solid transparent',
+        transition: 'all 0.15s',
+      }}
+    >
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
-        <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{label}</span>
+        <span style={{ color: isActive ? color : 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: isActive ? 700 : 400 }}>
+          {label} {filterKey && !isActive && <span style={{ color: 'var(--text-muted)', fontSize: '0.6rem' }}>↗ filter</span>}
+          {isActive && <span style={{ color, fontSize: '0.6rem' }}> ✕ clear</span>}
+        </span>
         <span style={{ color, fontWeight: 700, fontSize: '0.75rem', fontVariantNumeric: 'tabular-nums' }}>
           {count} ({pct}%)
         </span>
@@ -281,32 +312,38 @@ function ControlRow({ control, index, onClick }: { control: Control; index: numb
 
 // ─── Control → Risk chain row ─────────────────────────────────────────────────
 
-function ControlChainRow({ control }: { control: Control }) {
+function ControlChainRow({ control, onClick }: { control: Control; onClick: (c: Control) => void }) {
   const risk = getRisk(control.linkedRiskId)
   const color = STATUS_COLOR[control.status]
   if (!risk) return null
   return (
-    <div
+    <motion.div
+      onClick={() => onClick(control)}
+      whileHover={{ backgroundColor: 'var(--bg-hover)', x: 2 }}
       style={{
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
         padding: '8px 10px',
         borderRadius: '7px',
-        border: '1px solid var(--border-color)',
+        border: `1px solid ${control.status === 'failed' ? 'rgba(255,59,59,0.15)' : 'var(--border-color)'}`,
         backgroundColor: 'var(--bg-secondary)',
         flexWrap: 'wrap',
+        cursor: 'pointer',
+        transition: 'border-color 0.15s',
       }}
     >
       <span style={{ color, fontSize: '0.65rem', fontWeight: 700 }}>{control.id}</span>
       <span style={{ color: 'var(--text-muted)', fontSize: '0.65rem' }}>→</span>
-      <span style={{ color: 'var(--text-secondary)', fontSize: '0.72rem', fontWeight: 500 }}>{control.linkedRiskTitle}</span>
+      <span style={{ color: 'var(--text-secondary)', fontSize: '0.72rem', fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {control.linkedRiskTitle}
+      </span>
       <span style={{ color: 'var(--text-muted)', fontSize: '0.65rem' }}>→</span>
-      <span style={{ color: 'var(--accent-primary)', fontSize: '0.72rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+      <span style={{ color: 'var(--accent-primary)', fontSize: '0.72rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
         AED {risk.financialImpact}M
       </span>
-      <span style={{ color: 'var(--text-muted)', fontSize: '0.6rem' }}>({control.process})</span>
-    </div>
+      <ChevronRight size={11} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+    </motion.div>
   )
 }
 
@@ -373,14 +410,15 @@ export default function ControlCommandCenterPage() {
   }
 
   const filteredControls = (() => {
-    if (activeFilter === 'failed')  return controls.filter(c => c.status === 'failed')
-    if (activeFilter === 'partial') return controls.filter(c => c.status === 'partial')
+    if (activeFilter === 'failed')    return controls.filter(c => c.status === 'failed')
+    if (activeFilter === 'partial')   return controls.filter(c => c.status === 'partial')
+    if (activeFilter === 'effective') return controls.filter(c => c.status === 'effective')
     if (activeFilter === 'overdue') {
       const overdueTests = ALL_TESTS.filter(t => t.testStatus === 'overdue')
       const overdueIds = new Set(overdueTests.map(t => t.controlId))
       return controls.filter(c => overdueIds.has(c.id))
     }
-    return controls
+    return controls  // 'all' or null → show everything
   })()
 
   const handleActionClick = (actionId: string) => {
@@ -431,6 +469,7 @@ export default function ControlCommandCenterPage() {
           value={`${controlSummary.coveragePercent}%`}
           sub={`${controlSummary.effective} of ${controlSummary.total} effective`}
           color={controlSummary.coveragePercent >= 80 ? '#22C55E' : '#F5C518'}
+          filterKey="effective"
           activeFilter={activeFilter}
           onFilterClick={handleFilterClick}
         />
@@ -474,9 +513,9 @@ export default function ControlCommandCenterPage() {
             </div>
           </CardHeader>
           <CardBody>
-            <HealthBar label="Effective"  count={controlSummary.effective} total={controlSummary.total} color="#22C55E" />
-            <HealthBar label="Partial"    count={controlSummary.partial}   total={controlSummary.total} color="#F5C518" />
-            <HealthBar label="Failed"     count={controlSummary.failed}    total={controlSummary.total} color="#FF3B3B" />
+            <HealthBar label="Effective"  count={controlSummary.effective} total={controlSummary.total} color="#22C55E" filterKey="effective" activeFilter={activeFilter} onFilter={handleFilterClick} />
+            <HealthBar label="Partial"    count={controlSummary.partial}   total={controlSummary.total} color="#F5C518" filterKey="partial"   activeFilter={activeFilter} onFilter={handleFilterClick} />
+            <HealthBar label="Failed"     count={controlSummary.failed}    total={controlSummary.total} color="#FF3B3B" filterKey="failed"    activeFilter={activeFilter} onFilter={handleFilterClick} />
 
             <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid var(--border-color)' }}>
               <div style={{ color: 'var(--text-muted)', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '6px' }}>
@@ -511,28 +550,34 @@ export default function ControlCommandCenterPage() {
                 Testing Engine
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                {[
-                  { label: 'Pass', count: TEST_SUMMARY.pass, color: TEST_RESULT_COLOR.pass },
-                  { label: 'Fail', count: TEST_SUMMARY.fail, color: TEST_RESULT_COLOR.fail },
-                  { label: 'Partial', count: TEST_SUMMARY.partial, color: TEST_RESULT_COLOR.partial },
-                  { label: 'Overdue', count: TEST_SUMMARY.overdue, color: '#F5C518' },
-                ].map(({ label, count, color }) => (
-                  <div
-                    key={label}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      padding: '3px 8px',
-                      borderRadius: '4px',
-                      backgroundColor: `${color}10`,
-                      border: `1px solid ${color}25`,
-                    }}
-                  >
-                    <span style={{ color, fontSize: '0.8rem', fontWeight: 700 }}>{count}</span>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.62rem' }}>{label}</span>
-                  </div>
-                ))}
+                {([
+                  { label: 'Pass',    count: TEST_SUMMARY.pass,    color: TEST_RESULT_COLOR.pass,    filterKey: 'effective' as MetricFilter },
+                  { label: 'Fail',    count: TEST_SUMMARY.fail,    color: TEST_RESULT_COLOR.fail,    filterKey: 'failed'    as MetricFilter },
+                  { label: 'Partial', count: TEST_SUMMARY.partial, color: TEST_RESULT_COLOR.partial, filterKey: 'partial'   as MetricFilter },
+                  { label: 'Overdue', count: TEST_SUMMARY.overdue, color: '#F5C518',                 filterKey: 'overdue'   as MetricFilter },
+                ] as const).map(({ label, count, color, filterKey }) => {
+                  const isActive = activeFilter === filterKey
+                  return (
+                    <div
+                      key={label}
+                      onClick={() => handleFilterClick(isActive ? null : filterKey)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        padding: '3px 8px',
+                        borderRadius: '4px',
+                        backgroundColor: isActive ? `${color}18` : `${color}10`,
+                        border: `1px solid ${isActive ? color + '50' : color + '25'}`,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      <span style={{ color, fontSize: '0.8rem', fontWeight: 700 }}>{count}</span>
+                      <span style={{ color: isActive ? color : 'var(--text-muted)', fontSize: '0.62rem', fontWeight: isActive ? 600 : 400 }}>{label}</span>
+                    </div>
+                  )
+                })}
                 <span style={{ color: 'var(--text-muted)', fontSize: '0.65rem', marginLeft: 'auto' }}>
                   Pass rate: <strong style={{ color: TEST_SUMMARY.passRate >= 80 ? '#22C55E' : '#F5C518' }}>{TEST_SUMMARY.passRate}%</strong>
                 </span>
@@ -720,7 +765,7 @@ export default function ControlCommandCenterPage() {
           <CardBody>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '420px', overflowY: 'auto', scrollbarWidth: 'thin' }}>
               {FAILED_CONTROLS.map(control => (
-                <ControlChainRow key={control.id} control={control} />
+                <ControlChainRow key={control.id} control={control} onClick={setSelectedControl} />
               ))}
             </div>
           </CardBody>
