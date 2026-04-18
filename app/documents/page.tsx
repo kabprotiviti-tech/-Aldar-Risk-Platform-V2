@@ -27,6 +27,7 @@ import { Card, CardHeader, CardTitle, CardBody } from '@/components/ui/Card'
 import { RiskBadge, ConfidenceBadge } from '@/components/ui/Badge'
 import { AIInsightBox } from '@/components/ui/AIInsightBox'
 import { DocumentUpload } from '@/components/DocumentUpload'
+import { DocumentControlExtractor } from '@/components/controls/DocumentControlExtractor'
 
 // ─── Document Intelligence (paste) ───────────────────────────────────────────
 
@@ -1250,6 +1251,11 @@ export default function DocumentsPage() {
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {/* ICOFAR Control Extraction */}
+            {content.trim().length >= 50 && (
+              <DocumentControlExtractor documentText={content} />
+            )}
 
             {/* Audit Log */}
             {auditLog.length > 0 && (

@@ -29,6 +29,8 @@ import { FinancialCalculationPanel, ViewCalcButton, type FinancialCalcContext } 
 import { TopActionsPanel } from '@/components/TopActionsPanel'
 import { ActionDetailPanel } from '@/components/ActionDetailPanel'
 import { type Action } from '@/lib/actionEngine'
+import Link from 'next/link'
+import { controlSummary } from '@/lib/controlData'
 import {
   aggregateKPIs,
   kpiData,
@@ -549,6 +551,54 @@ export default function DashboardPage() {
 
       {/* Decision Intelligence — Priority Actions */}
       <TopActionsPanel onActionClick={(a) => setSelectedAction(a)} />
+
+      {/* ICOFAR Control Health Summary */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: '10px',
+          padding: '14px 16px',
+          borderRadius: '10px',
+          backgroundColor: 'var(--bg-secondary)',
+          border: '1px solid var(--border-color)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', gridColumn: 'span 4' }}>
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            ICOFAR Internal Controls
+          </span>
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.62rem' }}>·</span>
+          <span style={{ color: '#F5C518', fontSize: '0.62rem', fontWeight: 600 }}>Integration Pending</span>
+          <Link
+            href="/control-command-center"
+            style={{
+              marginLeft: 'auto',
+              color: 'var(--accent-primary)',
+              fontSize: '0.67rem',
+              fontWeight: 600,
+              textDecoration: 'none',
+              padding: '3px 9px',
+              borderRadius: '5px',
+              border: '1px solid var(--border-accent)',
+              backgroundColor: 'var(--accent-glow)',
+            }}
+          >
+            Open Command Center →
+          </Link>
+        </div>
+        {[
+          { label: 'Effective', value: controlSummary.effective, color: '#22C55E' },
+          { label: 'Partial',   value: controlSummary.partial,   color: '#F5C518' },
+          { label: 'Failed',    value: controlSummary.failed,    color: '#FF3B3B' },
+          { label: 'Coverage',  value: `${controlSummary.coveragePercent}%`, color: controlSummary.coveragePercent >= 80 ? '#22C55E' : '#F5C518' },
+        ].map(({ label, value, color }) => (
+          <div key={label} style={{ textAlign: 'center' }}>
+            <div style={{ color, fontSize: '1.2rem', fontWeight: 800, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.62rem', marginTop: '1px' }}>{label}</div>
+          </div>
+        ))}
+      </div>
 
       {/* Action Detail Panel — slide-in overlay */}
       <ActionDetailPanel action={selectedAction} onClose={() => setSelectedAction(null)} />

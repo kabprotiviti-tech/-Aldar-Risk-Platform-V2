@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Cpu,
+  Shield,
 } from 'lucide-react'
 import { clsx } from 'clsx'
 
@@ -45,6 +46,12 @@ const navItems = [
     label: 'Executive Brief',
     icon: ScrollText,
     description: 'Board Summary',
+  },
+  {
+    href: '/control-command-center',
+    label: 'Control Center',
+    icon: Shield,
+    description: 'ICOFAR Controls',
   },
 ]
 
