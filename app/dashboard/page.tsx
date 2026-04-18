@@ -26,6 +26,9 @@ import { LiveRiskSignals } from '@/components/dashboard/LiveRiskSignals'
 import { AIFusionPanel } from '@/components/dashboard/AIFusionPanel'
 import { KPIDrillDownPanel, AI_ALERT_COUNT, type KPIView } from '@/components/KPIDrillDownPanel'
 import { FinancialCalculationPanel, ViewCalcButton, type FinancialCalcContext } from '@/components/FinancialCalculationPanel'
+import { TopActionsPanel } from '@/components/TopActionsPanel'
+import { ActionDetailPanel } from '@/components/ActionDetailPanel'
+import { type Action } from '@/lib/actionEngine'
 import {
   aggregateKPIs,
   kpiData,
@@ -433,6 +436,7 @@ export default function DashboardPage() {
   const [alertsRefreshing, setAlertsRefreshing] = useState(false)
   const [activeView, setActiveView] = useState<KPIView | null>(null)
   const [calcCtx, setCalcCtx] = useState<FinancialCalcContext | null>(null)
+  const [selectedAction, setSelectedAction] = useState<Action | null>(null)
 
   const portfolioScores: Partial<Record<'real-estate' | 'retail' | 'hospitality' | 'education' | 'facilities', number>> = {
     'real-estate': PROPAGATED_METRICS['real-estate'].riskScore,
@@ -542,6 +546,12 @@ export default function DashboardPage() {
           />
         )}
       </AnimatePresence>
+
+      {/* Decision Intelligence — Priority Actions */}
+      <TopActionsPanel onActionClick={(a) => setSelectedAction(a)} />
+
+      {/* Action Detail Panel — slide-in overlay */}
+      <ActionDetailPanel action={selectedAction} onClose={() => setSelectedAction(null)} />
 
       {/* Live Risk Signals + AI Fusion */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
