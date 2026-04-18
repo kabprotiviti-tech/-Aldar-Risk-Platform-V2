@@ -1,13 +1,9 @@
 'use client'
 
-// ─── Decision Intelligence — Action Detail Panel ──────────────────────────────
-// Right-side slide-in panel. Six sections:
-//   1. Summary header (id, priority, impact, owner, deadline, AI confidence)
-//   2. Root Cause Analysis
-//   3. Risk Propagation Path
-//   4. Supporting Data Points (with breach indicators)
-//   5. Calculation Logic
-//   6. Consequence + Recommendations
+// ─── Decision Intelligence — Action Detail Panel (v2) ─────────────────────────
+// Fixed right-side drawer. Sticky header. Inner scroll. Executive-grade clarity.
+// Sections: Action Required → Why This Matters → Impact → What Will Happen →
+//           What To Do → Data Backing (collapsed)
 
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -16,7 +12,6 @@ import {
   AlertTriangle,
   ArrowRight,
   BarChart2,
-  Calculator,
   Lightbulb,
   ShieldAlert,
   Brain,
@@ -26,6 +21,9 @@ import {
   User,
   ChevronDown,
   ChevronUp,
+  Send,
+  TrendingDown,
+  Calculator,
 } from 'lucide-react'
 import {
   PRIORITY_COLOR,
@@ -36,9 +34,11 @@ import {
   type PropagationStep,
 } from '@/lib/actionEngine'
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Priority badge ───────────────────────────────────────────────────────────
 
 function PriorityBadge({ priority }: { priority: ActionPriority }) {
+  const label =
+    priority === 'critical' ? '⚡ CRITICAL' : priority === 'high' ? '▲ HIGH' : '● MEDIUM'
   return (
     <span
       style={{
@@ -47,88 +47,85 @@ function PriorityBadge({ priority }: { priority: ActionPriority }) {
         padding: '3px 10px',
         borderRadius: '5px',
         backgroundColor: PRIORITY_BG[priority],
-        border: `1px solid ${PRIORITY_COLOR[priority]}50`,
+        border: `1px solid ${PRIORITY_COLOR[priority]}55`,
         color: PRIORITY_COLOR[priority],
-        fontSize: '0.65rem',
-        fontWeight: 700,
-        letterSpacing: '0.08em',
+        fontSize: '0.63rem',
+        fontWeight: 800,
+        letterSpacing: '0.09em',
         textTransform: 'uppercase',
+        flexShrink: 0,
       }}
     >
-      {priority === 'critical' ? '⚡ CRITICAL' : priority === 'high' ? '▲ HIGH' : '● MEDIUM'}
+      {label}
     </span>
   )
 }
 
-// ─── Section wrapper ──────────────────────────────────────────────────────────
+// ─── Collapsible section ──────────────────────────────────────────────────────
 
 function Section({
   icon: Icon,
   title,
-  children,
   iconColor = 'var(--accent-primary)',
-  collapsible = false,
-  defaultOpen = true,
+  defaultOpen = false,
+  children,
 }: {
   icon: React.ElementType
   title: string
-  children: React.ReactNode
   iconColor?: string
-  collapsible?: boolean
   defaultOpen?: boolean
+  children: React.ReactNode
 }) {
   const [open, setOpen] = useState(defaultOpen)
 
   return (
-    <div
-      style={{
-        borderRadius: '8px',
-        border: '1px solid var(--border-color)',
-        overflow: 'hidden',
-      }}
-    >
+    <div style={{ borderBottom: '1px solid var(--border-color)' }}>
       <button
-        onClick={() => collapsible && setOpen((o) => !o)}
+        onClick={() => setOpen((o) => !o)}
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
           width: '100%',
-          padding: '10px 14px',
-          backgroundColor: 'var(--bg-card)',
+          padding: '12px 20px',
+          backgroundColor: 'transparent',
           border: 'none',
-          cursor: collapsible ? 'pointer' : 'default',
+          cursor: 'pointer',
           textAlign: 'left',
         }}
       >
         <div
           style={{
-            width: '22px',
-            height: '22px',
-            borderRadius: '5px',
-            backgroundColor: `${iconColor}15`,
-            border: `1px solid ${iconColor}30`,
+            width: '24px',
+            height: '24px',
+            borderRadius: '6px',
+            backgroundColor: `${iconColor}18`,
+            border: `1px solid ${iconColor}35`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
           }}
         >
-          <Icon size={12} style={{ color: iconColor }} />
+          <Icon size={13} style={{ color: iconColor }} />
         </div>
         <span
           style={{
             color: 'var(--text-secondary)',
-            fontSize: '0.72rem',
+            fontSize: '0.75rem',
             fontWeight: 700,
-            letterSpacing: '0.06em',
+            letterSpacing: '0.05em',
             textTransform: 'uppercase',
             flex: 1,
           }}
         >
           {title}
         </span>
-        {collapsible && (open ? <ChevronUp size={13} style={{ color: 'var(--text-muted)' }} /> : <ChevronDown size={13} style={{ color: 'var(--text-muted)' }} />)}
+        {open ? (
+          <ChevronUp size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+        ) : (
+          <ChevronDown size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+        )}
       </button>
 
       <AnimatePresence initial={false}>
@@ -137,12 +134,10 @@ function Section({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.22, ease: 'easeInOut' }}
             style={{ overflow: 'hidden' }}
           >
-            <div style={{ padding: '12px 14px', borderTop: '1px solid var(--border-color)' }}>
-              {children}
-            </div>
+            <div style={{ padding: '0 20px 16px' }}>{children}</div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -150,95 +145,95 @@ function Section({
   )
 }
 
-// ─── Root cause list ──────────────────────────────────────────────────────────
+// ─── Root causes ──────────────────────────────────────────────────────────────
 
 function RootCauses({ causes }: { causes: string[] }) {
+  if (!causes.length)
+    return <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>No additional data available</p>
   return (
-    <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      {causes.map((cause, i) => (
-        <li
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      {causes.map((c, i) => (
+        <div
           key={i}
           style={{
             display: 'flex',
-            gap: '8px',
+            gap: '9px',
             alignItems: 'flex-start',
-            padding: '8px 10px',
-            borderRadius: '6px',
+            padding: '9px 11px',
+            borderRadius: '7px',
             backgroundColor: 'rgba(255,59,59,0.06)',
-            border: '1px solid rgba(255,59,59,0.15)',
+            border: '1px solid rgba(255,59,59,0.18)',
           }}
         >
-          <AlertTriangle
-            size={12}
-            style={{ color: 'var(--risk-critical)', marginTop: '2px', flexShrink: 0 }}
-          />
-          <span style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: 1.5 }}>
-            {cause}
-          </span>
-        </li>
+          <AlertTriangle size={12} style={{ color: 'var(--risk-critical)', marginTop: '2px', flexShrink: 0 }} />
+          <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: 1.55 }}>{c}</span>
+        </div>
       ))}
-    </ul>
+    </div>
   )
 }
 
-// ─── Propagation path ─────────────────────────────────────────────────────────
+// ─── Propagation chain ────────────────────────────────────────────────────────
 
-function PropagationPath({ steps }: { steps: PropagationStep[] }) {
+function PropagationChain({ steps }: { steps: PropagationStep[] }) {
+  if (!steps.length)
+    return <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>No additional data available</p>
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
       {steps.map((step, i) => (
-        <React.Fragment key={i}>
+        <div key={i} style={{ display: 'flex', flexDirection: 'column' }}>
+          {/* Step card */}
           <div
             style={{
-              padding: '8px 10px',
-              borderRadius: '6px',
+              padding: '10px 12px',
+              borderRadius: '7px',
               backgroundColor: 'var(--bg-card)',
               border: '1px solid var(--border-color)',
             }}
           >
+            {/* Signal */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
-              <span style={{ color: 'var(--text-primary)', fontSize: '0.77rem', fontWeight: 600 }}>
+              <span style={{ color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 600 }}>
                 {step.signal}
               </span>
               <span
                 style={{
-                  color: 'var(--accent-primary)',
-                  fontSize: '0.68rem',
-                  fontWeight: 600,
+                  padding: '2px 8px',
+                  borderRadius: '4px',
                   backgroundColor: 'var(--accent-glow)',
                   border: '1px solid var(--border-accent)',
-                  borderRadius: '3px',
-                  padding: '1px 7px',
+                  color: 'var(--accent-primary)',
+                  fontSize: '0.67rem',
+                  fontWeight: 700,
                   whiteSpace: 'nowrap',
+                  flexShrink: 0,
                 }}
               >
                 {step.magnitude}
               </span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '3px' }}>
+            {/* Effect */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '4px' }}>
               <ArrowRight size={11} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.73rem' }}>{step.effect}</span>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{step.effect}</span>
             </div>
           </div>
 
-          {/* Connector */}
+          {/* Connector line between steps */}
           {i < steps.length - 1 && (
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-              }}
-            >
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '3px 0' }}>
               <div
                 style={{
                   width: '2px',
-                  height: '12px',
-                  background: 'linear-gradient(to bottom, var(--border-accent), transparent)',
+                  height: '14px',
+                  background: 'linear-gradient(to bottom, var(--border-accent), rgba(0,0,0,0))',
+                  borderRadius: '1px',
                 }}
               />
             </div>
           )}
-        </React.Fragment>
+        </div>
       ))}
     </div>
   )
@@ -247,6 +242,8 @@ function PropagationPath({ steps }: { steps: PropagationStep[] }) {
 // ─── Data points table ────────────────────────────────────────────────────────
 
 function DataPointsTable({ points }: { points: DataPoint[] }) {
+  if (!points.length)
+    return <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>No additional data available</p>
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
       {points.map((dp, i) => (
@@ -256,49 +253,25 @@ function DataPointsTable({ points }: { points: DataPoint[] }) {
             display: 'grid',
             gridTemplateColumns: '1fr auto auto',
             alignItems: 'center',
-            gap: '8px',
-            padding: '7px 10px',
-            borderRadius: '5px',
-            backgroundColor: dp.breached
-              ? 'rgba(255,59,59,0.05)'
-              : 'rgba(34,197,94,0.04)',
-            border: `1px solid ${dp.breached ? 'rgba(255,59,59,0.15)' : 'rgba(34,197,94,0.12)'}`,
+            gap: '10px',
+            padding: '8px 10px',
+            borderRadius: '6px',
+            backgroundColor: dp.breached ? 'rgba(255,59,59,0.05)' : 'rgba(34,197,94,0.04)',
+            border: `1px solid ${dp.breached ? 'rgba(255,59,59,0.18)' : 'rgba(34,197,94,0.14)'}`,
           }}
         >
-          {/* Label + source */}
           <div>
-            <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600 }}>
-              {dp.label}
-            </div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.63rem', marginTop: '1px' }}>
-              {dp.source}
-              {dp.threshold && (
-                <span style={{ marginLeft: '6px' }}>
-                  · Threshold: {dp.threshold}
-                </span>
-              )}
+            <div style={{ color: 'var(--text-secondary)', fontSize: '0.77rem', fontWeight: 600 }}>{dp.label}</div>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.63rem', marginTop: '2px' }}>
+              {dp.source}{dp.threshold ? ` · Threshold: ${dp.threshold}` : ''}
             </div>
           </div>
-
-          {/* Value */}
-          <span
-            style={{
-              color: dp.breached ? 'var(--risk-critical)' : 'var(--risk-low)',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              fontVariantNumeric: 'tabular-nums',
-              whiteSpace: 'nowrap',
-            }}
-          >
+          <span style={{ color: dp.breached ? 'var(--risk-critical)' : 'var(--risk-low)', fontSize: '0.8rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
             {dp.value}
           </span>
-
-          {/* Breach indicator */}
-          {dp.breached ? (
-            <XCircle size={13} style={{ color: 'var(--risk-critical)', flexShrink: 0 }} />
-          ) : (
-            <CheckCircle2 size={13} style={{ color: 'var(--risk-low)', flexShrink: 0 }} />
-          )}
+          {dp.breached
+            ? <XCircle size={13} style={{ color: 'var(--risk-critical)', flexShrink: 0 }} />
+            : <CheckCircle2 size={13} style={{ color: 'var(--risk-low)', flexShrink: 0 }} />}
         </div>
       ))}
     </div>
@@ -308,6 +281,8 @@ function DataPointsTable({ points }: { points: DataPoint[] }) {
 // ─── Recommendations ──────────────────────────────────────────────────────────
 
 function Recommendations({ items }: { items: string[] }) {
+  if (!items.length)
+    return <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>No additional data available</p>
   return (
     <ol style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '7px' }}>
       {items.map((item, i) => (
@@ -317,16 +292,16 @@ function Recommendations({ items }: { items: string[] }) {
             display: 'flex',
             gap: '10px',
             alignItems: 'flex-start',
-            padding: '9px 12px',
-            borderRadius: '6px',
-            backgroundColor: 'rgba(var(--accent-primary-rgb,201,168,76),0.05)',
+            padding: '10px 12px',
+            borderRadius: '7px',
+            backgroundColor: 'rgba(201,168,76,0.06)',
             border: '1px solid var(--border-accent)',
           }}
         >
           <div
             style={{
-              width: '20px',
-              height: '20px',
+              width: '22px',
+              height: '22px',
               borderRadius: '50%',
               backgroundColor: 'var(--accent-glow)',
               border: '1px solid var(--border-accent)',
@@ -341,9 +316,7 @@ function Recommendations({ items }: { items: string[] }) {
           >
             {i + 1}
           </div>
-          <span style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: 1.55 }}>
-            {item}
-          </span>
+          <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: 1.6 }}>{item}</span>
         </li>
       ))}
     </ol>
@@ -359,6 +332,11 @@ export function ActionDetailPanel({
   action: Action | null
   onClose: () => void
 }) {
+  const [escalated, setEscalated] = useState(false)
+
+  // Reset escalated state when action changes
+  React.useEffect(() => { setEscalated(false) }, [action?.id])
+
   return (
     <AnimatePresence>
       {action && (
@@ -374,55 +352,79 @@ export function ActionDetailPanel({
             style={{
               position: 'fixed',
               inset: 0,
-              backgroundColor: 'rgba(0,0,0,0.55)',
+              backgroundColor: 'rgba(0,0,0,0.6)',
               zIndex: 40,
             }}
           />
 
-          {/* Slide-in panel */}
+          {/* Panel — fixed, full height, inner scroll */}
           <motion.div
             key="panel"
             initial={{ x: '100%', opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: '100%', opacity: 0 }}
-            transition={{ type: 'spring', damping: 28, stiffness: 260 }}
+            transition={{ type: 'spring', damping: 30, stiffness: 280 }}
             style={{
               position: 'fixed',
               top: 0,
               right: 0,
               bottom: 0,
-              width: 'min(640px, 100vw)',
+              /* desktop: 460px wide; mobile: full screen */
+              width: 'min(460px, 100vw)',
               backgroundColor: 'var(--bg-primary)',
               borderLeft: '1px solid var(--border-color)',
               zIndex: 50,
               display: 'flex',
               flexDirection: 'column',
-              overflowY: 'hidden',
+              overflow: 'hidden',
             }}
           >
-            {/* ── Section 1: Summary header ────────────────────────────────── */}
+
+            {/* ── STICKY HEADER ─────────────────────────────────────────────── */}
             <div
               style={{
-                padding: '18px 20px 14px',
-                borderBottom: '1px solid var(--border-color)',
-                backgroundColor: 'var(--bg-secondary)',
                 flexShrink: 0,
+                backgroundColor: 'var(--bg-secondary)',
+                borderBottom: '1px solid var(--border-color)',
+                position: 'sticky',
+                top: 0,
+                zIndex: 10,
               }}
             >
-              {/* Top row: ID + close */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+              {/* "ACTION REQUIRED" banner */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '10px 20px 0',
+                }}
+              >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span
+                  <div
                     style={{
-                      fontSize: '0.62rem',
-                      fontWeight: 700,
-                      color: 'var(--text-muted)',
-                      letterSpacing: '0.1em',
-                      textTransform: 'uppercase',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      padding: '3px 10px',
+                      borderRadius: '5px',
+                      backgroundColor: `${PRIORITY_COLOR[action.priority]}18`,
+                      border: `1px solid ${PRIORITY_COLOR[action.priority]}45`,
                     }}
                   >
-                    {action.id}
-                  </span>
+                    <AlertTriangle size={11} style={{ color: PRIORITY_COLOR[action.priority] }} />
+                    <span
+                      style={{
+                        fontSize: '0.62rem',
+                        fontWeight: 800,
+                        color: PRIORITY_COLOR[action.priority],
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      Action Required
+                    </span>
+                  </div>
                   <span
                     style={{
                       fontSize: '0.62rem',
@@ -430,49 +432,61 @@ export function ActionDetailPanel({
                       backgroundColor: 'var(--bg-card)',
                       border: '1px solid var(--border-color)',
                       borderRadius: '3px',
-                      padding: '1px 6px',
+                      padding: '2px 7px',
                       fontWeight: 600,
                       letterSpacing: '0.05em',
                     }}
                   >
-                    {action.category}
+                    {action.id} · {action.category}
                   </span>
                 </div>
 
                 <button
                   onClick={onClose}
+                  title="Close"
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: '6px',
+                    width: '30px',
+                    height: '30px',
+                    borderRadius: '7px',
                     backgroundColor: 'var(--bg-card)',
                     border: '1px solid var(--border-color)',
                     color: 'var(--text-muted)',
                     cursor: 'pointer',
+                    flexShrink: 0,
                   }}
                 >
-                  <X size={14} />
+                  <X size={15} />
                 </button>
               </div>
 
               {/* Title */}
-              <h2
+              <div style={{ padding: '10px 20px 0' }}>
+                <h2
+                  style={{
+                    color: 'var(--text-primary)',
+                    fontSize: '1.02rem',
+                    fontWeight: 700,
+                    lineHeight: 1.38,
+                    margin: 0,
+                  }}
+                >
+                  {action.title}
+                </h2>
+              </div>
+
+              {/* Key facts row */}
+              <div
                 style={{
-                  color: 'var(--text-primary)',
-                  fontSize: '1rem',
-                  fontWeight: 700,
-                  lineHeight: 1.35,
-                  margin: '0 0 10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 20px 12px',
+                  flexWrap: 'wrap',
                 }}
               >
-                {action.title}
-              </h2>
-
-              {/* Meta pills */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <PriorityBadge priority={action.priority} />
 
                 <div
@@ -487,43 +501,143 @@ export function ActionDetailPanel({
                   }}
                 >
                   <BarChart2 size={10} style={{ color: PRIORITY_COLOR[action.priority] }} />
-                  <span
-                    style={{
-                      color: PRIORITY_COLOR[action.priority],
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      fontVariantNumeric: 'tabular-nums',
-                    }}
-                  >
+                  <span style={{ color: PRIORITY_COLOR[action.priority], fontSize: '0.74rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
                     {action.impactLabel}
                   </span>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '3px 8px', borderRadius: '5px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '3px 9px', borderRadius: '5px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
                   <Clock size={10} style={{ color: 'var(--text-muted)' }} />
-                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', fontWeight: 600 }}>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.72rem', fontWeight: 600 }}>
                     Act in {action.deadline}
                   </span>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '3px 8px', borderRadius: '5px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '3px 9px', borderRadius: '5px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
                   <User size={10} style={{ color: 'var(--text-muted)' }} />
-                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', fontWeight: 600 }}>
-                    {action.owner}
-                  </span>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.72rem', fontWeight: 600 }}>{action.owner}</span>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '3px 8px', borderRadius: '5px', backgroundColor: 'rgba(var(--accent-primary-rgb,201,168,76),0.08)', border: '1px solid var(--border-accent)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '3px 9px', borderRadius: '5px', backgroundColor: 'rgba(201,168,76,0.08)', border: '1px solid var(--border-accent)' }}>
                   <Brain size={10} style={{ color: 'var(--accent-primary)' }} />
                   <span style={{ color: 'var(--accent-primary)', fontSize: '0.7rem', fontWeight: 700 }}>
-                    {Math.round(action.aiConfidence * 100)}% AI Confidence
+                    {Math.round(action.aiConfidence * 100)}% confidence
                   </span>
                 </div>
               </div>
+            </div>
 
-              {/* Trigger IDs */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px', flexWrap: 'wrap' }}>
-                <span style={{ color: 'var(--text-muted)', fontSize: '0.65rem' }}>Triggers:</span>
+            {/* ── SCROLLABLE BODY ────────────────────────────────────────────── */}
+            <div
+              style={{
+                flex: 1,
+                overflowY: 'auto',
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'var(--border-color) transparent',
+              }}
+            >
+
+              {/* ── 1. Why This Matters (Root Causes) — default OPEN ─────────── */}
+              <Section
+                icon={AlertTriangle}
+                title="Why This Matters"
+                iconColor="var(--risk-critical)"
+                defaultOpen
+              >
+                <RootCauses causes={action.rootCauses} />
+              </Section>
+
+              {/* ── 2. Impact (Propagation) — default OPEN ───────────────────── */}
+              <Section
+                icon={TrendingDown}
+                title="How It Propagates"
+                iconColor="var(--risk-high)"
+                defaultOpen
+              >
+                <PropagationChain steps={action.propagationPath} />
+              </Section>
+
+              {/* ── 3. What Will Happen (Consequence) — default OPEN ─────────── */}
+              <Section
+                icon={ShieldAlert}
+                title="What Will Happen If Unaddressed"
+                iconColor="var(--risk-critical)"
+                defaultOpen
+              >
+                <div
+                  style={{
+                    padding: '11px 13px',
+                    borderRadius: '7px',
+                    backgroundColor: 'rgba(255,59,59,0.06)',
+                    border: '1px solid rgba(255,59,59,0.2)',
+                    color: 'var(--text-secondary)',
+                    fontSize: '0.8rem',
+                    lineHeight: 1.65,
+                  }}
+                >
+                  {action.consequence || 'No additional data available'}
+                </div>
+              </Section>
+
+              {/* ── 4. What To Do (Recommendations) — default OPEN ───────────── */}
+              <Section
+                icon={Lightbulb}
+                title="What To Do"
+                iconColor="var(--risk-low)"
+                defaultOpen
+              >
+                <Recommendations items={action.recommendation} />
+              </Section>
+
+              {/* ── 5. Data Backing — collapsed by default ────────────────────── */}
+              <Section
+                icon={BarChart2}
+                title="Data Backing"
+                iconColor="var(--chart-2)"
+                defaultOpen={false}
+              >
+                <DataPointsTable points={action.dataPoints} />
+              </Section>
+
+              {/* ── 6. Calculation Logic — collapsed by default ───────────────── */}
+              <Section
+                icon={Calculator}
+                title="Calculation Logic"
+                iconColor="var(--accent-primary)"
+                defaultOpen={false}
+              >
+                <div
+                  style={{
+                    padding: '11px 13px',
+                    borderRadius: '7px',
+                    backgroundColor: 'var(--bg-card)',
+                    border: '1px solid var(--border-color)',
+                    color: 'var(--text-secondary)',
+                    fontSize: '0.77rem',
+                    lineHeight: 1.7,
+                    fontFamily: 'monospace',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                  }}
+                >
+                  {action.calculationLogic || 'No additional data available'}
+                </div>
+              </Section>
+
+              {/* ── Trigger IDs ───────────────────────────────────────────────── */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '12px 20px',
+                  flexWrap: 'wrap',
+                  borderBottom: '1px solid var(--border-color)',
+                }}
+              >
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 600 }}>
+                  Source signals:
+                </span>
                 {action.triggerIds.map((id) => (
                   <span
                     key={id}
@@ -534,7 +648,7 @@ export function ActionDetailPanel({
                       backgroundColor: 'var(--bg-card)',
                       border: '1px solid var(--border-color)',
                       borderRadius: '3px',
-                      padding: '1px 6px',
+                      padding: '2px 7px',
                       fontVariantNumeric: 'tabular-nums',
                     }}
                   >
@@ -542,109 +656,62 @@ export function ActionDetailPanel({
                   </span>
                 ))}
               </div>
-            </div>
 
-            {/* ── Scrollable body ─────────────────────────────────────────── */}
-            <div
-              style={{
-                flex: 1,
-                overflowY: 'auto',
-                padding: '14px 20px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '10px',
-                scrollbarWidth: 'thin',
-              }}
-            >
-              {/* Section 2: Root Cause Analysis */}
-              <Section
-                icon={AlertTriangle}
-                title="Root Cause Analysis"
-                iconColor="var(--risk-critical)"
-                collapsible
-              >
-                <RootCauses causes={action.rootCauses} />
-              </Section>
-
-              {/* Section 3: Risk Propagation Path */}
-              <Section
-                icon={ArrowRight}
-                title="Risk Propagation Path"
-                iconColor="var(--risk-high)"
-                collapsible
-              >
-                <PropagationPath steps={action.propagationPath} />
-              </Section>
-
-              {/* Section 4: Supporting Data Points */}
-              <Section
-                icon={BarChart2}
-                title="Supporting Data Points"
-                iconColor="var(--chart-2)"
-                collapsible
-              >
-                <DataPointsTable points={action.dataPoints} />
-              </Section>
-
-              {/* Section 5: Calculation Logic */}
-              <Section
-                icon={Calculator}
-                title="Calculation Logic"
-                iconColor="var(--accent-primary)"
-                collapsible
-                defaultOpen={false}
-              >
-                <div
+              {/* ── CTA — Assign / Escalate ───────────────────────────────────── */}
+              <div style={{ padding: '16px 20px 28px' }}>
+                <button
+                  onClick={() => setEscalated(true)}
+                  disabled={escalated}
                   style={{
-                    padding: '10px 12px',
-                    borderRadius: '6px',
-                    backgroundColor: 'var(--bg-card)',
-                    border: '1px solid var(--border-color)',
-                    color: 'var(--text-secondary)',
-                    fontSize: '0.78rem',
-                    lineHeight: 1.65,
-                    fontFamily: 'monospace',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '7px',
+                    width: '100%',
+                    padding: '12px 20px',
+                    borderRadius: '9px',
+                    backgroundColor: escalated
+                      ? 'rgba(34,197,94,0.12)'
+                      : PRIORITY_BG[action.priority],
+                    border: `1.5px solid ${escalated ? 'rgba(34,197,94,0.4)' : PRIORITY_COLOR[action.priority]}`,
+                    color: escalated ? 'var(--risk-low)' : PRIORITY_COLOR[action.priority],
+                    cursor: escalated ? 'default' : 'pointer',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.04em',
+                    transition: 'all 0.25s ease',
                   }}
                 >
-                  {action.calculationLogic}
-                </div>
-              </Section>
+                  {escalated ? (
+                    <>
+                      <CheckCircle2 size={15} />
+                      Escalated — Action Logged
+                    </>
+                  ) : (
+                    <>
+                      <Send size={14} />
+                      Assign / Escalate to {action.owner}
+                    </>
+                  )}
+                </button>
 
-              {/* Section 6: Consequence */}
-              <Section
-                icon={ShieldAlert}
-                title="Consequence if Unaddressed"
-                iconColor="var(--risk-critical)"
-                collapsible
-              >
-                <div
-                  style={{
-                    padding: '10px 12px',
-                    borderRadius: '6px',
-                    backgroundColor: 'rgba(255,59,59,0.06)',
-                    border: '1px solid rgba(255,59,59,0.2)',
-                    color: 'var(--text-secondary)',
-                    fontSize: '0.78rem',
-                    lineHeight: 1.6,
-                  }}
-                >
-                  {action.consequence}
-                </div>
-              </Section>
+                {escalated && (
+                  <p
+                    style={{
+                      marginTop: '8px',
+                      textAlign: 'center',
+                      color: 'var(--text-muted)',
+                      fontSize: '0.7rem',
+                    }}
+                  >
+                    Notification sent · tracked in action log
+                  </p>
+                )}
+              </div>
 
-              {/* Section 6b: Recommendations */}
-              <Section
-                icon={Lightbulb}
-                title="Recommended Actions"
-                iconColor="var(--risk-low)"
-                collapsible
-              >
-                <Recommendations items={action.recommendation} />
-              </Section>
-
-              {/* Bottom spacer */}
-              <div style={{ height: '20px' }} />
             </div>
+            {/* end scrollable body */}
+
           </motion.div>
         </>
       )}
