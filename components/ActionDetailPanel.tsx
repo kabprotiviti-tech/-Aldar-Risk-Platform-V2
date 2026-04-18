@@ -724,26 +724,120 @@ export function ActionDetailPanel({
                 <PortfolioImpact units={action.impactedUnits} />
               </Section>
 
-              {/* ── 3. What Will Happen (Consequence) — default OPEN ─────────── */}
+              {/* ── 3. Consequence Comparison — default OPEN ─────────────────── */}
               <Section
                 icon={ShieldAlert}
-                title="What Will Happen If Unaddressed"
+                title="Consequence Comparison"
                 iconColor="var(--risk-critical)"
                 defaultOpen
               >
-                <div
-                  style={{
-                    padding: '11px 13px',
-                    borderRadius: '7px',
-                    backgroundColor: 'rgba(255,59,59,0.06)',
-                    border: '1px solid rgba(255,59,59,0.2)',
-                    color: 'var(--text-secondary)',
-                    fontSize: '0.8rem',
-                    lineHeight: 1.65,
-                  }}
-                >
-                  {action.consequence || 'No additional data available'}
-                </div>
+                {(() => {
+                  const delta = action.impactValue - action.ifActedExposureM
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {/* If Action Taken */}
+                      <div
+                        style={{
+                          padding: '11px 13px',
+                          borderRadius: '7px',
+                          backgroundColor: 'rgba(34,197,94,0.07)',
+                          border: '1px solid rgba(34,197,94,0.25)',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                          <CheckCircle2 size={13} style={{ color: 'var(--risk-low)', flexShrink: 0 }} />
+                          <span style={{ color: 'var(--risk-low)', fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                            If Action Taken
+                          </span>
+                          <span
+                            style={{
+                              marginLeft: 'auto',
+                              fontSize: '0.7rem',
+                              fontWeight: 700,
+                              color: 'var(--risk-low)',
+                              backgroundColor: 'rgba(34,197,94,0.12)',
+                              border: '1px solid rgba(34,197,94,0.3)',
+                              borderRadius: '4px',
+                              padding: '1px 8px',
+                              whiteSpace: 'nowrap',
+                              fontVariantNumeric: 'tabular-nums',
+                            }}
+                          >
+                            ~AED {action.ifActedExposureM}M residual
+                          </span>
+                        </div>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.79rem', lineHeight: 1.6, margin: 0 }}>
+                          {action.ifActed}
+                        </p>
+                      </div>
+
+                      {/* Delta banner */}
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          padding: '7px 12px',
+                          borderRadius: '6px',
+                          backgroundColor: 'var(--bg-card)',
+                          border: '1px solid var(--border-accent)',
+                        }}
+                      >
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>Delta</span>
+                        <span
+                          style={{
+                            color: 'var(--accent-primary)',
+                            fontSize: '0.82rem',
+                            fontWeight: 800,
+                            fontVariantNumeric: 'tabular-nums',
+                          }}
+                        >
+                          AED {delta}M risk avoided
+                        </span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>
+                          ({Math.round((delta / action.impactValue) * 100)}% reduction)
+                        </span>
+                      </div>
+
+                      {/* If Ignored */}
+                      <div
+                        style={{
+                          padding: '11px 13px',
+                          borderRadius: '7px',
+                          backgroundColor: 'rgba(255,59,59,0.09)',
+                          border: '1px solid rgba(255,59,59,0.3)',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                          <XCircle size={13} style={{ color: 'var(--risk-critical)', flexShrink: 0 }} />
+                          <span style={{ color: 'var(--risk-critical)', fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                            If Ignored
+                          </span>
+                          <span
+                            style={{
+                              marginLeft: 'auto',
+                              fontSize: '0.7rem',
+                              fontWeight: 700,
+                              color: 'var(--risk-critical)',
+                              backgroundColor: 'rgba(255,59,59,0.12)',
+                              border: '1px solid rgba(255,59,59,0.3)',
+                              borderRadius: '4px',
+                              padding: '1px 8px',
+                              whiteSpace: 'nowrap',
+                              fontVariantNumeric: 'tabular-nums',
+                            }}
+                          >
+                            AED {action.impactValue}M+ exposure
+                          </span>
+                        </div>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.79rem', lineHeight: 1.6, margin: 0 }}>
+                          {action.ifIgnored}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })()}
               </Section>
 
               {/* ── 4. What To Do (Recommendations) — default OPEN ───────────── */}

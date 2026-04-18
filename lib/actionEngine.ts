@@ -57,6 +57,9 @@ export interface Action {
   dataPoints: DataPoint[]
   calculationLogic: string
   consequence: string
+  ifActed: string              // outcome if recommended actions are taken
+  ifIgnored: string            // outcome if action is deferred/ignored
+  ifActedExposureM: number     // residual exposure AED M if acted (for delta calc)
   recommendation: string[]
   aiConfidence: number         // 0–1
   impactPercent: number        // impactValue / TOTAL_PORTFOLIO_VALUE_M × 100
@@ -235,6 +238,9 @@ function buildActions(): Action[] {
     ],
     calculationLogic: `R-007 full financial impact: AED ${r007.financialImpact}M. R-001 off-plan/HNI-linked portion (42%): AED ${Math.round(r001.financialImpact * 0.42)}M. Combined 90-day exposure window: AED ${hniImpact}M. RE portfolio financial exposure: AED ${reMetrics.financialExposure}M total.`,
     consequence: `If unaddressed within 30 days: off-plan absorption declines 18–25%, translating to AED ${r007.financialImpact}M revenue shortfall in FY2026. Two further Fed hikes (Bloomberg-signalled) would add AED ${Math.round(r001.financialImpact * 0.55)}M additional exposure.`,
+    ifActed: `Residual exposure reduces to ~AED 82M. Off-plan absorption stabilises at −5% (vs −18% unmitigated) with post-handover payment plans and preferential mortgage packages. HNI outreach for top 50 accounts containing geopolitical-driven sentiment decline.`,
+    ifIgnored: `AED ${hniImpact}M revenue shortfall in FY2026. Two further Fed hikes add AED ${Math.round(r001.financialImpact * 0.55)}M exposure. Off-plan absorption declines 18–25%, potentially triggering launch deferrals across Yas Island and Saadiyat phases.`,
+    ifActedExposureM: 82,
     recommendation: [
       'Introduce post-handover payment plans (60/40 split) across active off-plan launches within 14 days',
       'Partner with ADCB and FAB on preferential mortgage rate packages for Aldar buyers — target sub-4.5% effective rate',
@@ -291,6 +297,9 @@ function buildActions(): Action[] {
     ],
     calculationLogic: `Weekly RevPAR shortfall: AED ${weeklyRevPARShortfall}M/week × ${voidWeeks} weeks void = AED ${weeklyRevPARShortfall * voidWeeks}M base. Event concentration risk (60% of R-014 impact): AED ${Math.round(r014.financialImpact * 0.6)}M. Total recoverable with campaign: AED ${hospImpact}M (assumes 55% recovery rate on RevPAR gap).`,
     consequence: `7 months of sub-70% occupancy results in cumulative AED ${Math.round(weeklyRevPARShortfall * voidWeeks)}M RevPAR shortfall. Full-year EBITDA miss of 12–18%. Retail footfall cascade amplifies: each 1% occupancy decline = -0.8pt footfall index, accelerating retail vacancy toward 10% by June.`,
+    ifActed: `Recover AED 78M (55% of shortfall) via F1 advance-booking campaign + corporate long-stay programme. Occupancy stabilises at 72–74%. Retail footfall cascade contained; vacancy held below 9%. EBITDA miss narrows to 4–6%.`,
+    ifIgnored: `AED ${hospImpact}M cumulative shortfall over 7-month void. Full-year EBITDA miss 12–18%. Retail vacancy cascades to 10%+ by June, triggering anchor tenant lease clauses. Recovery timeline extends to Q1 2027.`,
+    ifActedExposureM: Math.round(hospImpact * 0.45),
     recommendation: [
       'Launch F1 Grand Prix advance-booking campaign immediately — target 8% room night uplift, AED 18M recovery',
       'Activate corporate long-stay packages (14+ night) targeting GCC business travellers — 15% occupancy uplift potential',
@@ -348,6 +357,9 @@ function buildActions(): Action[] {
     ],
     calculationLogic: `Pipeline AED ${pipelineAED}M × 18% cost inflation = AED ${Math.round(pipelineAED * costInflation)}M gross exposure. Risk Register financial impact: AED ${r004.financialImpact}M (validated by ERP-002 Saadiyat overrun of ${erp002.value}%). Mitigation via multi-sourcing could save ${Math.round(mitigableShare * 100)}% = AED ${savingsOpportunity}M.`,
     consequence: `Without fixed-price provisions: AED ${r004.financialImpact}M margin erosion across active pipeline. Red Sea disruptions extending through Q3 2026 (Reuters). At current trajectory, 3 projects breach profitability thresholds, requiring repricing or launch deferral.`,
+    ifActed: `Save AED 230M via fixed-price provisions + multi-source RFP (56% of total exposure). Pipeline cost inflation normalises to +5% vs current +18%. Saadiyat Grove Phase 2 variation order resolved at board level, containing further overrun.`,
+    ifIgnored: `AED ${r004.financialImpact}M margin erosion across AED ${pipelineAED}M pipeline. 3 projects breach profitability thresholds requiring launch deferral or repricing. Red Sea disruptions through Q3 2026 add further AED ${Math.round(pipelineAED * 0.05)}M exposure if unhedged.`,
+    ifActedExposureM: r004.financialImpact - 230,
     recommendation: [
       `Activate force majeure and fixed-price contract provisions on all AED ${pipelineAED}M pipeline within 7 days`,
       'Issue multi-source RFP to GCC + South Asian suppliers — target 12–15% cost reduction (AED ' + savingsOpportunity + 'M savings)',
@@ -398,6 +410,9 @@ function buildActions(): Action[] {
     ],
     calculationLogic: `Scenario 5 (Major Cyber Attack) validation: Facilities AED ${r006.financialImpact}M + Retail AED 65M + Hospitality AED 95M = AED 340M tail risk. Base case immediate exposure: AED ${r006.financialImpact}M (remediation + SLA penalties). CISA advisory elevates probability from 14% to estimated 22%.`,
     consequence: `Coordinated BMS attack could shut down 15+ assets simultaneously. Guest data breach liability + AED 65M tenant compensation claims + SLA penalties = AED ${r006.financialImpact}M minimum. Reputational damage to Aldar's smart city brand positioning is unquantifiable but significant.`,
+    ifActed: `Tail risk reduces to AED 45M with OT/IT segmentation + 24/7 SOC monitoring. Attack surface reduced 70%. NCA ECC compliance posture achieved within 30 days, materially lowering breach probability from 22% to estimated 6%.`,
+    ifIgnored: `AED ${r006.financialImpact}M+ remediation cost, SLA penalties and guest data breach liability. Coordinated attack on 15+ assets simultaneously could trigger operational shutdown across Facilities, Hospitality and Retail portfolios. Regulatory action by UAE NCA likely.`,
+    ifActedExposureM: 45,
     recommendation: [
       'Initiate emergency OT/IT network segmentation audit across all 40+ BMS-connected assets within 3 days',
       'Isolate building automation networks from corporate IT — no shared credentials or VLANs',
@@ -456,6 +471,9 @@ function buildActions(): Action[] {
     ],
     calculationLogic: `Vacancy exposure: (${crm001.value}% - ${crm001.benchmark}%) × AED ${retailGAV}M GAV = AED ${vacancyImpact}M annual revenue impact. Receivables at-risk portion (35% of AED ${erp001.value}M aging): AED ${Math.round(receivablesRisk * 0.35)}M. Total: AED ${vacancyImpact + Math.round(receivablesRisk * 0.35)}M. AI model projects AED 35M savings from convenience/health repositioning within 18 months.`,
     consequence: `Vacancy exceeding 10% (projected by June at current trajectory) triggers anchor tenant lease clauses in 3 agreements, potentially accelerating void spiral. AED 142M receivables: if 50% become bad debt = AED 71M write-off. Tenant NPS at 54 (vs 66 benchmark) signals further lease non-renewal risk.`,
+    ifActed: `Recover AED 120M via unit repositioning + structured receivables collection. Vacancy reduces to 6.2% within 12 months. Anchor tenant strategy initiated 18 months ahead of Q4 2026 expiry, avoiding AED ${r002.financialImpact}M void risk.`,
+    ifIgnored: `Vacancy reaches 10%+ by June, triggering anchor tenant lease clauses in 3 agreements. AED 71M bad debt write-off if 50% of receivables age past 180 days. Yas Mall anchor expiry AED ${r002.financialImpact}M impact unmitigated. Void spiral risk through 2027.`,
+    ifActedExposureM: vacancyImpact + Math.round(receivablesRisk * 0.35) - 120,
     recommendation: [
       `Immediately reposition 40% of vacant units (targeting ${(vacancyGap * 0.4).toFixed(1)}% vacancy reduction) to convenience, health and F&B categories`,
       'Issue formal performance improvement notices to tenants with >90-day receivables — initiate structured recovery for AED ' + Math.round(receivablesRisk * 0.35) + 'M at-risk portion',
