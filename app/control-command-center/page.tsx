@@ -60,7 +60,7 @@ function getRisk(id: string) { return riskRegister.find(r => r.id === id) }
 
 // ─── Metric card ──────────────────────────────────────────────────────────────
 
-type MetricFilter = 'failed' | 'overdue' | 'partial' | 'all' | null
+type MetricFilter = 'failed' | 'overdue' | 'partial' | 'effective' | 'all' | null
 
 function MetricCard({
   label,
