@@ -28,11 +28,53 @@ import {
 import {
   PRIORITY_COLOR,
   PRIORITY_BG,
+  STATUS_COLOR,
+  STATUS_BG,
+  STATUS_LABEL,
   type Action,
   type ActionPriority,
+  type ActionStatus,
   type DataPoint,
   type PropagationStep,
 } from '@/lib/actionEngine'
+
+// ─── Status badge ────────────────────────────────────────────────────────────
+
+function StatusBadge({ status }: { status: ActionStatus }) {
+  const color = STATUS_COLOR[status]
+  const bg    = STATUS_BG[status]
+  const label = STATUS_LABEL[status]
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '5px',
+        padding: '3px 10px',
+        borderRadius: '5px',
+        backgroundColor: bg,
+        border: `1px solid ${color}55`,
+        color,
+        fontSize: '0.63rem',
+        fontWeight: 800,
+        letterSpacing: '0.08em',
+        textTransform: 'uppercase',
+      }}
+    >
+      <span
+        style={{
+          width: '6px',
+          height: '6px',
+          borderRadius: '50%',
+          backgroundColor: color,
+          display: 'inline-block',
+          flexShrink: 0,
+        }}
+      />
+      {label}
+    </span>
+  )
+}
 
 // ─── Priority badge ───────────────────────────────────────────────────────────
 
@@ -524,7 +566,47 @@ export function ActionDetailPanel({
                     {Math.round(action.aiConfidence * 100)}% confidence
                   </span>
                 </div>
+
+                {/* Status badge */}
+                <StatusBadge status={action.status} />
               </div>
+
+              {/* Overdue / Escalation alert strip */}
+              {action.daysOverdue > 0 && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    margin: '8px 20px 0',
+                    padding: '8px 12px',
+                    borderRadius: '7px',
+                    backgroundColor: 'rgba(255,59,59,0.08)',
+                    border: '1px solid rgba(255,59,59,0.3)',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--risk-critical)' }}>
+                    ⚠ Overdue by {action.daysOverdue} day{action.daysOverdue !== 1 ? 's' : ''}
+                  </span>
+                  {action.escalated && (
+                    <span
+                      style={{
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        color: 'var(--risk-critical)',
+                        backgroundColor: 'rgba(255,59,59,0.15)',
+                        border: '1px solid rgba(255,59,59,0.35)',
+                        borderRadius: '4px',
+                        padding: '2px 8px',
+                        letterSpacing: '0.05em',
+                      }}
+                    >
+                      🔴 Escalated to CRO
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* ── SCROLLABLE BODY ────────────────────────────────────────────── */}

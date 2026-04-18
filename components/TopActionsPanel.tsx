@@ -13,10 +13,55 @@ import {
   TOP_ACTIONS,
   PRIORITY_COLOR,
   PRIORITY_BG,
+  STATUS_COLOR,
+  STATUS_BG,
+  STATUS_LABEL,
   rankLabel,
   type Action,
   type ActionPriority,
+  type ActionStatus,
 } from '@/lib/actionEngine'
+
+// ─── Status badge ────────────────────────────────────────────────────────────
+
+function StatusDot({ status }: { status: ActionStatus }) {
+  const color = STATUS_COLOR[status]
+  const bg    = STATUS_BG[status]
+  const label = STATUS_LABEL[status]
+  return (
+    <span
+      title={label}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '4px',
+        padding: '2px 7px',
+        borderRadius: '4px',
+        backgroundColor: bg,
+        border: `1px solid ${color}50`,
+        fontSize: '0.6rem',
+        fontWeight: 700,
+        color,
+        letterSpacing: '0.06em',
+        textTransform: 'uppercase',
+        whiteSpace: 'nowrap',
+        flexShrink: 0,
+      }}
+    >
+      <span
+        style={{
+          width: '5px',
+          height: '5px',
+          borderRadius: '50%',
+          backgroundColor: color,
+          flexShrink: 0,
+          display: 'inline-block',
+        }}
+      />
+      {label}
+    </span>
+  )
+}
 
 // ─── Portfolio label map ──────────────────────────────────────────────────────
 
@@ -241,6 +286,16 @@ function ActionRow({
               {Math.round(action.aiConfidence * 100)}% conf
             </span>
           </div>
+
+          {/* Status */}
+          <StatusDot status={action.status} />
+
+          {/* Overdue days (if applicable) */}
+          {action.daysOverdue > 0 && (
+            <span style={{ color: 'var(--risk-critical)', fontSize: '0.65rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
+              {action.escalated ? '🔴' : '🟡'} {action.daysOverdue}d overdue
+            </span>
+          )}
         </div>
       </div>
 

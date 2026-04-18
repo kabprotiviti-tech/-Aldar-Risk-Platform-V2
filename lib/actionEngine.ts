@@ -14,7 +14,7 @@ import { PROPAGATED_METRICS } from '@/lib/riskPropagationEngine'
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type ActionPriority = 'critical' | 'high' | 'medium'
-export type ActionStatus = 'open' | 'in-progress' | 'escalated'
+export type ActionStatus = 'open' | 'in-progress' | 'overdue'
 
 export interface DataPoint {
   label: string
@@ -51,6 +51,11 @@ export interface Action {
   recommendation: string[]
   aiConfidence: number         // 0–1
   priorityScore: number        // 0–100 weighted composite score
+  // ── Accountability fields (computed) ─────────────────────────────
+  elapsedDays: number          // days since action was flagged
+  status: ActionStatus         // open | in-progress | overdue
+  daysOverdue: number          // 0 if on track
+  escalated: boolean           // true if overdue > 3 days
 }
 
 // ─── Priority scoring ─────────────────────────────────────────────────────────
@@ -70,34 +75,59 @@ function trendScore(worseningTrend: number): number {
   return Math.round(worseningTrend * 100)
 }
 
-function computeScores(actions: Omit<Action, 'priorityScore'>[]): Action[] {
-  const impacts      = actions.map(a => a.impactValue)
-  const deadlines    = actions.map(a => a.deadlineDays)
-  const minImpact    = Math.min(...impacts)
-  const maxImpact    = Math.max(...impacts)
-  const minDays      = Math.min(...deadlines)
-  const maxDays      = Math.max(...deadlines)
+type RawAction = Omit<Action, 'priorityScore' | 'status' | 'daysOverdue' | 'escalated'>
+
+function computeScores(actions: RawAction[]): Action[] {
+  const impacts   = actions.map(a => a.impactValue)
+  const deadlines = actions.map(a => a.deadlineDays)
+  const minImpact = Math.min(...impacts)
+  const maxImpact = Math.max(...impacts)
+  const minDays   = Math.min(...deadlines)
+  const maxDays   = Math.max(...deadlines)
 
   return actions.map(a => {
+    // ── Priority score ─────────────────────────────────────────────
     const normImpact   = maxImpact === minImpact ? 100
       : ((a.impactValue - minImpact) / (maxImpact - minImpact)) * 100
-
-    // Fewer days remaining = higher urgency
     const normUrgency  = maxDays === minDays ? 100
       : ((maxDays - a.deadlineDays) / (maxDays - minDays)) * 100
-
     const normSeverity = severityScore(a.priority)
     const normTrend    = trendScore(a.worseningTrend)
 
-    const score = Math.round(
+    const priorityScore = Math.round(
       IMPACT_W   * normImpact   +
       URGENCY_W  * normUrgency  +
       SEVERITY_W * normSeverity +
       TREND_W    * normTrend
     )
 
-    return { ...a, priorityScore: score }
+    // ── Accountability ─────────────────────────────────────────────
+    const daysOverdue = Math.max(0, a.elapsedDays - a.deadlineDays)
+    const status: ActionStatus = daysOverdue > 0 ? 'overdue' : 'open'
+    const escalated = daysOverdue > 3
+
+    return { ...a, priorityScore, status, daysOverdue, escalated }
   })
+}
+
+// ─── Status display helpers ───────────────────────────────────────────────────
+
+export const STATUS_COLOR: Record<ActionStatus, string> = {
+  open:         'var(--risk-low)',
+  'in-progress':'var(--risk-medium)',
+  overdue:      'var(--risk-critical)',
+}
+
+export const STATUS_BG: Record<ActionStatus, string> = {
+  open:         'rgba(34,197,94,0.12)',
+  'in-progress':'rgba(245,197,24,0.12)',
+  overdue:      'rgba(255,59,59,0.12)',
+}
+
+export const STATUS_LABEL: Record<ActionStatus, string> = {
+  open:         'On Track',
+  'in-progress':'In Progress',
+  overdue:      'Overdue',
 }
 
 // ─── Source lookups ───────────────────────────────────────────────────────────
@@ -132,7 +162,7 @@ function buildActions(): Action[] {
   const hniImpact = r007.financialImpact + Math.round(r001.financialImpact * 0.42)
   // 42% of R-001 impact is mortgage/HNI-linked (off-plan portion)
 
-  const action1: Omit<Action, 'priorityScore'> = {
+  const action1: RawAction = {
     id: 'ACT-001',
     title: 'Activate HNI Buyer Retention & Mortgage Flexibility Program',
     priority: 'critical',
@@ -141,6 +171,7 @@ function buildActions(): Action[] {
     owner: r007.owner,
     deadline: '30 days',
     deadlineDays: 30,
+    elapsedDays: 35,       // flagged 35 days ago → 5 days overdue → escalated
     worseningTrend: 1.0,   // R-007 trend: increasing, R-001 trend: increasing
     portfolio: 'real-estate',
     category: 'Revenue Protection',
@@ -182,7 +213,7 @@ function buildActions(): Action[] {
   const voidWeeks = 28               // Apr–Oct = ~28 weeks
   const hospImpact = Math.round(weeklyRevPARShortfall * voidWeeks + r014.financialImpact * 0.6)
 
-  const action2: Omit<Action, 'priorityScore'> = {
+  const action2: RawAction = {
     id: 'ACT-002',
     title: 'Launch Corporate Long-Stay & Bridging Event Campaign — Hospitality',
     priority: 'high',
@@ -191,6 +222,7 @@ function buildActions(): Action[] {
     owner: r003.owner,
     deadline: '14 days',
     deadlineDays: 14,
+    elapsedDays: 8,        // flagged 8 days ago → 6 days remaining → open
     worseningTrend: 1.0,   // R-003 trend: increasing, R-014 trend: increasing
     portfolio: 'hospitality',
     category: 'Revenue Recovery',
@@ -234,7 +266,7 @@ function buildActions(): Action[] {
   const constructionImpact = r004.financialImpact
   const savingsOpportunity = Math.round(pipelineAED * mitigableShare)
 
-  const action3: Omit<Action, 'priorityScore'> = {
+  const action3: RawAction = {
     id: 'ACT-003',
     title: 'Activate Fixed-Price Provisions & Multi-Source Supply Chain — Construction',
     priority: 'critical',
@@ -243,6 +275,7 @@ function buildActions(): Action[] {
     owner: r004.owner,
     deadline: '7 days',
     deadlineDays: 7,
+    elapsedDays: 9,        // flagged 9 days ago → 2 days overdue → NOT escalated (≤3)
     worseningTrend: 1.0,   // R-004 trend: increasing
     portfolio: 'real-estate',
     category: 'Cost Containment',
@@ -279,7 +312,7 @@ function buildActions(): Action[] {
   }
 
   // ── Action 4: Cyber Security Emergency Response ───────────────────────────
-  const action4: Omit<Action, 'priorityScore'> = {
+  const action4: RawAction = {
     id: 'ACT-004',
     title: 'Emergency OT/IT Security Audit — Smart Building Infrastructure',
     priority: 'high',
@@ -288,6 +321,7 @@ function buildActions(): Action[] {
     owner: r006.owner,
     deadline: '3 days',
     deadlineDays: 3,
+    elapsedDays: 8,        // flagged 8 days ago → 5 days overdue → escalated
     worseningTrend: 1.0,   // R-006 trend: increasing; N-006: critical advisory
     portfolio: 'facilities',
     category: 'Cyber Risk Mitigation',
@@ -328,7 +362,7 @@ function buildActions(): Action[] {
   const vacancyImpact = Math.round((vacancyGap / 100) * retailGAV)
   const receivablesRisk = erp001.value  // AED 142M
 
-  const action5: Omit<Action, 'priorityScore'> = {
+  const action5: RawAction = {
     id: 'ACT-005',
     title: 'Retail Vacancy Repositioning & Receivables Recovery',
     priority: 'high',
@@ -337,6 +371,7 @@ function buildActions(): Action[] {
     owner: r009.owner,
     deadline: '45 days',
     deadlineDays: 45,
+    elapsedDays: 5,        // flagged 5 days ago → 40 days remaining → open
     worseningTrend: 0.75,  // R-009 trend: increasing (1.0), R-002 trend: stable (0.5) → avg 0.75
     portfolio: 'retail',
     category: 'Asset Performance',
