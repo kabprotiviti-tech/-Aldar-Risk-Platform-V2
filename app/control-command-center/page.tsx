@@ -350,7 +350,7 @@ function ControlChainRow({ control, onClick }: { control: Control; onClick: (c: 
 // ─── AI Governance Insight ────────────────────────────────────────────────────
 
 function AIInsight() {
-  const failedProcesses = [...new Set(FAILED_CONTROLS.map(c => c.process))]
+  const failedProcesses = Array.from(new Set(FAILED_CONTROLS.map(c => c.process)))
   const totalExposure = FAILED_CONTROLS.reduce((sum, c) => {
     const r = getRisk(c.linkedRiskId)
     return sum + (r?.financialImpact ?? 0)
