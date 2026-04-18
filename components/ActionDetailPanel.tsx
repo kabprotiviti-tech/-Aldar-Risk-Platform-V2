@@ -31,9 +31,12 @@ import {
   STATUS_COLOR,
   STATUS_BG,
   STATUS_LABEL,
+  IMPACT_LEVEL_COLOR,
+  IMPACT_LEVEL_BG,
   type Action,
   type ActionPriority,
   type ActionStatus,
+  type ImpactedUnit,
   type DataPoint,
   type PropagationStep,
 } from '@/lib/actionEngine'
@@ -277,6 +280,63 @@ function PropagationChain({ steps }: { steps: PropagationStep[] }) {
           )}
         </div>
       ))}
+    </div>
+  )
+}
+
+// ─── Portfolio impact ─────────────────────────────────────────────────────────
+
+function PortfolioImpact({ units }: { units: ImpactedUnit[] }) {
+  if (!units.length)
+    return <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>No additional data available</p>
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      {units.map((u, i) => {
+        const color = IMPACT_LEVEL_COLOR[u.impact]
+        const bg    = IMPACT_LEVEL_BG[u.impact]
+        return (
+          <div
+            key={i}
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '10px',
+              padding: '9px 12px',
+              borderRadius: '7px',
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-color)',
+            }}
+          >
+            {/* Business unit name + impact chip */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, minWidth: '160px' }}>
+              <span style={{ color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 600 }}>
+                {u.name}
+              </span>
+              <span
+                style={{
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  backgroundColor: bg,
+                  border: `1px solid ${color}45`,
+                  color,
+                  fontSize: '0.62rem',
+                  fontWeight: 800,
+                  letterSpacing: '0.07em',
+                  textTransform: 'uppercase',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {u.impact}
+              </span>
+            </div>
+            {/* Reason */}
+            <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', lineHeight: 1.5, flex: 1 }}>
+              {u.reason}
+            </span>
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -637,6 +697,16 @@ export function ActionDetailPanel({
                 defaultOpen
               >
                 <PropagationChain steps={action.propagationPath} />
+              </Section>
+
+              {/* ── 2b. Portfolio Impact — default OPEN ──────────────────────── */}
+              <Section
+                icon={BarChart2}
+                title="Portfolio Impact"
+                iconColor="var(--chart-2)"
+                defaultOpen
+              >
+                <PortfolioImpact units={action.impactedUnits} />
               </Section>
 
               {/* ── 3. What Will Happen (Consequence) — default OPEN ─────────── */}

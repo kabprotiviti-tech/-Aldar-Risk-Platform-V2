@@ -30,6 +30,15 @@ export interface PropagationStep {
   magnitude: string
 }
 
+export type ImpactLevel = 'High' | 'Medium' | 'Low'
+
+export interface ImpactedUnit {
+  name: string
+  portfolio: Portfolio
+  impact: ImpactLevel
+  reason: string   // one-line rationale derived from propagation
+}
+
 export interface Action {
   id: string
   title: string
@@ -50,6 +59,7 @@ export interface Action {
   consequence: string
   recommendation: string[]
   aiConfidence: number         // 0–1
+  impactedUnits: ImpactedUnit[]  // cross-portfolio impact derived from propagation
   priorityScore: number        // 0–100 weighted composite score
   // ── Accountability fields (computed) ─────────────────────────────
   elapsedDays: number          // days since action was flagged
@@ -76,6 +86,7 @@ function trendScore(worseningTrend: number): number {
 }
 
 type RawAction = Omit<Action, 'priorityScore' | 'status' | 'daysOverdue' | 'escalated'>
+// (impactedUnits is set manually per action; only scoring/accountability fields are computed)
 
 function computeScores(actions: RawAction[]): Action[] {
   const impacts   = actions.map(a => a.impactValue)
@@ -108,6 +119,20 @@ function computeScores(actions: RawAction[]): Action[] {
 
     return { ...a, priorityScore, status, daysOverdue, escalated }
   })
+}
+
+// ─── Impact level helpers ─────────────────────────────────────────────────────
+
+export const IMPACT_LEVEL_COLOR: Record<ImpactLevel, string> = {
+  High:   'var(--risk-critical)',
+  Medium: 'var(--risk-high)',
+  Low:    'var(--risk-medium)',
+}
+
+export const IMPACT_LEVEL_BG: Record<ImpactLevel, string> = {
+  High:   'rgba(255,59,59,0.1)',
+  Medium: 'rgba(255,140,0,0.1)',
+  Low:    'rgba(245,197,24,0.1)',
 }
 
 // ─── Status display helpers ───────────────────────────────────────────────────
@@ -206,6 +231,11 @@ function buildActions(): Action[] {
       'Fast-track launch of Yas Island branded residences to capture demand before next rate hike cycle',
     ],
     aiConfidence: 0.87,
+    impactedUnits: [
+      { name: 'Real Estate',  portfolio: 'real-estate', impact: 'High',   reason: 'Primary portfolio — off-plan absorption & HNI sales directly suppressed' },
+      { name: 'Education',    portfolio: 'education',   impact: 'Medium',  reason: 'HNI family relocation drives school enrollment; dampened demand reduces intake' },
+      { name: 'Retail',       portfolio: 'retail',      impact: 'Low',     reason: 'Lower resident density from deferred buyers reduces community retail footfall' },
+    ],
   }
 
   // ── Action 2: Hospitality Revenue Recovery ────────────────────────────────
@@ -257,6 +287,11 @@ function buildActions(): Action[] {
       'Implement dynamic pricing floor at AED 310/night to protect RevPAR baseline during shoulder season',
     ],
     aiConfidence: 0.89,
+    impactedUnits: [
+      { name: 'Hospitality',  portfolio: 'hospitality', impact: 'High',   reason: 'Primary portfolio — RevPAR shortfall and occupancy decline direct' },
+      { name: 'Retail',       portfolio: 'retail',      impact: 'High',   reason: 'Footfall cascade: each 1% occupancy drop = −0.8pt footfall index → vacancy pressure' },
+      { name: 'Facilities',   portfolio: 'facilities',  impact: 'Medium', reason: 'Shared asset operations; lower occupancy reduces FM revenue and SLA utilisation' },
+    ],
   }
 
   // ── Action 3: Construction Cost Containment ───────────────────────────────
@@ -309,6 +344,11 @@ function buildActions(): Action[] {
       'Raise Saadiyat Grove Phase 2 issue to Board level — AED 48M variation order requires executive resolution',
     ],
     aiConfidence: 0.91,
+    impactedUnits: [
+      { name: 'Real Estate',  portfolio: 'real-estate', impact: 'High',   reason: 'Primary portfolio — AED 8.2Bn active pipeline fully exposed to overrun' },
+      { name: 'Education',    portfolio: 'education',   impact: 'Medium', reason: 'School construction projects share same supply chain; cost inflation cascades' },
+      { name: 'Facilities',   portfolio: 'facilities',  impact: 'Low',    reason: 'FM infrastructure projects affected by steel/MEP cost increases' },
+    ],
   }
 
   // ── Action 4: Cyber Security Emergency Response ───────────────────────────
@@ -354,6 +394,12 @@ function buildActions(): Action[] {
       'Conduct tabletop simulation of coordinated BMS attack scenario within 14 days',
     ],
     aiConfidence: 0.88,
+    impactedUnits: [
+      { name: 'Facilities',   portfolio: 'facilities',  impact: 'High',   reason: 'Primary portfolio — 40+ IoT/BMS assets directly at risk from nation-state threat' },
+      { name: 'Retail',       portfolio: 'retail',      impact: 'High',   reason: 'BMS-connected retail assets share same OT network; single breach = full exposure' },
+      { name: 'Hospitality',  portfolio: 'hospitality', impact: 'High',   reason: 'Hotel building automation systems integrated; guest data breach liability AED 95M' },
+      { name: 'Real Estate',  portfolio: 'real-estate', impact: 'Medium', reason: 'Residential smart systems connected; reputational damage to smart city brand' },
+    ],
   }
 
   // ── Action 5: Retail Vacancy & Receivables Mitigation ─────────────────────
@@ -406,6 +452,11 @@ function buildActions(): Action[] {
       `Fast-track Yas Mall anchor tenant strategy before Q4 2026 lease expiry — 18-month lead time required for AED ${r002.financialImpact}M impact avoidance`,
     ],
     aiConfidence: 0.84,
+    impactedUnits: [
+      { name: 'Retail',       portfolio: 'retail',      impact: 'High',   reason: 'Primary portfolio — vacancy 8.5% vs 5.2% benchmark; AED 142M receivables aging' },
+      { name: 'Hospitality',  portfolio: 'hospitality', impact: 'Medium', reason: 'Shared Yas Island footfall — retail vacancy amplifies hotel demand softness' },
+      { name: 'Real Estate',  portfolio: 'real-estate', impact: 'Low',    reason: 'Covenant stress on 3 leases; anchor tenant exit could affect asset valuations' },
+    ],
   }
 
   return computeScores([action1, action2, action3, action4, action5])
