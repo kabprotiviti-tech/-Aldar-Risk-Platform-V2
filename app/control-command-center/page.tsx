@@ -19,6 +19,7 @@ import {
   Zap,
   User,
   FlaskConical,
+  X,
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardBody } from '@/components/ui/Card'
 import { controls, controlSummary, type Control, type ControlStatus } from '@/lib/controlData'
@@ -30,13 +31,19 @@ import { ControlDetailPanel } from '@/components/controls/ControlDetailPanel'
 import { ActionDetailPanel } from '@/components/ActionDetailPanel'
 import { getMergedActions } from '@/lib/controlActionBridge'
 import { riskRegister } from '@/lib/simulated-data'
+import { ControlFilterProvider, useControlFilter, type FilterType } from '@/context/ControlFilterContext'
+import { filterControls } from '@/lib/filterControls'
 
-// ─── Pre-compute ──────────────────────────────────────────────────────────────
+// ─── Pre-compute (module-level, never filtered) ────────────────────────────────
 
-const ALL_TESTS      = evaluateControlStatus()
-const TEST_SUMMARY   = testingSummary(ALL_TESTS)
-const MERGED_ACTIONS = getMergedActions(TOP_ACTIONS)
-const FAILED_CONTROLS = controls.filter(c => c.status === 'failed')
+const ALL_TESTS        = evaluateControlStatus()
+const TEST_SUMMARY     = testingSummary(ALL_TESTS)
+const MERGED_ACTIONS   = getMergedActions(TOP_ACTIONS)
+// Always full-dataset counts — metrics cards must never reflect filter state
+const FAILED_CONTROLS  = controls.filter(c => c.status === 'failed')
+const FINANCIAL_CONTROLS = controls.filter(
+  c => c.process === 'Finance' || c.icafarAssertion === 'Accuracy & Valuation' || c.icafarAssertion === 'Cut-off'
+)
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -56,11 +63,17 @@ const STATUS_LABEL: Record<ControlStatus, string> = {
   failed:    'Failed',
 }
 
+const FILTER_LABEL: Record<FilterType, string> = {
+  all:       'All Controls',
+  failed:    'Failed Controls',
+  partial:   'Partial Controls',
+  effective: 'Effective Controls',
+  overdue:   'Overdue Tests',
+}
+
 function getRisk(id: string) { return riskRegister.find(r => r.id === id) }
 
 // ─── Metric card ──────────────────────────────────────────────────────────────
-
-type MetricFilter = 'failed' | 'overdue' | 'partial' | 'effective' | 'all' | null
 
 function MetricCard({
   label,
@@ -68,22 +81,19 @@ function MetricCard({
   sub,
   color,
   filterKey,
-  activeFilter,
-  onFilterClick,
 }: {
   label: string
   value: string | number
   sub?: string
   color: string
-  filterKey?: MetricFilter
-  activeFilter: MetricFilter
-  onFilterClick: (k: MetricFilter) => void
+  filterKey?: FilterType
 }) {
-  const isActive = filterKey !== null && activeFilter === filterKey
+  const { filter, setFilter } = useControlFilter()
+  const isActive = filterKey !== undefined && filterKey !== 'all' && filter === filterKey
   return (
     <motion.div
       whileHover={{ scale: filterKey ? 1.02 : 1 }}
-      onClick={() => filterKey && onFilterClick(isActive ? null : filterKey)}
+      onClick={() => filterKey && setFilter(isActive ? 'all' : filterKey)}
       style={{
         padding: '14px 16px',
         borderRadius: '10px',
@@ -119,22 +129,19 @@ function HealthBar({
   total,
   color,
   filterKey,
-  activeFilter,
-  onFilter,
 }: {
   label: string
   count: number
   total: number
   color: string
-  filterKey?: MetricFilter
-  activeFilter: MetricFilter
-  onFilter: (k: MetricFilter) => void
+  filterKey?: FilterType
 }) {
+  const { filter, setFilter } = useControlFilter()
   const pct = Math.round((count / total) * 100)
-  const isActive = filterKey !== null && activeFilter === filterKey
+  const isActive = filterKey !== undefined && filterKey !== 'all' && filter === filterKey
   return (
     <div
-      onClick={() => filterKey && onFilter(isActive ? null : filterKey)}
+      onClick={() => filterKey && setFilter(isActive ? 'all' : filterKey)}
       style={{
         marginBottom: '8px',
         cursor: filterKey ? 'pointer' : 'default',
@@ -271,40 +278,27 @@ function ControlRow({ control, index, onClick }: { control: Control; index: numb
       }}
       whileHover={{ backgroundColor: 'var(--bg-hover)' }}
     >
-      {/* Status dot */}
       <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: color, flexShrink: 0 }} />
-
       <span style={{ color: 'var(--text-muted)', fontSize: '0.63rem', fontWeight: 700, flexShrink: 0, minWidth: '36px' }}>
         {control.id}
       </span>
-
       <span style={{ color: 'var(--text-primary)', fontSize: '0.78rem', fontWeight: 600, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {control.name}
       </span>
-
       <span
         style={{
-          padding: '2px 7px',
-          borderRadius: '4px',
-          fontSize: '0.6rem',
-          fontWeight: 700,
-          color,
-          backgroundColor: STATUS_BG[control.status],
-          border: `1px solid ${color}30`,
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-          flexShrink: 0,
+          padding: '2px 7px', borderRadius: '4px', fontSize: '0.6rem', fontWeight: 700,
+          color, backgroundColor: STATUS_BG[control.status], border: `1px solid ${color}30`,
+          textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0,
         }}
       >
         {STATUS_LABEL[control.status]}
       </span>
-
       {risk && (
         <span style={{ color: 'var(--text-muted)', fontSize: '0.65rem', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
           AED {risk.financialImpact}M
         </span>
       )}
-
       <ChevronRight size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
     </motion.div>
   )
@@ -392,34 +386,82 @@ function AIInsight() {
   )
 }
 
-// ─── ICOFAR Financial Controls ────────────────────────────────────────────────
+// ─── Global Filter Indicator ──────────────────────────────────────────────────
 
-const FINANCIAL_CONTROLS = controls.filter(c => c.process === 'Finance' || c.icafarAssertion === 'Accuracy & Valuation' || c.icafarAssertion === 'Cut-off')
+function FilterIndicator({ count }: { count: number }) {
+  const { filter, setFilter } = useControlFilter()
+  if (filter === 'all') return null
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -6 }}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        padding: '8px 14px',
+        borderRadius: '8px',
+        backgroundColor: 'rgba(201,168,76,0.07)',
+        border: '1px solid rgba(201,168,76,0.25)',
+      }}
+    >
+      <span style={{ color: 'var(--accent-primary)', fontSize: '0.75rem', fontWeight: 600 }}>
+        Showing: {FILTER_LABEL[filter]} ({count})
+      </span>
+      <button
+        onClick={() => setFilter('all')}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          padding: '2px 9px',
+          borderRadius: '4px',
+          fontSize: '0.65rem',
+          fontWeight: 700,
+          color: 'var(--text-muted)',
+          backgroundColor: 'var(--bg-card)',
+          border: '1px solid var(--border-color)',
+          cursor: 'pointer',
+        }}
+      >
+        <X size={10} />
+        Clear
+      </button>
+    </motion.div>
+  )
+}
 
-// ─── Main page ────────────────────────────────────────────────────────────────
+// ─── Main page (inner — consumes context) ─────────────────────────────────────
 
-type ActiveSection = MetricFilter
-
-export default function ControlCommandCenterPage() {
-  const [activeFilter, setActiveFilter] = useState<ActiveSection>(null)
+function ControlCommandCenterInner() {
+  const { filter, setFilter } = useControlFilter()
   const [selectedControl, setSelectedControl] = useState<Control | null>(null)
   const [selectedAction, setSelectedAction] = useState<Action | null>(null)
 
-  const handleFilterClick = (key: MetricFilter) => {
-    setActiveFilter(key)
-  }
+  // ── Single source of truth for all filtered lists ──
+  const filteredControls = filterControls(controls, filter)
 
-  const filteredControls = (() => {
-    if (activeFilter === 'failed')    return controls.filter(c => c.status === 'failed')
-    if (activeFilter === 'partial')   return controls.filter(c => c.status === 'partial')
-    if (activeFilter === 'effective') return controls.filter(c => c.status === 'effective')
-    if (activeFilter === 'overdue') {
-      const overdueTests = ALL_TESTS.filter(t => t.testStatus === 'overdue')
-      const overdueIds = new Set(overdueTests.map(t => t.controlId))
-      return controls.filter(c => overdueIds.has(c.id))
-    }
-    return controls  // 'all' or null → show everything
-  })()
+  // Failed controls shown in Section 3 — failed items within current filter
+  const displayedFailed = filteredControls.filter(c => c.status === 'failed')
+
+  // Control → Risk chain: all filtered controls (any status)
+  const displayedChain = filteredControls
+
+  // ICOFAR financial controls: apply global filter on top of financial subset
+  const filteredControlIds = new Set(filteredControls.map(c => c.id))
+  const displayedFinancial = FINANCIAL_CONTROLS.filter(c => filteredControlIds.has(c.id))
+
+  // Action tracker: filter actions to those whose control is in the filtered set
+  const failedFilteredIds = new Set(displayedFailed.map(c => `CTRL-${c.id}`))
+  const displayedActions = filter === 'all'
+    ? CONTROL_FAILURE_ACTIONS
+    : CONTROL_FAILURE_ACTIONS.filter(a => failedFilteredIds.has(a.id))
+
+  const totalExposure = FAILED_CONTROLS.reduce((sum, c) => {
+    const r = getRisk(c.linkedRiskId)
+    return sum + (r?.financialImpact ?? 0)
+  }, 0)
 
   const handleActionClick = (actionId: string) => {
     const action = MERGED_ACTIONS.find(a => a.id === actionId)
@@ -429,14 +471,9 @@ export default function ControlCommandCenterPage() {
     }
   }
 
-  const totalExposure = FAILED_CONTROLS.reduce((sum, c) => {
-    const r = getRisk(c.linkedRiskId)
-    return sum + (r?.financialImpact ?? 0)
-  }, 0)
-
   return (
     <div className="space-y-6">
-      {/* ── SECTION 1: Top Metrics ──────────────────────────────────────────── */}
+      {/* ── SECTION 1: Page header ─────────────────────────────────────────── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Shield size={16} style={{ color: 'var(--accent-primary)' }} />
@@ -462,7 +499,12 @@ export default function ControlCommandCenterPage() {
         </p>
       </div>
 
-      {/* Metric cards */}
+      {/* ── Global Filter Indicator ────────────────────────────────────────── */}
+      <AnimatePresence>
+        {filter !== 'all' && <FilterIndicator count={filteredControls.length} />}
+      </AnimatePresence>
+
+      {/* ── Metric cards (always use full dataset counts) ─────────────────── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
         <MetricCard
           label="Control Effectiveness"
@@ -470,8 +512,6 @@ export default function ControlCommandCenterPage() {
           sub={`${controlSummary.effective} of ${controlSummary.total} effective`}
           color={controlSummary.coveragePercent >= 80 ? '#22C55E' : '#F5C518'}
           filterKey="effective"
-          activeFilter={activeFilter}
-          onFilterClick={handleFilterClick}
         />
         <MetricCard
           label="Failed Controls"
@@ -479,8 +519,6 @@ export default function ControlCommandCenterPage() {
           sub={`AED ${totalExposure}M exposure`}
           color="#FF3B3B"
           filterKey="failed"
-          activeFilter={activeFilter}
-          onFilterClick={handleFilterClick}
         />
         <MetricCard
           label="Overdue Tests"
@@ -488,8 +526,6 @@ export default function ControlCommandCenterPage() {
           sub="Tests past due date"
           color="#F5C518"
           filterKey="overdue"
-          activeFilter={activeFilter}
-          onFilterClick={handleFilterClick}
         />
         <MetricCard
           label="Partial Controls"
@@ -497,8 +533,6 @@ export default function ControlCommandCenterPage() {
           sub="SLA or evidence gaps"
           color="#F97316"
           filterKey="partial"
-          activeFilter={activeFilter}
-          onFilterClick={handleFilterClick}
         />
       </div>
 
@@ -513,9 +547,10 @@ export default function ControlCommandCenterPage() {
             </div>
           </CardHeader>
           <CardBody>
-            <HealthBar label="Effective"  count={controlSummary.effective} total={controlSummary.total} color="#22C55E" filterKey="effective" activeFilter={activeFilter} onFilter={handleFilterClick} />
-            <HealthBar label="Partial"    count={controlSummary.partial}   total={controlSummary.total} color="#F5C518" filterKey="partial"   activeFilter={activeFilter} onFilter={handleFilterClick} />
-            <HealthBar label="Failed"     count={controlSummary.failed}    total={controlSummary.total} color="#FF3B3B" filterKey="failed"    activeFilter={activeFilter} onFilter={handleFilterClick} />
+            {/* Health bars always show full dataset counts — they ARE the filter trigger */}
+            <HealthBar label="Effective" count={controlSummary.effective} total={controlSummary.total} color="#22C55E" filterKey="effective" />
+            <HealthBar label="Partial"   count={controlSummary.partial}   total={controlSummary.total} color="#F5C518" filterKey="partial" />
+            <HealthBar label="Failed"    count={controlSummary.failed}    total={controlSummary.total} color="#FF3B3B" filterKey="failed" />
 
             <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid var(--border-color)' }}>
               <div style={{ color: 'var(--text-muted)', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '6px' }}>
@@ -529,12 +564,8 @@ export default function ControlCommandCenterPage() {
                   <div
                     key={label}
                     style={{
-                      flex: 1,
-                      padding: '8px',
-                      borderRadius: '7px',
-                      backgroundColor: `${color}10`,
-                      border: `1px solid ${color}25`,
-                      textAlign: 'center',
+                      flex: 1, padding: '8px', borderRadius: '7px',
+                      backgroundColor: `${color}10`, border: `1px solid ${color}25`, textAlign: 'center',
                     }}
                   >
                     <div style={{ color, fontSize: '1.1rem', fontWeight: 700 }}>{count}</div>
@@ -544,33 +575,29 @@ export default function ControlCommandCenterPage() {
               </div>
             </div>
 
-            {/* Test summary */}
+            {/* Test summary chips — clicking sets global filter */}
             <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid var(--border-color)' }}>
               <div style={{ color: 'var(--text-muted)', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '6px' }}>
                 Testing Engine
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 {([
-                  { label: 'Pass',    count: TEST_SUMMARY.pass,    color: TEST_RESULT_COLOR.pass,    filterKey: 'effective' as MetricFilter },
-                  { label: 'Fail',    count: TEST_SUMMARY.fail,    color: TEST_RESULT_COLOR.fail,    filterKey: 'failed'    as MetricFilter },
-                  { label: 'Partial', count: TEST_SUMMARY.partial, color: TEST_RESULT_COLOR.partial, filterKey: 'partial'   as MetricFilter },
-                  { label: 'Overdue', count: TEST_SUMMARY.overdue, color: '#F5C518',                 filterKey: 'overdue'   as MetricFilter },
-                ] as const).map(({ label, count, color, filterKey }) => {
-                  const isActive = activeFilter === filterKey
+                  { label: 'Pass',    count: TEST_SUMMARY.pass,    color: TEST_RESULT_COLOR.pass,    fk: 'effective' as FilterType },
+                  { label: 'Fail',    count: TEST_SUMMARY.fail,    color: TEST_RESULT_COLOR.fail,    fk: 'failed'    as FilterType },
+                  { label: 'Partial', count: TEST_SUMMARY.partial, color: TEST_RESULT_COLOR.partial, fk: 'partial'   as FilterType },
+                  { label: 'Overdue', count: TEST_SUMMARY.overdue, color: '#F5C518',                 fk: 'overdue'   as FilterType },
+                ]).map(({ label, count, color, fk }) => {
+                  const isActive = filter === fk
                   return (
                     <div
                       key={label}
-                      onClick={() => handleFilterClick(isActive ? null : filterKey)}
+                      onClick={() => setFilter(isActive ? 'all' : fk)}
                       style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        padding: '3px 8px',
-                        borderRadius: '4px',
+                        display: 'flex', alignItems: 'center', gap: '4px',
+                        padding: '3px 8px', borderRadius: '4px',
                         backgroundColor: isActive ? `${color}18` : `${color}10`,
                         border: `1px solid ${isActive ? color + '50' : color + '25'}`,
-                        cursor: 'pointer',
-                        transition: 'all 0.15s',
+                        cursor: 'pointer', transition: 'all 0.15s',
                       }}
                     >
                       <span style={{ color, fontSize: '0.8rem', fontWeight: 700 }}>{count}</span>
@@ -600,7 +627,7 @@ export default function ControlCommandCenterPage() {
         </Card>
       </div>
 
-      {/* ── SECTION 3: Failed Controls ──────────────────────────────────────── */}
+      {/* ── SECTION 3: Failed Controls (respects global filter) ─────────────── */}
       <Card>
         <CardHeader>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -609,33 +636,36 @@ export default function ControlCommandCenterPage() {
           </div>
           <span
             style={{
-              padding: '2px 8px',
-              borderRadius: '20px',
-              fontSize: '0.65rem',
-              fontWeight: 600,
-              color: '#FF3B3B',
-              backgroundColor: 'rgba(255,59,59,0.08)',
-              border: '1px solid rgba(255,59,59,0.2)',
+              padding: '2px 8px', borderRadius: '20px', fontSize: '0.65rem', fontWeight: 600,
+              color: '#FF3B3B', backgroundColor: 'rgba(255,59,59,0.08)', border: '1px solid rgba(255,59,59,0.2)',
             }}
           >
-            {FAILED_CONTROLS.length} failed · AED {totalExposure}M exposure
+            {displayedFailed.length} showing · AED {totalExposure}M exposure
           </span>
         </CardHeader>
         <CardBody>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
-            {FAILED_CONTROLS.map((control, i) => (
-              <FailedControlRow
-                key={control.id}
-                control={control}
-                index={i}
-                onClick={setSelectedControl}
-              />
-            ))}
-          </div>
+          {displayedFailed.length === 0 ? (
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', textAlign: 'center', padding: '20px 0' }}>
+              No failed controls match the current filter.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
+              <AnimatePresence mode="popLayout">
+                {displayedFailed.map((control, i) => (
+                  <FailedControlRow
+                    key={control.id}
+                    control={control}
+                    index={i}
+                    onClick={setSelectedControl}
+                  />
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
         </CardBody>
       </Card>
 
-      {/* ── SECTION 4: Action Tracker ───────────────────────────────────────── */}
+      {/* ── SECTION 4: Action Tracker (respects global filter) ──────────────── */}
       <Card>
         <CardHeader>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -643,93 +673,86 @@ export default function ControlCommandCenterPage() {
             <CardTitle>Decision Layer — Control-Triggered Actions</CardTitle>
           </div>
           <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>
-            Click any action to open full analysis
+            {displayedActions.length} actions · Click to open full analysis
           </span>
         </CardHeader>
         <CardBody>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {CONTROL_FAILURE_ACTIONS.map((action, i) => (
-              <motion.div
-                key={action.id}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.25, delay: i * 0.06 }}
-                onClick={() => setSelectedAction(action)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  padding: '10px 12px',
-                  borderRadius: '8px',
-                  border: `1px solid ${PRIORITY_COLOR[action.priority]}25`,
-                  cursor: 'pointer',
-                  backgroundColor: `${PRIORITY_BG[action.priority]}`,
-                  position: 'relative',
-                  overflow: 'hidden',
-                }}
-                whileHover={{ x: 3 }}
-              >
-                <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '3px', backgroundColor: PRIORITY_COLOR[action.priority], borderRadius: '8px 0 0 8px' }} />
-
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '7px', flexWrap: 'wrap' }}>
-                    <span style={{ color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 600 }}>
-                      {action.title}
-                    </span>
-                    <span
-                      style={{
-                        padding: '1px 7px',
-                        borderRadius: '4px',
-                        fontSize: '0.6rem',
-                        fontWeight: 700,
-                        color: PRIORITY_COLOR[action.priority],
-                        backgroundColor: `${PRIORITY_COLOR[action.priority]}15`,
-                        border: `1px solid ${PRIORITY_COLOR[action.priority]}30`,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.06em',
-                        flexShrink: 0,
-                      }}
-                    >
-                      {action.priority}
-                    </span>
-                    {action.daysOverdue > 0 && (
-                      <span style={{ color: 'var(--risk-critical)', fontSize: '0.65rem', fontWeight: 700 }}>
-                        {action.escalated ? '🔴' : '🟡'} {action.daysOverdue}d overdue
+          {displayedActions.length === 0 ? (
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', textAlign: 'center', padding: '20px 0' }}>
+              No control-triggered actions match the current filter.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {displayedActions.map((action, i) => (
+                <motion.div
+                  key={action.id}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.25, delay: i * 0.06 }}
+                  onClick={() => setSelectedAction(action)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '10px',
+                    padding: '10px 12px', borderRadius: '8px',
+                    border: `1px solid ${PRIORITY_COLOR[action.priority]}25`,
+                    cursor: 'pointer', backgroundColor: `${PRIORITY_BG[action.priority]}`,
+                    position: 'relative', overflow: 'hidden',
+                  }}
+                  whileHover={{ x: 3 }}
+                >
+                  <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '3px', backgroundColor: PRIORITY_COLOR[action.priority], borderRadius: '8px 0 0 8px' }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '7px', flexWrap: 'wrap' }}>
+                      <span style={{ color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 600 }}>
+                        {action.title}
                       </span>
-                    )}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px', flexWrap: 'wrap' }}>
-                    <span style={{ color: 'var(--accent-primary)', fontSize: '0.7rem', fontWeight: 700 }}>{action.impactLabel}</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                      <User size={9} style={{ color: 'var(--text-muted)' }} />
-                      <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>{action.owner}</span>
+                      <span
+                        style={{
+                          padding: '1px 7px', borderRadius: '4px', fontSize: '0.6rem', fontWeight: 700,
+                          color: PRIORITY_COLOR[action.priority], backgroundColor: `${PRIORITY_COLOR[action.priority]}15`,
+                          border: `1px solid ${PRIORITY_COLOR[action.priority]}30`,
+                          textTransform: 'uppercase', letterSpacing: '0.06em', flexShrink: 0,
+                        }}
+                      >
+                        {action.priority}
+                      </span>
+                      {action.daysOverdue > 0 && (
+                        <span style={{ color: 'var(--risk-critical)', fontSize: '0.65rem', fontWeight: 700 }}>
+                          {action.escalated ? '🔴' : '🟡'} {action.daysOverdue}d overdue
+                        </span>
+                      )}
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                      <Clock size={9} style={{ color: 'var(--text-muted)' }} />
-                      <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>Act in {action.deadline}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px', flexWrap: 'wrap' }}>
+                      <span style={{ color: 'var(--accent-primary)', fontSize: '0.7rem', fontWeight: 700 }}>{action.impactLabel}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                        <User size={9} style={{ color: 'var(--text-muted)' }} />
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>{action.owner}</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                        <Clock size={9} style={{ color: 'var(--text-muted)' }} />
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>Act in {action.deadline}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                <ChevronRight size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-              </motion.div>
-            ))}
-          </div>
+                  <ChevronRight size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                </motion.div>
+              ))}
+            </div>
+          )}
         </CardBody>
       </Card>
 
       {/* ── Filterable Control List + Chain ────────────────────────────────── */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-        {/* SECTION 3B: All Controls (filterable) */}
+        {/* SECTION 3B: All Controls */}
         <Card>
           <CardHeader>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <FlaskConical size={14} style={{ color: '#4A9EFF' }} />
               <CardTitle>
                 All Controls
-                {activeFilter && (
+                {filter !== 'all' && (
                   <span style={{ color: 'var(--text-muted)', fontWeight: 400, fontSize: '0.75rem', marginLeft: '6px' }}>
-                    — {activeFilter} filter active
+                    — {filter} filter active
                   </span>
                 )}
               </CardTitle>
@@ -761,12 +784,17 @@ export default function ControlCommandCenterPage() {
               <TrendingDown size={14} style={{ color: '#FF3B3B' }} />
               <CardTitle>Control → Risk → Financial Exposure</CardTitle>
             </div>
+            <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>
+              {displayedChain.length} controls
+            </span>
           </CardHeader>
           <CardBody>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '420px', overflowY: 'auto', scrollbarWidth: 'thin' }}>
-              {FAILED_CONTROLS.map(control => (
-                <ControlChainRow key={control.id} control={control} onClick={setSelectedControl} />
-              ))}
+              <AnimatePresence mode="popLayout">
+                {displayedChain.map(control => (
+                  <ControlChainRow key={control.id} control={control} onClick={setSelectedControl} />
+                ))}
+              </AnimatePresence>
             </div>
           </CardBody>
         </Card>
@@ -781,24 +809,27 @@ export default function ControlCommandCenterPage() {
           </div>
           <span
             style={{
-              padding: '2px 8px',
-              borderRadius: '20px',
-              fontSize: '0.62rem',
-              fontWeight: 600,
-              color: '#F5C518',
-              backgroundColor: 'rgba(245,197,24,0.06)',
-              border: '1px solid rgba(245,197,24,0.18)',
+              padding: '2px 8px', borderRadius: '20px', fontSize: '0.62rem', fontWeight: 600,
+              color: '#F5C518', backgroundColor: 'rgba(245,197,24,0.06)', border: '1px solid rgba(245,197,24,0.18)',
             }}
           >
-            Simulated · ICOFAR Compliance View
+            {displayedFinancial.length} showing · Simulated · ICOFAR Compliance View
           </span>
         </CardHeader>
         <CardBody>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-            {FINANCIAL_CONTROLS.map((control, i) => (
-              <ControlRow key={control.id} control={control} index={i} onClick={setSelectedControl} />
-            ))}
-          </div>
+          {displayedFinancial.length === 0 ? (
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', textAlign: 'center', padding: '20px 0' }}>
+              No financial controls match the current filter.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              <AnimatePresence mode="popLayout">
+                {displayedFinancial.map((control, i) => (
+                  <ControlRow key={control.id} control={control} index={i} onClick={setSelectedControl} />
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
         </CardBody>
       </Card>
 
@@ -814,5 +845,15 @@ export default function ControlCommandCenterPage() {
         onClose={() => setSelectedAction(null)}
       />
     </div>
+  )
+}
+
+// ─── Default export — wraps inner with global filter provider ─────────────────
+
+export default function ControlCommandCenterPage() {
+  return (
+    <ControlFilterProvider>
+      <ControlCommandCenterInner />
+    </ControlFilterProvider>
   )
 }
