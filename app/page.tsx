@@ -8,7 +8,6 @@ import {
   Shield,
   Layers,
   GitBranch,
-  Sparkles,
   Palette,
   TrendingUp,
   AlertTriangle,
@@ -78,16 +77,6 @@ function useThemeAccent() {
     return () => obs.disconnect()
   }, [])
   return accent
-}
-
-// Rotating word in headline
-function useRotatingWord(words: string[], interval = 2200) {
-  const [idx, setIdx] = useState(0)
-  useEffect(() => {
-    const id = setInterval(() => setIdx((i) => (i + 1) % words.length), interval)
-    return () => clearInterval(id)
-  }, [words, interval])
-  return words[idx]
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -449,10 +438,6 @@ export default function LandingPage() {
   const time = useGSTClock()
   const [showThemes, setShowThemes] = useState(false)
   const [revealed, setRevealed] = useState(false)
-  const rotating = useRotatingWord(
-    ['risk', 'controls', 'capital', 'reputation', 'resilience'],
-    2400
-  )
 
   // Trigger subtle entrance cascade once on mount
   useEffect(() => {
@@ -523,25 +508,16 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="landing-hero">
-        <div className="landing-hero-eyebrow">
-          <Sparkles size={12} />
-          <span>Enterprise AI · ICOFAR · Board-Grade</span>
-        </div>
         <h1 className="landing-hero-title">
-          Unified command for
+          Unified command centre for
           <br />
           enterprise{' '}
-          <span className="landing-hero-rotator" aria-live="polite">
-            <span key={rotating} className="landing-hero-gradient">
-              {rotating}
-            </span>
-          </span>
-          .
+          <span className="landing-hero-gradient">risk and control</span>.
         </h1>
         <p className="landing-hero-sub">
           An executive operating system that fuses risk registers, ICOFAR controls, portfolio
           signals and AI fusion into a single decision surface — purpose-built for Aldar
-          Properties&apos; board and risk committee.
+          Properties.
         </p>
         <div className="landing-hero-cta">
           <MagneticCTA href="/dashboard">
