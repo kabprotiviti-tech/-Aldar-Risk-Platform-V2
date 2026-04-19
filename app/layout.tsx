@@ -3,10 +3,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/lib/context/ThemeContext'
-import { Sidebar } from '@/components/layout/Sidebar'
-import { Header } from '@/components/layout/Header'
-import { MobileNav } from '@/components/layout/MobileNav'
-import { AIRiskAdvisor } from '@/components/AIRiskAdvisor'
+import { AppChrome } from '@/components/layout/AppChrome'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -41,23 +38,7 @@ export default function RootLayout({
       </head>
       <body className={inter.variable} suppressHydrationWarning>
         <ThemeProvider>
-          <div
-            style={{
-              display: 'flex',
-              minHeight: '100vh',
-              backgroundColor: 'var(--bg-primary)',
-            }}
-          >
-            <Sidebar />
-            <div className="layout-content-area">
-              <Header />
-              <main className="layout-main-content">
-                {children}
-              </main>
-            </div>
-          </div>
-          <MobileNav />
-          <AIRiskAdvisor />
+          <AppChrome>{children}</AppChrome>
         </ThemeProvider>
       </body>
     </html>
