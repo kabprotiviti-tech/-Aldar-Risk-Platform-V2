@@ -375,7 +375,7 @@ export function ControlDetailPanel({ control, onClose, onActionClick }: ControlD
               position: 'fixed',
               right: 0,
               top: 0,
-              bottom: 0,
+              height: '100vh',
               width: 'min(460px, 100vw)',
               zIndex: 999,
               display: 'flex',
@@ -527,11 +527,12 @@ export function ControlDetailPanel({ control, onClose, onActionClick }: ControlD
               style={{
                 flex: 1,
                 overflowY: 'auto',
-                padding: '14px 18px',
+                padding: '14px 18px 24px',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '10px',
                 scrollbarWidth: 'thin',
+                scrollbarColor: 'var(--border-color) transparent',
               }}
             >
               {/* Description */}

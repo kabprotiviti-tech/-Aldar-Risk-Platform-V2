@@ -605,7 +605,7 @@ export function ActionDetailPanel({
               position: 'fixed',
               top: 0,
               right: 0,
-              bottom: 0,
+              height: '100vh',
               /* desktop: 460px wide; mobile: full screen */
               width: 'min(460px, 100vw)',
               backgroundColor: 'var(--bg-primary)',
@@ -613,7 +613,6 @@ export function ActionDetailPanel({
               zIndex: 50,
               display: 'flex',
               flexDirection: 'column',
-              overflow: 'hidden',
             }}
           >
 
@@ -826,6 +825,7 @@ export function ActionDetailPanel({
                 overflowY: 'auto',
                 scrollbarWidth: 'thin',
                 scrollbarColor: 'var(--border-color) transparent',
+                paddingBottom: '24px',
               }}
             >
 
