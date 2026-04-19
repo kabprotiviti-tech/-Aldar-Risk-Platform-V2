@@ -512,7 +512,7 @@ export default function LandingPage() {
           Unified command centre for
           <br />
           enterprise{' '}
-          <span className="landing-hero-gradient">risk and control</span>.
+          <span className="landing-hero-gradient">resilience</span>.
         </h1>
         <p className="landing-hero-sub">
           An executive operating system that fuses risk registers, ICOFAR controls, portfolio
