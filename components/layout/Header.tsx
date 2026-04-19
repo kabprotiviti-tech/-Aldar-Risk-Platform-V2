@@ -151,21 +151,30 @@ export function Header() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '10px 20px',
-            gap: '12px',
+            padding: '12px 24px',
+            gap: '16px',
             minWidth: 0,
           }}
         >
-          {/* LEFT — logo + title */}
+          {/* LEFT — vertical title block */}
           <div
             style={{
               display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
+              flexDirection: 'column',
+              lineHeight: 1.25,
               flexShrink: 0,
+              gap: '1px',
             }}
           >
-            <span className="h-8 flex items-center font-semibold" style={{ color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
+            <span
+              style={{
+                color: 'var(--text-muted)',
+                fontSize: '0.65rem',
+                fontWeight: 500,
+                letterSpacing: '0.04em',
+                whiteSpace: 'nowrap',
+              }}
+            >
               Aldar Properties
             </span>
             <h1
@@ -178,7 +187,7 @@ export function Header() {
                 whiteSpace: 'nowrap',
               }}
             >
-              <span className="hidden sm:inline">Risk Intelligence </span>Platform
+              Risk &amp; Control Operating System
             </h1>
           </div>
 
