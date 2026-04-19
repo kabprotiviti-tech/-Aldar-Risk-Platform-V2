@@ -156,39 +156,63 @@ export function Header() {
             minWidth: 0,
           }}
         >
-          {/* LEFT — vertical title block */}
+          {/* LEFT — brand accent + vertical title block */}
           <div
             style={{
               display: 'flex',
-              flexDirection: 'column',
-              lineHeight: 1.25,
+              alignItems: 'center',
+              gap: '12px',
               flexShrink: 0,
-              gap: '1px',
+              minWidth: 0,
             }}
           >
             <span
+              aria-hidden
               style={{
-                color: 'var(--text-muted)',
-                fontSize: '0.65rem',
-                fontWeight: 500,
-                letterSpacing: '0.04em',
-                whiteSpace: 'nowrap',
+                width: '3px',
+                height: '30px',
+                borderRadius: '2px',
+                background:
+                  'linear-gradient(180deg, var(--accent-primary) 0%, var(--risk-low) 100%)',
+                flexShrink: 0,
+              }}
+            />
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                lineHeight: 1.2,
+                minWidth: 0,
               }}
             >
-              Aldar Properties
-            </span>
-            <h1
-              style={{
-                color: 'var(--text-primary)',
-                fontSize: '0.95rem',
-                fontWeight: 600,
-                letterSpacing: '0.01em',
-                margin: 0,
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Risk &amp; Control Operating System
-            </h1>
+              <span
+                style={{
+                  color: 'var(--text-muted)',
+                  fontSize: '0.62rem',
+                  fontWeight: 600,
+                  letterSpacing: '0.14em',
+                  textTransform: 'uppercase',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Aldar Properties
+              </span>
+              <h1
+                className="header-title"
+                style={{
+                  color: 'var(--text-primary)',
+                  fontSize: '0.98rem',
+                  fontWeight: 650,
+                  letterSpacing: '-0.005em',
+                  margin: 0,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                Risk &amp; Control Operating System
+              </h1>
+            </div>
           </div>
 
           {/* RIGHT — controls row, scrolls on mobile rather than wrapping */}
@@ -213,6 +237,19 @@ export function Header() {
               <MarketWidget />
               <ConfidenceWidget />
             </div>
+
+            {/* Subtle divider between status cluster and theme */}
+            <span
+              aria-hidden
+              className="hidden md:inline-block"
+              style={{
+                width: '1px',
+                height: '20px',
+                backgroundColor: 'var(--border-color)',
+                opacity: 0.6,
+                flexShrink: 0,
+              }}
+            />
 
             {/* Theme button */}
             <button

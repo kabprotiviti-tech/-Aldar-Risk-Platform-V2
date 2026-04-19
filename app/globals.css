@@ -510,6 +510,19 @@ body {
   max-height: 90vh;
 }
 
+/* Header title — scale down gracefully on narrow screens */
+@media (max-width: 767px) {
+  .header-title {
+    font-size: 0.85rem !important;
+    letter-spacing: -0.01em !important;
+  }
+}
+@media (max-width: 479px) {
+  .header-title {
+    font-size: 0.78rem !important;
+  }
+}
+
 /* ---- Tablet (< 1024px): sidebar collapses to 72px ---- */
 @media (max-width: 1023px) {
   .layout-content-area {

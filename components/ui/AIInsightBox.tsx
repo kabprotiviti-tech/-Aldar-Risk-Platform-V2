@@ -98,7 +98,7 @@ export function AIInsightBox({
           <div className="flex items-center gap-1 mt-2">
             <Sparkles size={10} style={{ color: 'var(--text-muted)' }} />
             <span style={{ color: 'var(--text-muted)', fontSize: '0.65rem' }}>
-              {source} · Aldar Risk Intelligence Platform
+              {source} · Aldar Risk &amp; Control Operating System
             </span>
           </div>
         </div>
