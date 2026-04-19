@@ -15,7 +15,6 @@ import {
   CheckCircle2,
   CornerDownLeft,
   Radio,
-  Check,
 } from 'lucide-react'
 import { ThemeSelector } from '@/components/layout/ThemeSelector'
 import { aggregateKPIs, externalNews, kpiData } from '@/lib/simulated-data'
@@ -444,154 +443,25 @@ function MagneticCTA({ href, children }: { href: string; children: React.ReactNo
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Boot sequence — cinematic intro overlay
-// ═══════════════════════════════════════════════════════════════════════════
-const BOOT_STEPS = [
-  { label: 'Secure channel established', ms: 300 },
-  { label: 'Risk register loaded', ms: 450 },
-  { label: 'ICOFAR control library synced', ms: 600 },
-  { label: 'AI fusion engine online', ms: 850 },
-  { label: 'Market data stream connected', ms: 1100 },
-  { label: 'Board view calibrated', ms: 1400 },
-]
-const BOOT_TOTAL = 2000
-
-function BootSequence({ onDone }: { onDone: () => void }) {
-  const [step, setStep] = useState(0)
-  const [progress, setProgress] = useState(0)
-  const [leaving, setLeaving] = useState(false)
-
-  useEffect(() => {
-    const timers: number[] = []
-    BOOT_STEPS.forEach((s, i) => {
-      timers.push(window.setTimeout(() => setStep(i + 1), s.ms))
-    })
-    const t0 = performance.now()
-    let raf = 0
-    const tick = (t: number) => {
-      const p = Math.min(1, (t - t0) / BOOT_TOTAL)
-      setProgress(p)
-      if (p < 1) raf = requestAnimationFrame(tick)
-    }
-    raf = requestAnimationFrame(tick)
-
-    const done = window.setTimeout(() => {
-      setLeaving(true)
-      window.setTimeout(onDone, 420)
-    }, BOOT_TOTAL)
-
-    return () => {
-      timers.forEach((id) => clearTimeout(id))
-      clearTimeout(done)
-      cancelAnimationFrame(raf)
-    }
-  }, [onDone])
-
-  const skip = () => {
-    setLeaving(true)
-    window.setTimeout(onDone, 280)
-  }
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') skip()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  return (
-    <div className={`boot-root ${leaving ? 'boot-leaving' : ''}`} onClick={skip}>
-      <div className="boot-scanline" aria-hidden />
-      <div className="boot-vignette" aria-hidden />
-
-      <div className="boot-inner" onClick={(e) => e.stopPropagation()}>
-        <div className="boot-brand">
-          <span className="boot-brand-bar" />
-          <div className="boot-brand-text">
-            <span className="boot-eyebrow">ALDAR PROPERTIES · ADX: ALDAR</span>
-            <span className="boot-title">Risk &amp; Control Operating System</span>
-          </div>
-        </div>
-
-        <div className="boot-status">
-          <span className="boot-status-dot" />
-          <span>INITIALIZING SYSTEM</span>
-        </div>
-
-        <ul className="boot-steps">
-          {BOOT_STEPS.map((s, i) => {
-            const active = i < step
-            const current = i === step
-            return (
-              <li
-                key={s.label}
-                className={`boot-step ${active ? 'active' : ''} ${current ? 'current' : ''}`}
-              >
-                <span className="boot-step-icon">
-                  {active ? <Check size={11} /> : <span className="boot-step-spin" />}
-                </span>
-                <span className="boot-step-label">{s.label}</span>
-                <span className="boot-step-status">
-                  {active ? 'OK' : current ? '···' : ''}
-                </span>
-              </li>
-            )
-          })}
-        </ul>
-
-        <div className="boot-progress">
-          <div className="boot-progress-track">
-            <div
-              className="boot-progress-fill"
-              style={{ width: `${Math.round(progress * 100)}%` }}
-            />
-          </div>
-          <div className="boot-progress-meta">
-            <span>{Math.round(progress * 100).toString().padStart(3, '0')}%</span>
-            <span className="boot-skip-hint">click or press ESC to skip</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
 // Page
 // ═══════════════════════════════════════════════════════════════════════════
 export default function LandingPage() {
   const time = useGSTClock()
   const [showThemes, setShowThemes] = useState(false)
-  const [booting, setBooting] = useState(true)
   const [revealed, setRevealed] = useState(false)
   const rotating = useRotatingWord(
     ['risk', 'controls', 'capital', 'reputation', 'resilience'],
     2400
   )
 
-  // Boot decision — skip if already seen this session or reduced motion
+  // Trigger subtle entrance cascade once on mount
   useEffect(() => {
-    const prefersReduced =
-      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
-    const seen = sessionStorage.getItem('aldar-boot-seen') === '1'
-    if (prefersReduced || seen) {
-      setBooting(false)
-      setRevealed(true)
-    }
+    const id = requestAnimationFrame(() => setRevealed(true))
+    return () => cancelAnimationFrame(id)
   }, [])
 
-  const finishBoot = () => {
-    sessionStorage.setItem('aldar-boot-seen', '1')
-    setBooting(false)
-    // Small tick so reveal animations start after overlay fades
-    requestAnimationFrame(() => setRevealed(true))
-  }
-
-  // Keyboard shortcut: Enter → dashboard (only after boot, not in theme modal)
+  // Keyboard shortcut: Enter → dashboard (not while theme modal open)
   useEffect(() => {
-    if (booting) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Enter' && !showThemes) {
         window.location.href = '/dashboard'
@@ -599,7 +469,7 @@ export default function LandingPage() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [showThemes, booting])
+  }, [showThemes])
 
   const totalRisks =
     aggregateKPIs.criticalRisks +
@@ -613,8 +483,6 @@ export default function LandingPage() {
 
   return (
     <main className={`landing-root ${revealed ? 'revealed' : 'pre-reveal'}`}>
-      {booting && <BootSequence onDone={finishBoot} />}
-
       {/* Ambient layers */}
       <div aria-hidden className="landing-bg">
         <div className="landing-mesh" />
