@@ -182,12 +182,20 @@ Respond with a JSON array of exactly ${batch.length} objects in the same order:
 
     return NextResponse.json({ results: [...results, ...extra], source: 'ai' })
   } catch (error) {
-    console.error('AI classify error:', error)
-    // Return keyword-based fallbacks — never fail the frontend
+    const errMsg =
+      error instanceof Error ? `${error.name}: ${error.message}` : String(error)
+    const keyMissing = !process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY.includes('your_anthropic_api_key_here')
+    console.error('[ai-classify] fallback triggered:', errMsg, { keyMissing })
+    // Return keyword-based fallbacks — never fail the frontend, but surface
+    // the actual error so the UI can show why AI analysis is unavailable.
     const fallbacks: ClassifyResult[] = items.map((item) => ({
       id: item.id,
       classification: keywordFallback(item.headline),
     }))
-    return NextResponse.json({ results: fallbacks, source: 'fallback' })
+    return NextResponse.json({
+      results: fallbacks,
+      source: 'fallback',
+      error: keyMissing ? 'ANTHROPIC_API_KEY not configured on server' : errMsg,
+    })
   }
 }
