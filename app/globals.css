@@ -32,6 +32,14 @@
 }
 
 /* ---- EXECUTIVE LIGHT ---- */
+/* In executive-light the accent gradient is dark navy, so any element that
+   hardcodes black text on --accent-primary becomes unreadable. Flip to white. */
+[data-theme="executive-light"] .btn-primary,
+[data-theme="executive-light"] .ai-badge,
+[data-theme="executive-light"] .landing-cta-primary {
+  color: #FFFFFF;
+}
+
 [data-theme="executive-light"] {
   --bg-primary: #F4F7FB;
   --bg-secondary: #FFFFFF;
