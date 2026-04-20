@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { anthropic } from '@/lib/openai'
+import { anthropic, CLAUDE_MODEL } from '@/lib/openai'
 
 export async function POST(req: NextRequest) {
   try {
@@ -44,7 +44,7 @@ Respond with ONLY a valid JSON object (no markdown fences):
 }`
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
+      model: CLAUDE_MODEL,
       max_tokens: 1024,
       system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],

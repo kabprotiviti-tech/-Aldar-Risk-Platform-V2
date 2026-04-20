@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { anthropic } from '@/lib/openai'
+import { anthropic, CLAUDE_MODEL } from '@/lib/openai'
 
 export interface ExecutiveBriefResponse {
   // Original fields (preserved for backward compat)
@@ -130,7 +130,7 @@ Respond with ONLY a valid JSON object (no markdown, start with {, end with }):
 }`
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
+      model: CLAUDE_MODEL,
       max_tokens: 2500,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: userPrompt }],

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { anthropic } from '@/lib/openai'
+import { anthropic, CLAUDE_MODEL } from '@/lib/openai'
 import { portfolioProfiles } from '@/lib/portfolioData'
 import type { PortfolioKey } from '@/lib/portfolioData'
 
@@ -62,7 +62,7 @@ Respond with ONLY this JSON:
 }`
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
+      model: CLAUDE_MODEL,
       max_tokens: 800,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: prompt }],

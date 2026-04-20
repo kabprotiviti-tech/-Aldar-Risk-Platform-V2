@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { anthropic } from '@/lib/openai'
+import { anthropic, CLAUDE_MODEL } from '@/lib/openai'
 
 export interface ScenarioImpactResponse {
   explanation: string
@@ -66,7 +66,7 @@ Respond with ONLY this JSON (start with {, end with }):
 }`
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
+      model: CLAUDE_MODEL,
       max_tokens: 600,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: userPrompt }],

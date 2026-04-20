@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { anthropic } from '@/lib/openai'
+import { anthropic, CLAUDE_MODEL } from '@/lib/openai'
 import type { InternalDataSnapshot } from '@/lib/internalData'
 
 export interface FusionResult {
@@ -68,7 +68,7 @@ Respond with ONLY this JSON object:
 }`
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
+      model: CLAUDE_MODEL,
       max_tokens: 1024,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: userPrompt }],
