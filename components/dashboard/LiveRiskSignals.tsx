@@ -628,8 +628,6 @@ export function LiveRiskSignals() {
   // ── Classify unclassified items via Claude ──────────────────────────────────
   const classifyItems = useCallback(async (toClassify: NewsItem[]) => {
     if (toClassify.length === 0) return
-    // Mark immediately to avoid double-calls
-    toClassify.forEach((it) => classifiedIds.current.add(it.id))
     setAiLoading(true)
     try {
       const res = await fetch('/api/ai-classify', {
@@ -647,8 +645,16 @@ export function LiveRiskSignals() {
         map[r.id] = r.classification
       }
       setAiData((prev) => ({ ...prev, ...map }))
+
+      // Only mark as classified when the server actually returned AI results
+      // (not keyword fallbacks). This allows retry after transient failures
+      // like rate-limits or quota resets.
+      if (data.source === 'ai') {
+        toClassify.forEach((it) => classifiedIds.current.add(it.id))
+      }
     } catch {
-      // Silent fail — cards still show keyword-based severity
+      // Silent fail — cards still show keyword-based severity; ids are NOT
+      // added to classifiedIds so the next refresh interval will retry.
     } finally {
       setAiLoading(false)
     }
