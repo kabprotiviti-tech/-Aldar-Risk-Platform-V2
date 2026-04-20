@@ -1252,7 +1252,7 @@ export default function DocumentsPage() {
               )}
             </AnimatePresence>
 
-            {/* ICOFAR Control Extraction */}
+            {/* ICOFR Control Extraction */}
             {content.trim().length >= 50 && (
               <DocumentControlExtractor documentText={content} />
             )}

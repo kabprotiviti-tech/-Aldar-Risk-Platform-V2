@@ -51,7 +51,7 @@ const navItems = [
     href: '/control-command-center',
     label: 'Control Center',
     icon: Shield,
-    description: 'ICOFAR Controls',
+    description: 'ICOFR Controls',
   },
 ]
 

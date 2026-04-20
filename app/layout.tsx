@@ -14,7 +14,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Aldar Risk & Control Operating System',
   description: 'Enterprise AI-powered risk and control operating system for Aldar Properties PJSC — Abu Dhabi',
-  keywords: ['risk management', 'internal controls', 'ICOFAR', 'Aldar Properties', 'Abu Dhabi', 'real estate', 'enterprise risk'],
+  keywords: ['risk management', 'internal controls', 'ICOFR', 'Aldar Properties', 'Abu Dhabi', 'real estate', 'enterprise risk'],
 }
 
 export default function RootLayout({

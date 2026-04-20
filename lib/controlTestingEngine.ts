@@ -1,6 +1,6 @@
 // ─── Control Testing Engine ────────────────────────────────────────────────────
 // Integration Pending — replace with live GRC test workflow when available.
-// Simulates control test results for each of the 20 ICOFAR controls.
+// Simulates control test results for each of the 20 ICOFR controls.
 // Logic:
 //   - If nextDue < today → 'overdue'
 //   - 30% of controls → testResult = 'fail'

@@ -1,4 +1,4 @@
-// ─── Control Library — ICOFAR-aligned Internal Controls ──────────────────────
+// ─── Control Library — ICOFR-aligned Internal Controls ──────────────────────
 // Integration Pending — replace static arrays with API call to GRC system
 // All controls link to existing risk register IDs (R-001 … R-015).
 // No random values — every field is traceable to source risk, owner or signal data.
@@ -19,7 +19,7 @@ export type ControlFrequency = 'Monthly' | 'Quarterly' | 'Annual'
 export type ControlType     = 'Preventive' | 'Detective' | 'Corrective'
 export type ControlStatus   = 'effective' | 'partial' | 'failed'
 
-export type ICOFARAssertion =
+export type ICOFRAssertion =
   | 'Existence / Occurrence'
   | 'Completeness'
   | 'Accuracy & Valuation'
@@ -38,7 +38,7 @@ export interface Control {
   linkedRiskTitle: string          // denormalised for display (no lookup needed)
   portfolio: Portfolio
   controlType: ControlType
-  icafarAssertion: ICOFARAssertion
+  icafarAssertion: ICOFRAssertion
   status: ControlStatus
   statusReason: string             // why this status — traceable to signal/ERP/CRM data
   lastTested: string               // ISO date

@@ -552,7 +552,7 @@ export default function DashboardPage() {
       {/* Decision Intelligence — Priority Actions */}
       <TopActionsPanel onActionClick={(a) => setSelectedAction(a)} />
 
-      {/* ICOFAR Control Health Summary */}
+      {/* ICOFR Control Health Summary */}
       <div
         style={{
           display: 'grid',
@@ -566,7 +566,7 @@ export default function DashboardPage() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', gridColumn: 'span 4' }}>
           <span style={{ color: 'var(--text-muted)', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-            ICOFAR Internal Controls
+            ICOFR Internal Controls
           </span>
           <span style={{ color: 'var(--text-muted)', fontSize: '0.62rem' }}>·</span>
           <span style={{ color: '#F5C518', fontSize: '0.62rem', fontWeight: 600 }}>Integration Pending</span>

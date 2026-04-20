@@ -1,7 +1,7 @@
 'use client'
 
 // ─── Control Testing Engine — Test Panel ──────────────────────────────────────
-// Displays test results for all 20 ICOFAR controls.
+// Displays test results for all 20 ICOFR controls.
 // Shows pass/fail/partial distribution, overdue tests, and per-control detail.
 // Integration Pending — data from controlTestingEngine.ts simulation.
 
@@ -395,7 +395,7 @@ function TestRecordRow({
                 </div>
               </div>
 
-              {/* ICOFAR assertion + frequency row */}
+              {/* ICOFR assertion + frequency row */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                 <div
                   style={{
@@ -476,7 +476,7 @@ export function ControlTestPanel() {
           >
             <FlaskConical size={14} style={{ color: '#4A9EFF' }} />
           </div>
-          <CardTitle>ICOFAR Control Testing Engine</CardTitle>
+          <CardTitle>ICOFR Control Testing Engine</CardTitle>
         </div>
 
         {/* Summary chips */}

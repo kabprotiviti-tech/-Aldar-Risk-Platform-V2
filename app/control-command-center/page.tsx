@@ -1,7 +1,7 @@
 'use client'
 
 // ─── Internal Control Command Center ──────────────────────────────────────────
-// ICOFAR-aligned Internal Control Operating System — Command Center.
+// ICOFR-aligned Internal Control Operating System — Command Center.
 // Integration Pending — all data from controlData.ts / controlTestingEngine.ts.
 // CRITICAL: No existing modules modified. Standalone page.
 
@@ -375,7 +375,7 @@ function AIInsight() {
         <strong style={{ color: TEST_RESULT_COLOR.pass }}>{TEST_SUMMARY.passRate}%</strong>, below the recommended 80% threshold.
       </p>
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: 1.65, margin: 0 }}>
-        <strong style={{ color: 'var(--text-primary)' }}>ICOFAR impact: </strong>
+        <strong style={{ color: 'var(--text-primary)' }}>ICOFR impact: </strong>
         Failed controls violate <strong>Accuracy &amp; Valuation</strong> and <strong>Rights &amp; Obligations</strong> assertions. The procurement control failures (C-009, C-010) leave AED 8.2Bn project pipeline unhedged against commodity price movements. Immediate remediation actions have been auto-generated in the Decision Intelligence layer for all {FAILED_CONTROLS.length} failures.
       </p>
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: 1.65, margin: 0 }}>
@@ -448,7 +448,7 @@ function ControlCommandCenterInner() {
   // Control → Risk chain: all filtered controls (any status)
   const displayedChain = filteredControls
 
-  // ICOFAR financial controls: apply global filter on top of financial subset
+  // ICOFR financial controls: apply global filter on top of financial subset
   const filteredControlIds = new Set(filteredControls.map(c => c.id))
   const displayedFinancial = FINANCIAL_CONTROLS.filter(c => filteredControlIds.has(c.id))
 
@@ -491,7 +491,7 @@ function ControlCommandCenterInner() {
               border: '1px solid rgba(245,197,24,0.2)',
             }}
           >
-            ICOFAR · Integration Pending
+            ICOFR · Integration Pending
           </span>
         </div>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>
@@ -800,12 +800,12 @@ function ControlCommandCenterInner() {
         </Card>
       </div>
 
-      {/* ── SECTION 7: ICOFAR Financial Controls ────────────────────────────── */}
+      {/* ── SECTION 7: ICOFR Financial Controls ────────────────────────────── */}
       <Card>
         <CardHeader>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Shield size={14} style={{ color: 'var(--accent-primary)' }} />
-            <CardTitle>Financial Controls — ICOFAR Compliance View</CardTitle>
+            <CardTitle>Financial Controls — ICOFR Compliance View</CardTitle>
           </div>
           <span
             style={{
@@ -813,7 +813,7 @@ function ControlCommandCenterInner() {
               color: '#F5C518', backgroundColor: 'rgba(245,197,24,0.06)', border: '1px solid rgba(245,197,24,0.18)',
             }}
           >
-            {displayedFinancial.length} showing · Simulated · ICOFAR Compliance View
+            {displayedFinancial.length} showing · Simulated · ICOFR Compliance View
           </span>
         </CardHeader>
         <CardBody>

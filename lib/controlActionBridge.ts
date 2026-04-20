@@ -36,9 +36,9 @@ function controlAlertLink(controlId: string, controlName: string, process: strin
   return {
     id: controlId,
     title: controlName,
-    source: `ICOFAR Control Library · ${process}`,
+    source: `ICOFR Control Library · ${process}`,
     type: 'risk',
-    detail: 'Control failure detected via ICOFAR testing engine',
+    detail: 'Control failure detected via ICOFR testing engine',
   }
 }
 
@@ -89,28 +89,28 @@ function buildControlFailureActions(): Action[] {
       rootCauses: [
         `Control ${control.id} failed: ${control.statusReason}`,
         `Linked risk ${control.linkedRiskId} (${control.linkedRiskTitle}) — exposure AED ${impactValue}M`,
-        `Integration Pending — triggered due to control failure in ICOFAR testing engine`,
+        `Integration Pending — triggered due to control failure in ICOFR testing engine`,
       ],
 
       propagationPath: [
         { signal: `${control.id} status: failed`, effect: 'Internal control objective not met', magnitude: `${control.process} process — ${control.controlType}` },
         { signal: `${control.linkedRiskId} risk unmitigated`, effect: 'Financial exposure window open', magnitude: `AED ${impactValue}M` },
-        { signal: `ICOFAR assertion: ${control.icafarAssertion}`, effect: 'Financial statement reliability risk', magnitude: control.portfolio },
+        { signal: `ICOFR assertion: ${control.icafarAssertion}`, effect: 'Financial statement reliability risk', magnitude: control.portfolio },
       ],
 
       dataPoints: [
-        { label: 'Control Status',    value: 'FAILED',                source: 'ICOFAR Testing Engine', threshold: 'Effective', breached: true },
+        { label: 'Control Status',    value: 'FAILED',                source: 'ICOFR Testing Engine', threshold: 'Effective', breached: true },
         { label: 'Control Type',      value: control.controlType,     source: 'Control Library', breached: false },
         { label: 'Process',           value: control.process,         source: 'Control Library', breached: false },
-        { label: 'ICOFAR Assertion',  value: control.icafarAssertion, source: 'ICOFAR Framework', breached: true },
+        { label: 'ICOFR Assertion',  value: control.icafarAssertion, source: 'ICOFR Framework', breached: true },
         { label: 'Financial Exposure',value: `AED ${impactValue}M`,   source: 'Risk Register', threshold: 'AED 0', breached: true },
       ],
 
       calculationLogic: `Control ${control.id} failed testing. Linked risk ${control.linkedRiskId} carries AED ${impactValue}M financial exposure (${impactPercent}% of total AED ${TOTAL_PORTFOLIO_VALUE_M.toLocaleString()}M portfolio). Remediation deadline: ${deadlineDays} days from failure detection. Elapsed: ${elapsedDays} days since nextDue.`,
 
-      consequence: `Control ${control.id} failure leaves ${control.linkedRiskTitle} unmitigated. If not remediated within ${deadlineDays} days: AED ${impactValue}M exposure escalates, ICOFAR assertion '${control.icafarAssertion}' is not met, and audit findings may be raised.`,
+      consequence: `Control ${control.id} failure leaves ${control.linkedRiskTitle} unmitigated. If not remediated within ${deadlineDays} days: AED ${impactValue}M exposure escalates, ICOFR assertion '${control.icafarAssertion}' is not met, and audit findings may be raised.`,
 
-      ifActed:         `Control remediated within SLA. ICOFAR assertion restored. Financial exposure reduced to residual risk level. Audit trail complete.`,
+      ifActed:         `Control remediated within SLA. ICOFR assertion restored. Financial exposure reduced to residual risk level. Audit trail complete.`,
       ifIgnored:       `Control ${control.id} remains failed. AED ${impactValue}M exposure persists. Potential regulatory and audit implications for ${control.icafarAssertion} assertion.`,
       ifActedExposureM: Math.round(impactValue * 0.15),   // 85% risk reduction if control fixed
 

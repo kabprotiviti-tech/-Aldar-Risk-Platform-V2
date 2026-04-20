@@ -515,7 +515,7 @@ export default function LandingPage() {
           <span className="landing-hero-gradient">resilience</span>.
         </h1>
         <p className="landing-hero-sub">
-          An executive operating system that fuses risk registers, ICOFAR controls, portfolio
+          An executive operating system that fuses risk registers, ICOFR controls, portfolio
           signals and AI fusion into a single decision surface — purpose-built for Aldar
           Properties.
         </p>
@@ -554,7 +554,7 @@ export default function LandingPage() {
             delay={100}
           />
           <Stat
-            label="ICOFAR Controls"
+            label="ICOFR Controls"
             value={controlSummary.total}
             icon={<Shield size={14} />}
             accent="ok"
@@ -593,9 +593,9 @@ export default function LandingPage() {
           />
           <EntryCard
             href="/control-command-center"
-            eyebrow="02 · ICOFAR"
+            eyebrow="02 · ICOFR"
             title="Control Command Center"
-            description="Design, test, and monitor the full control library across 6 ICOFAR steps with AI-flagged weaknesses."
+            description="Design, test, and monitor the full control library across 6 ICOFR steps with AI-flagged weaknesses."
             metric={`${controlSummary.effective}/${controlSummary.total}`}
             metricLabel="Effective Controls"
             icon={<Shield size={18} />}
@@ -626,7 +626,7 @@ export default function LandingPage() {
 
       {/* Trust strip */}
       <section className="landing-trust">
-        <div className="landing-trust-item"><CheckCircle2 size={14} /> ICOFAR-aligned</div>
+        <div className="landing-trust-item"><CheckCircle2 size={14} /> ICOFR-aligned</div>
         <div className="landing-trust-item"><CheckCircle2 size={14} /> COSO 2013 mapped</div>
         <div className="landing-trust-item"><CheckCircle2 size={14} /> SCA disclosure-ready</div>
         <div className="landing-trust-item"><CheckCircle2 size={14} /> IFRS-compliant exposure</div>

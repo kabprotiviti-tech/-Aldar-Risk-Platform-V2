@@ -421,7 +421,7 @@ export function DocumentControlExtractor({ documentText }: DocumentControlExtrac
           >
             <ShieldCheck size={14} style={{ color: 'var(--accent-primary)' }} />
           </div>
-          <CardTitle>ICOFAR Control Extraction</CardTitle>
+          <CardTitle>ICOFR Control Extraction</CardTitle>
         </div>
 
         {/* Summary chips */}

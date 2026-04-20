@@ -1,6 +1,6 @@
 // ─── Control Audit Trail ───────────────────────────────────────────────────────
 // Integration Pending — replace with live GRC audit log entries.
-// Simulates test history for each of the 20 ICOFAR controls.
+// Simulates test history for each of the 20 ICOFR controls.
 // Each control has 3–5 historical test entries showing trend over time.
 // Label: "Simulated audit data"
 
