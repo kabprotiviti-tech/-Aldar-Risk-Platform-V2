@@ -6,13 +6,19 @@ import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { MobileNav } from './MobileNav'
 import { AIRiskAdvisor } from '@/components/AIRiskAdvisor'
+import { StealthToggle } from './StealthToggle'
 
 export function AppChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isLanding = pathname === '/'
 
   if (isLanding) {
-    return <>{children}</>
+    return (
+      <>
+        {children}
+        <StealthToggle />
+      </>
+    )
   }
 
   return (
@@ -32,6 +38,7 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
       </div>
       <MobileNav />
       <AIRiskAdvisor />
+      <StealthToggle />
     </>
   )
 }
