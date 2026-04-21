@@ -19,6 +19,7 @@ import { DriverControlPanel } from './DriverControlPanel'
 import { BaselineVsSimulationPanel } from './BaselineVsSimulationPanel'
 import { ExplainabilityPanel } from './ExplainabilityPanel'
 import { DecisionPanel } from './DecisionPanel'
+import { RegisterCriticPanel } from './RegisterCriticPanel'
 
 export function SimulationWorkbench() {
   return (
@@ -56,6 +57,8 @@ export function SimulationWorkbench() {
           <ExplainabilityPanel />
           <DecisionPanel />
         </div>
+
+        <RegisterCriticPanel />
       </div>
     </SimulationProvider>
   )
