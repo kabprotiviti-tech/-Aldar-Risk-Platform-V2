@@ -156,43 +156,97 @@ export function StealthToggle() {
     })
   }, [])
 
+  // Keyboard shortcut: Ctrl/Cmd + Shift + H → toggle
+  useEffect(() => {
+    if (!mounted) return
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'H' || e.key === 'h')) {
+        e.preventDefault()
+        toggle()
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [mounted, toggle])
+
+  const [hover, setHover] = useState(false)
+
   if (!mounted) return null
 
   return (
     <button
       data-stealth-ignore="true"
       onClick={toggle}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
       aria-label={stealth ? 'Disable anonymisation' : 'Enable anonymisation'}
-      title=""
       style={{
+        // Large invisible hit area so the cursor finds it easily,
+        // but the visible dot is drawn via ::before-style inline element.
         position: 'fixed',
-        right: 6,
-        bottom: 6,
-        width: 8,
-        height: 8,
+        right: 0,
+        bottom: 0,
+        width: 48,
+        height: 48,
         padding: 0,
         border: 'none',
-        borderRadius: '50%',
-        background: stealth
-          ? 'rgba(120, 200, 140, 0.35)'
-          : 'rgba(255, 255, 255, 0.06)',
+        background: 'transparent',
         cursor: 'pointer',
         zIndex: 2147483647,
-        transition: 'background 200ms ease, transform 200ms ease',
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'flex-end',
         outline: 'none',
       }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'scale(1.6)'
-        e.currentTarget.style.background = stealth
-          ? 'rgba(120, 200, 140, 0.7)'
-          : 'rgba(255, 255, 255, 0.25)'
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'scale(1)'
-        e.currentTarget.style.background = stealth
-          ? 'rgba(120, 200, 140, 0.35)'
-          : 'rgba(255, 255, 255, 0.06)'
-      }}
-    />
+    >
+      {/* The actual visible dot */}
+      <span
+        data-stealth-ignore="true"
+        style={{
+          display: 'block',
+          marginRight: 8,
+          marginBottom: 8,
+          width: hover ? 16 : 10,
+          height: hover ? 16 : 10,
+          borderRadius: '50%',
+          background: stealth
+            ? hover
+              ? 'rgba(120, 220, 150, 0.95)'
+              : 'rgba(120, 200, 140, 0.55)'
+            : hover
+            ? 'rgba(255, 255, 255, 0.6)'
+            : 'rgba(255, 255, 255, 0.18)',
+          boxShadow: hover
+            ? stealth
+              ? '0 0 12px rgba(120, 220, 150, 0.7)'
+              : '0 0 10px rgba(255, 255, 255, 0.35)'
+            : 'none',
+          transition: 'all 180ms ease',
+        }}
+      />
+      {hover && (
+        <span
+          data-stealth-ignore="true"
+          style={{
+            position: 'absolute',
+            right: 28,
+            bottom: 10,
+            padding: '6px 10px',
+            borderRadius: 6,
+            background: 'rgba(20,20,22,0.92)',
+            color: '#fff',
+            fontSize: 11,
+            fontWeight: 500,
+            whiteSpace: 'nowrap',
+            letterSpacing: 0.3,
+            pointerEvents: 'none',
+            border: '1px solid rgba(255,255,255,0.1)',
+          }}
+        >
+          {stealth ? 'Anonymised (ABC) — click to restore' : 'Click to anonymise client name'}
+          <span style={{ opacity: 0.5, marginLeft: 8 }}>⇧⌘H</span>
+        </span>
+      )}
+    </button>
   )
 }
