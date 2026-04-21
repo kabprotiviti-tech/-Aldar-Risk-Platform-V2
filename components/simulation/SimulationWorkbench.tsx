@@ -20,6 +20,7 @@ import { BaselineVsSimulationPanel } from './BaselineVsSimulationPanel'
 import { ExplainabilityPanel } from './ExplainabilityPanel'
 import { DecisionPanel } from './DecisionPanel'
 import { RegisterCriticPanel } from './RegisterCriticPanel'
+import { ExternalSignalCouplingPanel } from './ExternalSignalCouplingPanel'
 
 export function SimulationWorkbench() {
   return (
@@ -45,6 +46,13 @@ export function SimulationWorkbench() {
         </div>
 
         <DriverControlPanel />
+        <ExternalSignalCouplingPanel
+          seedHeadlines={[
+            'Steel prices surge 18% on China demand',
+            'UAE tightens ESG disclosure rules for listed developers',
+            'Red Sea shipping disruption extends lead times on imports',
+          ]}
+        />
         <BaselineVsSimulationPanel />
 
         <div
