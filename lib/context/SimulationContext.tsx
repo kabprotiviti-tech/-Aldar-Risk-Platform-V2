@@ -14,6 +14,7 @@ import type { Driver, DriverId, RiskState, PortfolioState, SimulationMode } from
 import { INITIAL_DRIVERS } from '@/lib/engine/seedData'
 import { applyDriverChange, runSimulation } from '@/lib/engine/simulationEngine'
 import { generateExplainability, type ExplainabilityBlock } from '@/lib/engine/explainabilityEngine'
+import { useDerivedRisks } from '@/lib/context/DerivedRisksContext'
 
 interface SimulationContextValue {
   drivers: Driver[]
@@ -44,7 +45,13 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
     setMode('baseline')
   }, [])
 
-  const { risks, portfolio } = useMemo(() => runSimulation(drivers), [drivers])
+  // Derived risks from control-assessment uploads are added ON TOP of seed RISKS.
+  // If no upload has happened the array is empty → behaviour is unchanged.
+  const { derivedRisks } = useDerivedRisks()
+  const { risks, portfolio } = useMemo(
+    () => runSimulation(drivers, derivedRisks),
+    [drivers, derivedRisks],
+  )
   const explainability = useMemo(
     () => generateExplainability(mode, drivers, risks, portfolio),
     [mode, drivers, risks, portfolio],

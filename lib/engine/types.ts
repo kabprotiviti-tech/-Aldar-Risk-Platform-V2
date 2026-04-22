@@ -60,6 +60,9 @@ export interface RiskDef {
   financialBaseAedMn: number
   sensitivityCoefficient: number // 0..1 — portion of financial base at risk when residual=25
   financialWeight: number // portfolio aggregation weight (Σ=1)
+  source?: 'seed' | 'control_assessment' | 'document' // provenance tag — defaults to seed when omitted
+  linkedControlArea?: string // set when source = 'control_assessment'
+  controlScore?: number // raw control score (0..1, higher = stronger control) — only for derived risks
 }
 
 export interface RiskState {

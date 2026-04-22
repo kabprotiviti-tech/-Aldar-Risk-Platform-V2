@@ -112,18 +112,23 @@ export function recomputeRisk(risk: RiskDef, drivers: Driver[]): RiskState {
 // -----------------------------------------------------------------------------
 // Run full simulation
 // -----------------------------------------------------------------------------
-export function runSimulation(drivers: Driver[]): {
+export function runSimulation(
+  drivers: Driver[],
+  extraRisks: RiskDef[] = [],
+): {
   risks: RiskState[]
   portfolio: PortfolioState
 } {
-  const risks = RISKS.map((r) => recomputeRisk(r, drivers))
+  // Additive risk pool — seed RISKS are never replaced, only extended.
+  const pool: RiskDef[] = [...RISKS, ...extraRisks]
+  const risks = pool.map((r) => recomputeRisk(r, drivers))
 
   // Portfolio exposure index = Σ (residual × financialWeight)
-  const baselineIndex = RISKS.reduce(
+  const baselineIndex = pool.reduce(
     (sum, r, i) => sum + risks[i].baseResidual * r.financialWeight,
     0,
   )
-  const scenarioIndex = RISKS.reduce(
+  const scenarioIndex = pool.reduce(
     (sum, r, i) => sum + risks[i].newResidual * r.financialWeight,
     0,
   )

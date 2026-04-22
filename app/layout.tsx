@@ -3,6 +3,8 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/lib/context/ThemeContext'
+import { DerivedRisksProvider } from '@/lib/context/DerivedRisksContext'
+import { UploadedDocumentProvider } from '@/lib/context/UploadedDocumentContext'
 import { AppChrome } from '@/components/layout/AppChrome'
 
 const inter = Inter({
@@ -38,7 +40,11 @@ export default function RootLayout({
       </head>
       <body className={inter.variable} suppressHydrationWarning>
         <ThemeProvider>
-          <AppChrome>{children}</AppChrome>
+          <UploadedDocumentProvider>
+            <DerivedRisksProvider>
+              <AppChrome>{children}</AppChrome>
+            </DerivedRisksProvider>
+          </UploadedDocumentProvider>
         </ThemeProvider>
       </body>
     </html>

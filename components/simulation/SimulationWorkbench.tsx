@@ -19,6 +19,7 @@
 import React from 'react'
 import { SimulationProvider } from '@/lib/context/SimulationContext'
 import { BoardModeProvider, useBoardMode } from '@/lib/context/BoardModeContext'
+import { useDerivedRisks } from '@/lib/context/DerivedRisksContext'
 import { DriverControlPanel } from './DriverControlPanel'
 import { BaselineVsSimulationPanel } from './BaselineVsSimulationPanel'
 import { ExplainabilityPanel } from './ExplainabilityPanel'
@@ -47,6 +48,7 @@ export function SimulationWorkbench() {
 
 function WorkbenchBody() {
   const { boardMode } = useBoardMode()
+  const { derivedRisks, sourceFileName, clearDerivedRisks } = useDerivedRisks()
 
   return (
     <div
@@ -78,6 +80,41 @@ function WorkbenchBody() {
         </div>
         <BoardModeToggle />
       </div>
+
+      {derivedRisks.length > 0 && (
+        <div
+          style={{
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--accent-primary)',
+            borderLeft: '3px solid var(--accent-primary)',
+            borderRadius: 8,
+            padding: '10px 14px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 10,
+          }}
+        >
+          <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+            <b style={{ color: 'var(--accent-primary)' }}>+{derivedRisks.length} control-based risks</b> from{' '}
+            <i>{sourceFileName}</i> are live in this simulation (source = control_assessment).
+          </div>
+          <button
+            onClick={clearDerivedRisks}
+            style={{
+              background: 'transparent',
+              color: 'var(--text-tertiary)',
+              border: '1px solid var(--border-primary)',
+              fontSize: 10,
+              padding: '5px 10px',
+              borderRadius: 4,
+              cursor: 'pointer',
+            }}
+          >
+            Remove derived risks
+          </button>
+        </div>
+      )}
 
       <DriverControlPanel />
 

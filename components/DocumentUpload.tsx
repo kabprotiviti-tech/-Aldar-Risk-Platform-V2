@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardBody } from '@/components/ui/Card'
 import { RiskBadge } from '@/components/ui/Badge'
+import { useUploadedDocument } from '@/lib/context/UploadedDocumentContext'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -144,6 +145,7 @@ export function DocumentUpload() {
   const [applying, setApplying] = useState(false)
   const [changeLog, setChangeLog] = useState<ChangeEntry[]>([])
   const [expandedRisk, setExpandedRisk] = useState<string | null>(null)
+  const { setUploaded, clearUploaded } = useUploadedDocument()
 
   const handleFile = useCallback(async (f: File) => {
     const ext = fileExt(f.name)
@@ -163,10 +165,11 @@ export function DocumentUpload() {
     try {
       const text = await readFileAsText(f)
       setFileContent(text)
+      setUploaded({ fileName: f.name, content: text })
     } catch {
       setError('Could not read file. Ensure it is a valid text-based document.')
     }
-  }, [])
+  }, [setUploaded])
 
   const onDrop = useCallback(
     (e: React.DragEvent) => {
@@ -252,6 +255,7 @@ export function DocumentUpload() {
     setError(null)
     setApplied(false)
     setChangeLog([])
+    clearUploaded()
     if (inputRef.current) inputRef.current.value = ''
   }
 

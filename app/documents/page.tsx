@@ -28,6 +28,7 @@ import { RiskBadge, ConfidenceBadge } from '@/components/ui/Badge'
 import { AIInsightBox } from '@/components/ui/AIInsightBox'
 import { DocumentUpload } from '@/components/DocumentUpload'
 import { DocumentControlExtractor } from '@/components/controls/DocumentControlExtractor'
+import { ControlAssessmentPanel } from '@/components/simulation/ControlAssessmentPanel'
 
 // ─── Document Intelligence (paste) ───────────────────────────────────────────
 
@@ -930,6 +931,7 @@ export default function DocumentsPage() {
         {activeTab === 'upload' ? (
           <motion.div key="upload" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
             <DocumentUpload />
+            <ControlAssessmentPanel />
           </motion.div>
         ) : (
           <motion.div key="manual" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-6">
