@@ -19,9 +19,32 @@
  *   4. Action Summary          — top recommended action + risk-reduction %
  */
 
-import React from 'react'
+import React, { useState } from 'react'
 import { useSimulation } from '@/lib/context/SimulationContext'
 import { costOfDelay, ceoSummary } from '@/lib/engine/decisionEngine'
+import type { DriverId } from '@/lib/engine/types'
+
+// ─── Driver source classification (metadata only — no new math) ──────────────
+// Tags each driver as Internal (sourced from ERP / CRM / Projects / Leasing /
+// Treasury systems) or External (market / external signal feeds).
+type DriverSource = 'internal' | 'external'
+const DRIVER_SOURCE: Record<DriverId, { kind: DriverSource; system: string }> = {
+  'DRV-01': { kind: 'external', system: 'Commodity Markets' },
+  'DRV-02': { kind: 'internal', system: 'CRM · Sales' },
+  'DRV-03': { kind: 'external', system: 'Rental Market' },
+  'DRV-04': { kind: 'internal', system: 'Leasing Ops' },
+  'DRV-05': { kind: 'internal', system: 'Projects / Primavera' },
+  'DRV-06': { kind: 'internal', system: 'Projects / Contracts' },
+  'DRV-07': { kind: 'internal', system: 'ERP · Treasury' },
+  'DRV-08': { kind: 'external', system: 'Global Supply Chain' },
+  'DRV-09': { kind: 'internal', system: 'Leasing KRI' },
+  'DRV-10': { kind: 'internal', system: 'Leasing KRI' },
+  'DRV-11': { kind: 'internal', system: 'Projects KRI' },
+  'DRV-12': { kind: 'internal', system: 'Projects KRI' },
+  'DRV-13': { kind: 'external', system: 'Credit / Buyer Signals' },
+  'DRV-14': { kind: 'external', system: 'Residential Market Index' },
+  'DRV-15': { kind: 'external', system: 'Commercial Rent Index' },
+}
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 const fmtMn = (v: number) =>
@@ -94,6 +117,7 @@ function Block({
 // ─── main component ──────────────────────────────────────────────────────────
 export function LiveBusinessImpact() {
   const { risks, portfolio, drivers, mode } = useSimulation()
+  const [breakdownOpen, setBreakdownOpen] = useState(false)
 
   // ── 1. Financial Impact ─────────────────────────────────────────────────────
   // Aggregate existing risk-weighted Δ exposure by risk category. No new math.
@@ -157,6 +181,53 @@ export function LiveBusinessImpact() {
     topAction && currentExposureTotal > 0
       ? (topAction.reductionAedMn / currentExposureTotal) * 100
       : 0
+
+  // ── Breakdown: per-driver and per-risk AED contribution to total Δ ────────
+  // Attribution logic (no new math, just proportional allocation of existing
+  // contributingDrivers contributionPoints against each risk's known
+  // deltaExposureAedMn). Sum across risks gives each driver's net AED impact.
+  const driverAedMap = new Map<DriverId, { name: string; aed: number }>()
+  for (const r of risks) {
+    if (r.contributingDrivers.length === 0) continue
+    const absTotal = r.contributingDrivers.reduce(
+      (s, cd) => s + Math.abs(cd.contributionPoints),
+      0,
+    )
+    if (absTotal === 0) continue
+    for (const cd of r.contributingDrivers) {
+      const share = cd.contributionPoints / absTotal // signed
+      const aed = share * r.deltaExposureAedMn
+      const prev = driverAedMap.get(cd.driverId) ?? {
+        name: cd.driverName,
+        aed: 0,
+      }
+      prev.aed += aed
+      driverAedMap.set(cd.driverId, prev)
+    }
+  }
+  const driverBreakdown = [...driverAedMap.entries()]
+    .map(([id, v]) => ({
+      id,
+      name: v.name,
+      aed: v.aed,
+      source: DRIVER_SOURCE[id]?.kind ?? 'internal',
+      system: DRIVER_SOURCE[id]?.system ?? '—',
+    }))
+    .filter((d) => Math.abs(d.aed) > 0.01)
+    .sort((a, b) => Math.abs(b.aed) - Math.abs(a.aed))
+
+  const internalDrivers = driverBreakdown.filter((d) => d.source === 'internal')
+  const externalDrivers = driverBreakdown.filter((d) => d.source === 'external')
+  const internalTotal = internalDrivers.reduce((s, d) => s + d.aed, 0)
+  const externalTotal = externalDrivers.reduce((s, d) => s + d.aed, 0)
+
+  const riskBreakdown = [...risks]
+    .filter((r) => Math.abs(r.deltaExposureAedMn) > 0.01)
+    .sort((a, b) => Math.abs(b.deltaExposureAedMn) - Math.abs(a.deltaExposureAedMn))
+
+  const totalAbsAed = driverBreakdown.reduce((s, d) => s + Math.abs(d.aed), 0) || 1
+  const maxAbsAedRisk =
+    Math.max(...riskBreakdown.map((r) => Math.abs(r.deltaExposureAedMn)), 0.01)
 
   // ── Headline narrative (boardroom-friendly, <5s read) ─────────────────────
   const atRest = Math.abs(exposurePct) < 0.5
@@ -329,6 +400,301 @@ export function LiveBusinessImpact() {
             </div>
           )}
         </Block>
+      </div>
+
+      {/* ── Collapsible "View Impact Breakdown" drawer ────────────────────── */}
+      <div
+        style={{
+          borderTop: '1px dashed var(--border-primary)',
+          paddingTop: 10,
+        }}
+      >
+        <button
+          onClick={() => setBreakdownOpen(!breakdownOpen)}
+          style={{
+            background: 'transparent',
+            border: '1px solid var(--border-primary)',
+            color: 'var(--accent-primary)',
+            fontSize: 11,
+            fontWeight: 700,
+            padding: '7px 12px',
+            borderRadius: 6,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            textTransform: 'uppercase',
+            letterSpacing: 0.8,
+          }}
+        >
+          <span>{breakdownOpen ? '▾' : '▸'}</span>
+          {breakdownOpen ? 'Hide' : 'View'} Impact Breakdown — what is driving this number
+        </button>
+
+        {breakdownOpen && (
+          <div
+            style={{
+              marginTop: 12,
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+              gap: 10,
+            }}
+          >
+            {/* A. Driver contribution */}
+            <Block no="A" title="Driver Contribution (AED)" accent="var(--accent-primary)">
+              <Caption
+                text={`Total movement attributed across ${driverBreakdown.length} drivers · net ${fmtMn(exposureDelta)}`}
+              />
+              {driverBreakdown.length === 0 && (
+                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', fontStyle: 'italic' }}>
+                  No drivers moved from baseline.
+                </div>
+              )}
+              {driverBreakdown.map((d) => {
+                const pct = (Math.abs(d.aed) / totalAbsAed) * 100
+                const c = colourFor(d.aed)
+                return (
+                  <div key={d.id} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr auto',
+                        gap: 8,
+                        fontSize: 12,
+                      }}
+                    >
+                      <span
+                        style={{
+                          color: 'var(--text-primary)',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {d.name}
+                        <span style={{ color: 'var(--text-tertiary)', fontSize: 10 }}>
+                          {' '}· {d.system}
+                        </span>
+                      </span>
+                      <span style={{ color: c, fontWeight: 700, whiteSpace: 'nowrap' }}>
+                        {fmtMn(d.aed)}
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        height: 4,
+                        background: 'var(--bg-primary)',
+                        borderRadius: 2,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <div
+                        style={{
+                          height: '100%',
+                          width: `${pct}%`,
+                          background: c,
+                        }}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </Block>
+
+            {/* B. Internal vs External */}
+            <Block no="B" title="Internal vs External" accent="var(--risk-medium)">
+              <Caption text="Split of total movement by the source system of each driver." />
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr auto',
+                    fontSize: 12,
+                  }}
+                >
+                  <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
+                    Internal factors
+                  </span>
+                  <span
+                    style={{
+                      color: colourFor(internalTotal),
+                      fontWeight: 700,
+                    }}
+                  >
+                    {fmtMn(internalTotal)}
+                  </span>
+                </div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', paddingLeft: 2 }}>
+                  ERP · CRM · Projects · Leasing · Treasury
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginTop: 4 }}>
+                  {internalDrivers.length === 0 && (
+                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontStyle: 'italic' }}>
+                      No internal drivers moved.
+                    </span>
+                  )}
+                  {internalDrivers.map((d) => (
+                    <div
+                      key={d.id}
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr auto',
+                        fontSize: 11,
+                        color: 'var(--text-secondary)',
+                      }}
+                    >
+                      <span>• {d.name} <span style={{ color: 'var(--text-tertiary)' }}>({d.system})</span></span>
+                      <span style={{ color: colourFor(d.aed), fontWeight: 600 }}>{fmtMn(d.aed)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 6,
+                  marginTop: 10,
+                  paddingTop: 8,
+                  borderTop: '1px dashed var(--border-primary)',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr auto',
+                    fontSize: 12,
+                  }}
+                >
+                  <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
+                    External factors
+                  </span>
+                  <span
+                    style={{
+                      color: colourFor(externalTotal),
+                      fontWeight: 700,
+                    }}
+                  >
+                    {fmtMn(externalTotal)}
+                  </span>
+                </div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', paddingLeft: 2 }}>
+                  Market prices · Rates · Supply chain · Buyer sentiment
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginTop: 4 }}>
+                  {externalDrivers.length === 0 && (
+                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontStyle: 'italic' }}>
+                      No external drivers moved.
+                    </span>
+                  )}
+                  {externalDrivers.map((d) => (
+                    <div
+                      key={d.id}
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr auto',
+                        fontSize: 11,
+                        color: 'var(--text-secondary)',
+                      }}
+                    >
+                      <span>• {d.name} <span style={{ color: 'var(--text-tertiary)' }}>({d.system})</span></span>
+                      <span style={{ color: colourFor(d.aed), fontWeight: 600 }}>{fmtMn(d.aed)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Block>
+
+            {/* C. Risk contribution */}
+            <Block no="C" title="Risk Contribution (AED)" accent="var(--risk-critical)">
+              <Caption
+                text={`Every risk that moved, ordered by size. Sum = total portfolio Δ.`}
+              />
+              {riskBreakdown.length === 0 && (
+                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', fontStyle: 'italic' }}>
+                  No risks moved from baseline.
+                </div>
+              )}
+              {riskBreakdown.map((r) => {
+                const w = (Math.abs(r.deltaExposureAedMn) / maxAbsAedRisk) * 100
+                const c = r.deltaExposureAedMn >= 0 ? 'var(--risk-critical)' : 'var(--risk-low)'
+                return (
+                  <div key={r.id} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr auto',
+                        gap: 8,
+                        fontSize: 12,
+                      }}
+                    >
+                      <span
+                        style={{
+                          color: 'var(--text-primary)',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {r.name}
+                        <span style={{ color: 'var(--text-tertiary)', fontSize: 10 }}>
+                          {' '}· {r.ratingFrom} → {r.ratingTo}
+                        </span>
+                      </span>
+                      <span style={{ color: c, fontWeight: 700, whiteSpace: 'nowrap' }}>
+                        {fmtMn(r.deltaExposureAedMn)}
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        height: 4,
+                        background: 'var(--bg-primary)',
+                        borderRadius: 2,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <div style={{ height: '100%', width: `${w}%`, background: c }} />
+                    </div>
+                  </div>
+                )
+              })}
+            </Block>
+
+            {/* D. Calculation basis */}
+            <Block no="D" title="Calculation Basis" accent="var(--risk-low)">
+              <div
+                style={{
+                  fontSize: 12,
+                  color: 'var(--text-primary)',
+                  lineHeight: 1.55,
+                }}
+              >
+                Impact is calculated using a <b>driver-based model</b> that
+                links business KPIs (occupancy, sales velocity, price index,
+                construction cost, etc.) to risk exposure using <b>predefined
+                sensitivities</b> drawn from Aldar&rsquo;s risk register and
+                control library.
+              </div>
+              <ul
+                style={{
+                  margin: '4px 0 0 18px',
+                  padding: 0,
+                  fontSize: 11,
+                  color: 'var(--text-secondary)',
+                  lineHeight: 1.6,
+                }}
+              >
+                <li>Each slider changes a business driver.</li>
+                <li>Drivers feed risks through weighted sensitivities.</li>
+                <li>Risks convert to AED using their financial anchor and residual rating.</li>
+                <li>Exposure is aggregated to the portfolio level.</li>
+              </ul>
+              <Caption text="Figures are risk-weighted exposure — directional, not accounting loss." />
+            </Block>
+          </div>
+        )}
       </div>
 
       <div style={{ fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'right' }}>
