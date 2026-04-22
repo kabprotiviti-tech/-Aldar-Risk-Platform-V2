@@ -22,6 +22,7 @@ import { DecisionPanel } from './DecisionPanel'
 import { RegisterCriticPanel } from './RegisterCriticPanel'
 import { ExternalSignalCouplingPanel } from './ExternalSignalCouplingPanel'
 import { NewsIntelligenceCards } from './NewsIntelligenceCards'
+import { AssumptionsFooter } from './AssumptionsFooter'
 
 const SEED_HEADLINES = [
   'Steel prices surge 18% on China demand',
@@ -69,6 +70,7 @@ export function SimulationWorkbench() {
         </div>
 
         <RegisterCriticPanel />
+        <AssumptionsFooter />
       </div>
     </SimulationProvider>
   )
