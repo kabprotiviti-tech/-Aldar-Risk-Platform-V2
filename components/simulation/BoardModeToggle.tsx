@@ -23,7 +23,7 @@ export function BoardModeToggle() {
         alignItems: 'center',
         gap: 8,
         background: boardMode ? 'var(--accent-primary)' : 'var(--bg-secondary)',
-        color: boardMode ? 'var(--bg-primary)' : 'var(--text-secondary)',
+        color: boardMode ? 'var(--on-accent)' : 'var(--text-secondary)',
         border: '1px solid var(--border-primary)',
         padding: '6px 12px',
         borderRadius: 999,
@@ -40,7 +40,7 @@ export function BoardModeToggle() {
           width: 8,
           height: 8,
           borderRadius: '50%',
-          background: boardMode ? 'var(--bg-primary)' : 'var(--text-tertiary)',
+          background: boardMode ? 'var(--on-accent)' : 'var(--text-tertiary)',
         }}
       />
       {boardMode ? 'Board Mode ON' : 'Board Mode'}

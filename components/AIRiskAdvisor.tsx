@@ -214,7 +214,7 @@ export function AIRiskAdvisor() {
             }}
             title="AI Risk Advisor"
           >
-            <Bot size={24} style={{ color: '#000' }} />
+            <Bot size={24} style={{ color: 'var(--on-accent)' }} />
             {/* Pulse ring */}
             {pulse && (
               <motion.span
@@ -280,7 +280,7 @@ export function AIRiskAdvisor() {
                   flexShrink: 0,
                 }}
               >
-                <Bot size={17} style={{ color: '#000' }} />
+                <Bot size={17} style={{ color: 'var(--on-accent)' }} />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ color: 'var(--text-primary)', fontSize: '0.875rem', fontWeight: 700, letterSpacing: '-0.01em' }}>
@@ -377,7 +377,7 @@ export function AIRiskAdvisor() {
                         marginTop: '2px',
                       }}
                     >
-                      <Sparkles size={13} style={{ color: '#000' }} />
+                      <Sparkles size={13} style={{ color: 'var(--on-accent)' }} />
                     </div>
                     <div
                       style={{
@@ -453,7 +453,7 @@ export function AIRiskAdvisor() {
                       maxWidth: '82%',
                     }}
                   >
-                    <p style={{ color: '#000', fontSize: '0.8rem', fontWeight: 500, margin: 0, lineHeight: 1.5 }}>
+                    <p style={{ color: 'var(--on-accent)', fontSize: '0.8rem', fontWeight: 500, margin: 0, lineHeight: 1.5 }}>
                       {asked}
                     </p>
                   </div>
@@ -480,7 +480,7 @@ export function AIRiskAdvisor() {
                       marginTop: '2px',
                     }}
                   >
-                    <Bot size={13} style={{ color: '#000' }} />
+                    <Bot size={13} style={{ color: 'var(--on-accent)' }} />
                   </div>
                   <div
                     style={{
@@ -540,7 +540,7 @@ export function AIRiskAdvisor() {
                         marginTop: '2px',
                       }}
                     >
-                      <Bot size={13} style={{ color: '#000' }} />
+                      <Bot size={13} style={{ color: 'var(--on-accent)' }} />
                     </div>
 
                     <div

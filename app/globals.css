@@ -18,6 +18,11 @@
   --accent-primary: #C9A84C;
   --accent-secondary: #E8C96A;
   --accent-glow: rgba(201, 168, 76, 0.25);
+  --on-accent: #0A0E1A;
+  --on-risk-critical: #FFFFFF;
+  --on-risk-high: #FFFFFF;
+  --on-risk-medium: #0A0E1A;
+  --on-risk-low: #0A0E1A;
   --border-color: rgba(255,255,255,0.07);
   --border-accent: rgba(201, 168, 76, 0.4);
   --risk-critical: #FF3B3B;
@@ -32,14 +37,6 @@
 }
 
 /* ---- EXECUTIVE LIGHT ---- */
-/* In executive-light the accent gradient is dark navy, so any element that
-   hardcodes black text on --accent-primary becomes unreadable. Flip to white. */
-[data-theme="executive-light"] .btn-primary,
-[data-theme="executive-light"] .ai-badge,
-[data-theme="executive-light"] .landing-cta-primary {
-  color: #FFFFFF;
-}
-
 [data-theme="executive-light"] {
   --bg-primary: #F4F7FB;
   --bg-secondary: #FFFFFF;
@@ -51,6 +48,11 @@
   --accent-primary: #0A3D7A;
   --accent-secondary: #1A5FA8;
   --accent-glow: rgba(10, 61, 122, 0.15);
+  --on-accent: #FFFFFF;
+  --on-risk-critical: #FFFFFF;
+  --on-risk-high: #FFFFFF;
+  --on-risk-medium: #FFFFFF;
+  --on-risk-low: #FFFFFF;
   --border-color: rgba(10,22,40,0.1);
   --border-accent: rgba(10, 61, 122, 0.35);
   --risk-critical: #DC2626;
@@ -76,6 +78,11 @@
   --accent-primary: #FF6600;
   --accent-secondary: #FF8C33;
   --accent-glow: rgba(255, 102, 0, 0.2);
+  --on-accent: #FFFFFF;
+  --on-risk-critical: #FFFFFF;
+  --on-risk-high: #FFFFFF;
+  --on-risk-medium: #0D0D0D;
+  --on-risk-low: #FFFFFF;
   --border-color: rgba(255,255,255,0.08);
   --border-accent: rgba(255, 102, 0, 0.5);
   --risk-critical: #FF1A1A;
@@ -101,6 +108,11 @@
   --accent-primary: #00E676;
   --accent-secondary: #69F0AE;
   --accent-glow: rgba(0, 230, 118, 0.2);
+  --on-accent: #051209;
+  --on-risk-critical: #FFFFFF;
+  --on-risk-high: #051209;
+  --on-risk-medium: #051209;
+  --on-risk-low: #051209;
   --border-color: rgba(0,230,118,0.1);
   --border-accent: rgba(0, 230, 118, 0.4);
   --risk-critical: #FF5252;
@@ -126,6 +138,11 @@
   --accent-primary: #FF4444;
   --accent-secondary: #FF6B6B;
   --accent-glow: rgba(255, 68, 68, 0.2);
+  --on-accent: #FFFFFF;
+  --on-risk-critical: #FFFFFF;
+  --on-risk-high: #FFFFFF;
+  --on-risk-medium: #110808;
+  --on-risk-low: #110808;
   --border-color: rgba(255,68,68,0.1);
   --border-accent: rgba(255, 68, 68, 0.4);
   --risk-critical: #FF0000;
@@ -151,6 +168,11 @@
   --accent-primary: #FFD600;
   --accent-secondary: #FFEA00;
   --accent-glow: rgba(255, 214, 0, 0.2);
+  --on-accent: #0C0A00;
+  --on-risk-critical: #FFFFFF;
+  --on-risk-high: #FFFFFF;
+  --on-risk-medium: #0C0A00;
+  --on-risk-low: #0C0A00;
   --border-color: rgba(255,214,0,0.1);
   --border-accent: rgba(255, 214, 0, 0.4);
   --risk-critical: #FF3D00;
@@ -176,6 +198,11 @@
   --accent-primary: #FFFFFF;
   --accent-secondary: #EEEEEE;
   --accent-glow: rgba(255, 255, 255, 0.1);
+  --on-accent: #000000;
+  --on-risk-critical: #FFFFFF;
+  --on-risk-high: #FFFFFF;
+  --on-risk-medium: #000000;
+  --on-risk-low: #FFFFFF;
   --border-color: rgba(255,255,255,0.08);
   --border-accent: rgba(255, 255, 255, 0.3);
   --risk-critical: #FF3B3B;
@@ -201,6 +228,11 @@
   --accent-primary: #2D9EFF;
   --accent-secondary: #5BB8FF;
   --accent-glow: rgba(45, 158, 255, 0.2);
+  --on-accent: #FFFFFF;
+  --on-risk-critical: #FFFFFF;
+  --on-risk-high: #FFFFFF;
+  --on-risk-medium: #020B18;
+  --on-risk-low: #FFFFFF;
   --border-color: rgba(45,158,255,0.1);
   --border-accent: rgba(45, 158, 255, 0.4);
   --risk-critical: #FF3B3B;
@@ -361,7 +393,7 @@ body {
 /* ---- AI badge glow ---- */
 .ai-badge {
   background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-  color: #000;
+  color: var(--on-accent, #000);
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -428,7 +460,7 @@ body {
 /* ---- Button styles ---- */
 .btn-primary {
   background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-  color: #000;
+  color: var(--on-accent, #000);
   font-weight: 600;
   font-size: 0.875rem;
   padding: 10px 20px;
@@ -864,7 +896,7 @@ body {
 }
 .landing-cta-primary {
   background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary, var(--accent-primary)));
-  color: var(--bg-primary);
+  color: var(--on-accent, var(--bg-primary));
   border: 1px solid var(--accent-primary);
   box-shadow: 0 10px 30px -10px var(--accent-primary);
 }

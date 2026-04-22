@@ -107,7 +107,7 @@ export function ExternalSignalCouplingPanel({ seedHeadlines = [] as string[] }: 
           onClick={() => addHeadline(input)}
           style={{
             background: 'var(--accent-primary)',
-            color: 'var(--bg-primary)',
+            color: 'var(--on-accent)',
             border: 'none',
             fontSize: 11,
             fontWeight: 600,

@@ -150,7 +150,7 @@ export function ThemeSelector({ onClose }: ThemeSelectorProps) {
                       justifyContent: 'center',
                     }}
                   >
-                    <Check size={11} style={{ color: '#000' }} />
+                    <Check size={11} style={{ color: 'var(--on-accent)' }} />
                   </div>
                 )}
               </button>

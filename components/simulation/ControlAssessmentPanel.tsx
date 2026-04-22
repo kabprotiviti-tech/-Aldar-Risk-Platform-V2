@@ -180,7 +180,7 @@ export function ControlAssessmentPanel() {
             disabled={aiLoading}
             style={{
               background: 'var(--accent-primary)',
-              color: 'var(--bg-primary)',
+              color: 'var(--on-accent)',
               border: 'none',
               fontSize: 11,
               fontWeight: 600,

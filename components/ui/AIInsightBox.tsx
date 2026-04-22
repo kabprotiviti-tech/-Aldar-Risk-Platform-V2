@@ -50,7 +50,7 @@ export function AIInsightBox({
               className="ai-badge"
               style={{
                 background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))',
-                color: '#000',
+                color: 'var(--on-accent)',
               }}
             >
               AI Generated

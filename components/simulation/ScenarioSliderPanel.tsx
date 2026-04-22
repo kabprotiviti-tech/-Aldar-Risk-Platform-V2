@@ -155,6 +155,12 @@ function ModeBadge({
       : mode === 'custom'
       ? 'var(--risk-high)'
       : 'var(--risk-low)'
+  const fg =
+    mode === 'scenario'
+      ? 'var(--on-accent)'
+      : mode === 'custom'
+      ? 'var(--on-risk-high, #fff)'
+      : 'var(--on-risk-low, #fff)'
   const label =
     mode === 'scenario' && scenarioLabel
       ? `Scenario · ${scenarioLabel}`
@@ -166,7 +172,7 @@ function ModeBadge({
       style={{
         fontSize: 10,
         fontWeight: 700,
-        color: '#fff',
+        color: fg,
         background: color,
         borderRadius: 4,
         padding: '3px 8px',

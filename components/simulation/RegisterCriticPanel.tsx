@@ -97,7 +97,7 @@ export function RegisterCriticPanel({ signals = [] as string[] }: { signals?: st
           disabled={loading}
           style={{
             background: 'var(--accent-primary)',
-            color: 'var(--bg-primary)',
+            color: 'var(--on-accent)',
             border: 'none',
             fontSize: 11,
             fontWeight: 600,
