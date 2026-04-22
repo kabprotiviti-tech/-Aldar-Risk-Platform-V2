@@ -124,11 +124,19 @@ const GROUPS: SliderGroup[] = [
     sliders: [
       {
         driverId: 'DRV-13',
-        label: 'Default Rate',
+        label: 'Domestic Default Rate',
         min: 0,
-        max: 40,
+        max: 200,
         unit: '%',
-        hint: 'Buyer default-rate uplift vs. baseline',
+        hint: 'UAE buyer default-rate uplift vs. baseline',
+      },
+      {
+        driverId: 'DRV-16',
+        label: 'International Default Rate',
+        min: 0,
+        max: 200,
+        unit: '%',
+        hint: 'Overseas buyer default-rate uplift vs. baseline (typically higher in stress)',
       },
     ],
   },

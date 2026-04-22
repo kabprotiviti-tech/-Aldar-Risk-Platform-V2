@@ -15,9 +15,10 @@ export type DriverId =
   | 'DRV-10' // Commercial Occupancy %
   | 'DRV-11' // Project Delay KRI %
   | 'DRV-12' // Handover Delay %
-  | 'DRV-13' // Sales Default Rate
+  | 'DRV-13' // Domestic Sales Default Rate
   | 'DRV-14' // Residential Price Index
   | 'DRV-15' // Commercial Rent Index
+  | 'DRV-16' // International Sales Default Rate
 
 export type Sensitivity = 'low' | 'medium' | 'high'
 export type Rating = 'Low' | 'Medium' | 'High' | 'Critical'

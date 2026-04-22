@@ -41,9 +41,10 @@ const DRIVER_SOURCE: Record<DriverId, { kind: DriverSource; system: string }> = 
   'DRV-10': { kind: 'internal', system: 'Leasing KRI' },
   'DRV-11': { kind: 'internal', system: 'Projects KRI' },
   'DRV-12': { kind: 'internal', system: 'Projects KRI' },
-  'DRV-13': { kind: 'external', system: 'Credit / Buyer Signals' },
+  'DRV-13': { kind: 'external', system: 'Credit · Domestic Buyer Signals' },
   'DRV-14': { kind: 'external', system: 'Residential Market Index' },
   'DRV-15': { kind: 'external', system: 'Commercial Rent Index' },
+  'DRV-16': { kind: 'external', system: 'Credit · International Buyer Signals' },
 }
 
 // ─── helpers ─────────────────────────────────────────────────────────────────

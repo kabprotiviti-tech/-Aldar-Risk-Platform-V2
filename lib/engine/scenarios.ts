@@ -50,27 +50,30 @@ export const SCENARIOS: ScenarioDef[] = [
     summary: 'Residential prices fall sharply; off-plan sales seize up; defaults climb.',
     narrative:
       'A demand shock in Abu Dhabi residential — price index falls, occupancy softens, sales velocity collapses, buyer defaults spike.',
-    driversTouched: ['DRV-14', 'DRV-09', 'DRV-02', 'DRV-13', 'DRV-07'],
+    driversTouched: ['DRV-14', 'DRV-09', 'DRV-02', 'DRV-13', 'DRV-16', 'DRV-07'],
     effects: {
       mild: {
         'DRV-14': -25, // residential price index
         'DRV-09': -10, // residential occupancy
         'DRV-02': -20, // sales volume
-        'DRV-13': 50, // default rate (index +50%)
+        'DRV-13': 40,  // domestic defaults
+        'DRV-16': 70,  // international defaults move faster
         'DRV-07': -10, // liquidity squeeze
       },
       moderate: {
         'DRV-14': -35,
         'DRV-09': -18,
         'DRV-02': -32,
-        'DRV-13': 100,
+        'DRV-13': 90,
+        'DRV-16': 140,
         'DRV-07': -20,
       },
       severe: {
         'DRV-14': -50,
         'DRV-09': -28,
         'DRV-02': -45,
-        'DRV-13': 150,
+        'DRV-13': 140,
+        'DRV-16': 200,
         'DRV-07': -35,
       },
     },
@@ -84,22 +87,23 @@ export const SCENARIOS: ScenarioDef[] = [
       'Tenant consolidation, hybrid-work spillover, and new Grade-A supply push renewal rents below budget across office + retail.',
     driversTouched: ['DRV-15', 'DRV-10', 'DRV-03', 'DRV-04'],
     effects: {
+      // Client calibration: commercial price/rental decline 25% / 35% / 50%.
       mild: {
-        'DRV-15': -15,
-        'DRV-10': -10,
-        'DRV-03': -12,
-        'DRV-04': -8,
+        'DRV-15': -25,
+        'DRV-10': -15,
+        'DRV-03': -20,
+        'DRV-04': -12,
       },
       moderate: {
-        'DRV-15': -25,
-        'DRV-10': -18,
-        'DRV-03': -22,
-        'DRV-04': -15,
+        'DRV-15': -35,
+        'DRV-10': -22,
+        'DRV-03': -28,
+        'DRV-04': -18,
       },
       severe: {
-        'DRV-15': -40,
+        'DRV-15': -50, // capped by DRV-15 slider bound of -50
         'DRV-10': -30,
-        'DRV-03': -35,
+        'DRV-03': -38,
         'DRV-04': -25,
       },
     },
@@ -111,12 +115,13 @@ export const SCENARIOS: ScenarioDef[] = [
     summary: 'Rate shock + credit tightening: liquidity, sales, defaults and commodities all hit.',
     narrative:
       'A systemic risk-off move — capital flows reverse, refinancing costs jump, construction inputs inflate, sales freeze, defaults rise.',
-    driversTouched: ['DRV-07', 'DRV-02', 'DRV-13', 'DRV-14', 'DRV-15', 'DRV-01', 'DRV-11'],
+    driversTouched: ['DRV-07', 'DRV-02', 'DRV-13', 'DRV-16', 'DRV-14', 'DRV-15', 'DRV-01', 'DRV-11'],
     effects: {
       mild: {
         'DRV-07': -15,
         'DRV-02': -15,
-        'DRV-13': 40,
+        'DRV-13': 35,  // domestic defaults
+        'DRV-16': 60,  // international buyers pull out first
         'DRV-14': -10,
         'DRV-15': -8,
         'DRV-01': 10,
@@ -125,7 +130,8 @@ export const SCENARIOS: ScenarioDef[] = [
       moderate: {
         'DRV-07': -25,
         'DRV-02': -25,
-        'DRV-13': 80,
+        'DRV-13': 70,
+        'DRV-16': 120,
         'DRV-14': -20,
         'DRV-15': -15,
         'DRV-01': 18,
@@ -134,7 +140,8 @@ export const SCENARIOS: ScenarioDef[] = [
       severe: {
         'DRV-07': -40,
         'DRV-02': -40,
-        'DRV-13': 120,
+        'DRV-13': 110,
+        'DRV-16': 180,
         'DRV-14': -35,
         'DRV-15': -25,
         'DRV-01': 28,
