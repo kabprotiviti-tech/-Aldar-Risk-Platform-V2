@@ -1,189 +1,173 @@
 'use client'
 
 /**
- * LiveBusinessImpact
- * ------------------
- * The "so what for Aldar" panel. Sits directly under the executive sliders so
- * that every drag shows an immediate, plain-English consequence:
+ * Executive Impact Panel
+ * ----------------------
+ * Sits directly under the slider controls and answers, in <5 seconds,
+ * "So what does this mean for Aldar?"
  *
- *   • Portfolio exposure Δ (AED mn + %)
- *   • Portfolio risk band transition (Stable → Stressed, etc.)
- *   • Impact mapped to Aldar's four business anchors
- *       – Off-plan sales revenue
- *       – Recurring rental NOI
- *       – Active project GDV
- *       – Group revenue
- *   • Top-3 risks by Δ AED (what's actually moving)
- *   • One-line plain-English narrative
+ * ⚠️ Additive only — NO new simulation logic. All numbers come from existing
+ *    engine outputs exposed via SimulationContext + decisionEngine:
+ *      • portfolio.* (runSimulation)
+ *      • costOfDelay() per risk (decisionEngine)
+ *      • ceoSummary() top action + reduction (decisionEngine)
  *
- * Reads entirely from SimulationContext — no new state, no new engine.
+ * Four blocks, business language only:
+ *   1. Financial Impact        — revenue, cash flow, exposure change (AED + %)
+ *   2. Risk Impact Summary     — top-3 risks with % increase + driving sliders
+ *   3. Cost of Delay           — exposure in 7 and 30 days if nothing is done
+ *   4. Action Summary          — top recommended action + risk-reduction %
  */
 
 import React from 'react'
 import { useSimulation } from '@/lib/context/SimulationContext'
-import { FINANCIAL_ANCHORS } from '@/lib/engine/seedData'
+import { costOfDelay, ceoSummary } from '@/lib/engine/decisionEngine'
 
-// Map each anchor value to a human label + icon. Risks carry the raw AED
-// anchor (financialBaseAedMn) so we can group by it.
-const ANCHOR_META: Array<{
-  value: number
-  key: 'gdv' | 'sales' | 'noi' | 'revenue' | 'capex' | 'hospitality'
-  label: string
-  sub: string
-  icon: string
-}> = [
-  {
-    value: FINANCIAL_ANCHORS.annualOffPlanSalesAedMn,
-    key: 'sales',
-    label: 'Off-Plan Sales',
-    sub: 'AED 7.5 bn / yr',
-    icon: '🏠',
-  },
-  {
-    value: FINANCIAL_ANCHORS.recurringRentalNoiAedMn,
-    key: 'noi',
-    label: 'Recurring Rental NOI',
-    sub: 'AED 1.8 bn / yr',
-    icon: '🏢',
-  },
-  {
-    value: FINANCIAL_ANCHORS.activeProjectGdvAedMn,
-    key: 'gdv',
-    label: 'Active Project GDV',
-    sub: 'AED 28 bn pipeline',
-    icon: '🏗',
-  },
-  {
-    value: FINANCIAL_ANCHORS.portfolioRevenueAedMn,
-    key: 'revenue',
-    label: 'Group Revenue',
-    sub: 'AED 11 bn / yr',
-    icon: '💼',
-  },
-  {
-    value: FINANCIAL_ANCHORS.annualCapexAedMn,
-    key: 'capex',
-    label: 'Annual CapEx',
-    sub: 'AED 6.5 bn / yr',
-    icon: '🔧',
-  },
-  {
-    value: FINANCIAL_ANCHORS.hospitalityRevenueAedMn,
-    key: 'hospitality',
-    label: 'Hospitality Revenue',
-    sub: 'AED 1.4 bn / yr',
-    icon: '🏨',
-  },
-]
+// ─── helpers ─────────────────────────────────────────────────────────────────
+const fmtMn = (v: number) =>
+  `${v >= 0 ? '+' : ''}${v.toFixed(0)} AED mn`
+const fmtAbsMn = (v: number) => `${v.toFixed(0)} AED mn`
+const fmtPct = (v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`
 
-function colourForDelta(delta: number): string {
+const colourFor = (delta: number): string => {
   if (delta > 0.5) return 'var(--risk-critical)'
   if (delta > 0.05) return 'var(--risk-high)'
   if (delta < -0.05) return 'var(--risk-low)'
   return 'var(--text-tertiary)'
 }
 
-function narrative(
-  deltaPct: number,
-  ratingFrom: string,
-  ratingTo: string,
-): string {
-  if (Math.abs(deltaPct) < 0.5) {
-    return 'Portfolio within baseline tolerance — no material change to Aldar\'s risk posture.'
-  }
-  const dir = deltaPct > 0 ? 'deteriorates' : 'improves'
-  const band =
-    ratingFrom !== ratingTo
-      ? ` Portfolio risk band shifts ${ratingFrom} → ${ratingTo}.`
-      : ''
-  return `Aldar's aggregate risk-weighted exposure ${dir} by ${Math.abs(deltaPct).toFixed(1)}% under these assumptions.${band}`
+// ─── block wrapper ───────────────────────────────────────────────────────────
+function Block({
+  no,
+  title,
+  accent,
+  children,
+}: {
+  no: string
+  title: string
+  accent: string
+  children: React.ReactNode
+}) {
+  return (
+    <div
+      style={{
+        background: 'var(--bg-secondary)',
+        border: '1px solid var(--border-primary)',
+        borderLeft: `3px solid ${accent}`,
+        borderRadius: 8,
+        padding: 12,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 8,
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span
+          style={{
+            fontSize: 10,
+            fontWeight: 700,
+            color: '#fff',
+            background: accent,
+            borderRadius: 4,
+            padding: '2px 6px',
+          }}
+        >
+          {no}
+        </span>
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            textTransform: 'uppercase',
+            letterSpacing: 1,
+          }}
+        >
+          {title}
+        </span>
+      </div>
+      {children}
+    </div>
+  )
 }
 
+// ─── main component ──────────────────────────────────────────────────────────
 export function LiveBusinessImpact() {
-  const { risks, portfolio, mode } = useSimulation()
+  const { risks, portfolio, drivers, mode } = useSimulation()
 
-  // Aggregate Δ exposure per financial anchor
-  const anchorDeltas = new Map<number, { base: number; scen: number }>()
+  // ── 1. Financial Impact ─────────────────────────────────────────────────────
+  // Aggregate existing risk-weighted Δ exposure by risk category. No new math.
+  // Revenue lines: customer-facing income streams that fall when demand / price /
+  // occupancy weaken  → Financial, Market/Sales, Strategic, Operational.
+  // Cash-flow lines: items that defer / consume cash immediately → Project/
+  // Construction (handover delays defer sales cash) + Financial (liquidity).
+  const revenueCats = new Set([
+    'Financial',
+    'Market/Sales',
+    'Strategic',
+    'Operational',
+  ])
+  const cashflowCats = new Set(['Project/Construction', 'Financial'])
+
+  let revenueImpact = 0
+  let cashflowImpact = 0
   for (const r of risks) {
-    // We can't access financialBaseAedMn from RiskState directly, but each risk's
-    // exposure is proportional to its own anchor. Use the risk name grouping via
-    // deltaExposureAedMn and a lookup table of seeded anchors keyed by risk id.
-    // (Simpler: attribute by risk name heuristics below.)
+    if (revenueCats.has(r.category)) revenueImpact += r.deltaExposureAedMn
+    if (cashflowCats.has(r.category)) cashflowImpact += r.deltaExposureAedMn
   }
 
-  // Bucket risks by business area using category + name heuristics
-  const buckets: Record<
-    'sales' | 'noi' | 'gdv' | 'revenue' | 'capex' | 'hospitality',
-    { base: number; scen: number; names: string[] }
-  > = {
-    sales: { base: 0, scen: 0, names: [] },
-    noi: { base: 0, scen: 0, names: [] },
-    gdv: { base: 0, scen: 0, names: [] },
-    revenue: { base: 0, scen: 0, names: [] },
-    capex: { base: 0, scen: 0, names: [] },
-    hospitality: { base: 0, scen: 0, names: [] },
-  }
+  const exposureDelta = portfolio.deltaAedMn
+  const exposurePct = portfolio.deltaPct
 
-  for (const r of risks) {
-    const n = r.name.toLowerCase()
-    let bucket: keyof typeof buckets = 'revenue'
-    if (
-      n.includes('sales') ||
-      n.includes('off-plan') ||
-      n.includes('default') ||
-      n.includes('buyer')
-    ) {
-      bucket = 'sales'
-    } else if (
-      n.includes('lease') ||
-      n.includes('rent') ||
-      n.includes('occupan') ||
-      n.includes('tenant')
-    ) {
-      bucket = 'noi'
-    } else if (
-      n.includes('construction') ||
-      n.includes('delivery') ||
-      n.includes('delay') ||
-      n.includes('contractor') ||
-      n.includes('supply')
-    ) {
-      bucket = 'gdv'
-    } else if (n.includes('hospitality') || n.includes('hotel')) {
-      bucket = 'hospitality'
-    } else if (n.includes('capex') || n.includes('capital')) {
-      bucket = 'capex'
-    }
-    buckets[bucket].base += r.baseExposureAedMn
-    buckets[bucket].scen += r.exposureAedMn
-    if (Math.abs(r.deltaExposureAedMn) > 0.01) buckets[bucket].names.push(r.name)
-  }
-
-  const orderedAnchors: Array<keyof typeof buckets> = [
-    'sales',
-    'noi',
-    'gdv',
-    'revenue',
-    'hospitality',
-    'capex',
-  ]
-  const anchorCards = orderedAnchors
-    .map((key) => {
-      const b = buckets[key]
-      const meta = ANCHOR_META.find((m) => m.key === key)!
-      const delta = b.scen - b.base
-      return { key, meta, base: b.base, scen: b.scen, delta, names: b.names }
+  // ── 2. Risk Impact Summary ─────────────────────────────────────────────────
+  // Top-3 risks by % increase in inherent score (newInherent vs baseInherent).
+  // Attach the top 2 driving sliders per risk from existing contributingDrivers.
+  const top3 = [...risks]
+    .map((r) => {
+      const pctIncrease =
+        r.baseInherent > 0
+          ? ((r.newInherent - r.baseInherent) / r.baseInherent) * 100
+          : 0
+      const topDrivers = [...r.contributingDrivers]
+        .sort((a, b) => Math.abs(b.contributionPoints) - Math.abs(a.contributionPoints))
+        .slice(0, 2)
+        .map((d) => d.driverName)
+      return { ...r, pctIncrease, topDrivers }
     })
-    // Hide anchors with zero base AND zero delta to keep the strip focused
-    .filter((a) => a.base > 0.01 || Math.abs(a.delta) > 0.01)
-
-  const topRisks = [...risks]
-    .filter((r) => Math.abs(r.deltaExposureAedMn) > 0.05)
-    .sort((a, b) => Math.abs(b.deltaExposureAedMn) - Math.abs(a.deltaExposureAedMn))
+    .filter((r) => Math.abs(r.pctIncrease) > 0.5)
+    .sort((a, b) => Math.abs(b.pctIncrease) - Math.abs(a.pctIncrease))
     .slice(0, 3)
 
-  const deltaUp = portfolio.deltaAedMn >= 0
-  const headlineColor = deltaUp ? 'var(--risk-critical)' : 'var(--risk-low)'
+  // ── 3. Cost of Delay (from existing decision engine) ───────────────────────
+  let delay7 = 0
+  let delay30 = 0
+  for (const r of risks) {
+    const cd = costOfDelay(r)
+    delay7 += cd.at_7d_aed_mn
+    delay30 += cd.at_30d_aed_mn
+  }
+  const currentExposureTotal = risks.reduce((s, r) => s + r.exposureAedMn, 0)
+  const exposureIn7 = currentExposureTotal + delay7
+  const exposureIn30 = currentExposureTotal + delay30
+
+  // ── 4. Action Summary (from existing ceoSummary) ───────────────────────────
+  const summary = ceoSummary(drivers, risks)
+  const topAction = summary.top3Priorities[0]
+  const topActionReductionPct =
+    topAction && currentExposureTotal > 0
+      ? (topAction.reductionAedMn / currentExposureTotal) * 100
+      : 0
+
+  // ── Headline narrative (boardroom-friendly, <5s read) ─────────────────────
+  const atRest = Math.abs(exposurePct) < 0.5
+  const dir = exposureDelta >= 0 ? 'worsens' : 'improves'
+  const headline = atRest
+    ? `Aldar is within baseline tolerance — no material change from current assumptions.`
+    : `Aldar's risk-weighted exposure ${dir} by ${fmtAbsMn(Math.abs(exposureDelta))} (${fmtPct(exposurePct)}). ${
+        portfolio.ratingFrom !== portfolio.ratingTo
+          ? `Portfolio moves ${portfolio.ratingFrom} → ${portfolio.ratingTo}.`
+          : `Portfolio band holds at ${portfolio.ratingTo}.`
+      }`
 
   return (
     <div
@@ -194,215 +178,205 @@ export function LiveBusinessImpact() {
         padding: 16,
         display: 'flex',
         flexDirection: 'column',
-        gap: 14,
+        gap: 12,
       }}
     >
-      {/* Headline row */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 12,
-        }}
-      >
-        <div>
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              color: 'var(--accent-primary)',
-              textTransform: 'uppercase',
-              letterSpacing: 1,
-            }}
-          >
-            Live Business Impact · Aldar Properties
-          </div>
-          <div
-            style={{
-              fontSize: 12,
-              color: 'var(--text-secondary)',
-              marginTop: 4,
-              maxWidth: 680,
-              lineHeight: 1.5,
-            }}
-          >
-            {narrative(portfolio.deltaPct, portfolio.ratingFrom, portfolio.ratingTo)}
-          </div>
-        </div>
-
+      {/* Header + one-line headline */}
+      <div>
         <div
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, auto)',
-            gap: 18,
-            alignItems: 'center',
+            fontSize: 11,
+            fontWeight: 700,
+            color: 'var(--accent-primary)',
+            textTransform: 'uppercase',
+            letterSpacing: 1.2,
           }}
         >
-          <div>
-            <div
-              style={{
-                fontSize: 10,
-                color: 'var(--text-tertiary)',
-                textTransform: 'uppercase',
-                letterSpacing: 1,
-              }}
-            >
-              Baseline Exposure
-            </div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>
-              {portfolio.baselineExposureAedMn.toFixed(0)}{' '}
-              <span style={{ fontSize: 11 }}>AED mn</span>
-            </div>
-          </div>
-          <div>
-            <div
-              style={{
-                fontSize: 10,
-                color: 'var(--text-tertiary)',
-                textTransform: 'uppercase',
-                letterSpacing: 1,
-              }}
-            >
-              Simulated Exposure
-            </div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: headlineColor }}>
-              {portfolio.scenarioExposureAedMn.toFixed(0)}{' '}
-              <span style={{ fontSize: 11 }}>AED mn</span>
-            </div>
-          </div>
-          <div>
-            <div
-              style={{
-                fontSize: 10,
-                color: 'var(--text-tertiary)',
-                textTransform: 'uppercase',
-                letterSpacing: 1,
-              }}
-            >
-              Δ Exposure
-            </div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: headlineColor, lineHeight: 1.1 }}>
-              {deltaUp ? '+' : ''}
-              {portfolio.deltaAedMn.toFixed(0)}{' '}
-              <span style={{ fontSize: 12 }}>AED mn</span>
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-              {deltaUp ? '+' : ''}
-              {portfolio.deltaPct.toFixed(1)}% · {portfolio.ratingFrom} → {portfolio.ratingTo}
-            </div>
-          </div>
+          Executive Impact Panel · So what does this mean for Aldar?
+        </div>
+        <div
+          style={{
+            fontSize: 13,
+            color: 'var(--text-primary)',
+            fontWeight: 600,
+            marginTop: 6,
+            lineHeight: 1.5,
+          }}
+        >
+          {headline}
         </div>
       </div>
 
-      {/* Business anchor tiles */}
+      {/* 4 blocks in a responsive grid */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
           gap: 10,
         }}
       >
-        {anchorCards.map((a) => {
-          const pct = a.base > 0 ? (a.delta / a.base) * 100 : 0
-          const c = colourForDelta(a.delta)
-          return (
-            <div
-              key={a.key}
-              style={{
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--border-primary)',
-                borderLeft: `3px solid ${c}`,
-                borderRadius: 8,
-                padding: 10,
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>
-                    {a.meta.icon} {a.meta.label}
-                  </div>
-                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{a.meta.sub}</div>
-                </div>
-              </div>
+        {/* ── BLOCK 1 — Financial Impact ─────────────────────────────────── */}
+        <Block no="1" title="Financial Impact" accent="var(--accent-primary)">
+          <Row label="Revenue at risk" value={fmtMn(revenueImpact)} color={colourFor(revenueImpact)} />
+          <Row label="Cash flow at risk" value={fmtMn(cashflowImpact)} color={colourFor(cashflowImpact)} />
+          <Row
+            label="Portfolio exposure change"
+            value={`${fmtMn(exposureDelta)} (${fmtPct(exposurePct)})`}
+            color={colourFor(exposureDelta)}
+            strong
+          />
+          <Caption text={`${portfolio.ratingFrom} → ${portfolio.ratingTo}`} />
+        </Block>
+
+        {/* ── BLOCK 2 — Risk Impact Summary ─────────────────────────────── */}
+        <Block no="2" title="Top Risks Moving" accent="var(--risk-high)">
+          {top3.length === 0 && (
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', fontStyle: 'italic' }}>
+              No risks materially moving from baseline.
+            </div>
+          )}
+          {top3.map((r, idx) => (
+            <div key={r.id} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <div
                 style={{
-                  fontSize: 16,
-                  fontWeight: 700,
-                  color: c,
-                  marginTop: 6,
-                  lineHeight: 1.1,
+                  display: 'grid',
+                  gridTemplateColumns: 'auto 1fr auto',
+                  gap: 6,
+                  alignItems: 'center',
+                  fontSize: 12,
                 }}
               >
-                {a.delta >= 0 ? '+' : ''}
-                {a.delta.toFixed(1)} <span style={{ fontSize: 10 }}>AED mn risk</span>
-              </div>
-              <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 2 }}>
-                {a.delta >= 0 ? '+' : ''}
-                {pct.toFixed(1)}% vs. baseline
-              </div>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Top impacted risks */}
-      {topRisks.length > 0 && (
-        <div
-          style={{
-            background: 'var(--bg-secondary)',
-            border: '1px solid var(--border-primary)',
-            borderRadius: 8,
-            padding: 10,
-          }}
-        >
-          <div
-            style={{
-              fontSize: 10,
-              fontWeight: 700,
-              color: 'var(--text-tertiary)',
-              textTransform: 'uppercase',
-              letterSpacing: 1,
-              marginBottom: 6,
-            }}
-          >
-            Biggest movers — risks driving the Δ
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {topRisks.map((r) => {
-              const c = r.deltaExposureAedMn >= 0 ? 'var(--risk-critical)' : 'var(--risk-low)'
-              return (
-                <div
-                  key={r.id}
+                <span style={{ color: 'var(--text-tertiary)', fontWeight: 700 }}>#{idx + 1}</span>
+                <span
                   style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr auto auto',
-                    gap: 10,
-                    alignItems: 'center',
-                    fontSize: 12,
+                    color: 'var(--text-primary)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
                   }}
                 >
-                  <div style={{ color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {r.name}
-                  </div>
-                  <div style={{ color: 'var(--text-tertiary)', fontSize: 10, whiteSpace: 'nowrap' }}>
-                    {r.ratingFrom} → {r.ratingTo}
-                  </div>
-                  <div style={{ color: c, fontWeight: 700, whiteSpace: 'nowrap' }}>
-                    {r.deltaExposureAedMn >= 0 ? '+' : ''}
-                    {r.deltaExposureAedMn.toFixed(1)} mn
-                  </div>
+                  {r.name}
+                </span>
+                <span
+                  style={{
+                    fontWeight: 700,
+                    color: colourFor(r.pctIncrease),
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {fmtPct(r.pctIncrease)}
+                </span>
+              </div>
+              {r.topDrivers.length > 0 && (
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', paddingLeft: 22 }}>
+                  driven by: {r.topDrivers.join(' · ')}
                 </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
+              )}
+            </div>
+          ))}
+        </Block>
+
+        {/* ── BLOCK 3 — Cost of Delay ────────────────────────────────────── */}
+        <Block no="3" title="Cost of Doing Nothing" accent="var(--risk-critical)">
+          <Row
+            label="Today"
+            value={fmtAbsMn(currentExposureTotal)}
+            color="var(--text-primary)"
+          />
+          <Row
+            label="In 7 days"
+            value={fmtAbsMn(exposureIn7)}
+            color={colourFor(exposureIn7 - currentExposureTotal)}
+          />
+          <Row
+            label="In 30 days"
+            value={fmtAbsMn(exposureIn30)}
+            color={colourFor(exposureIn30 - currentExposureTotal)}
+            strong
+          />
+          <Caption
+            text={`Exposure grows AED ${delay30.toFixed(0)} mn in 30 days if no action is taken.`}
+          />
+        </Block>
+
+        {/* ── BLOCK 4 — Action Summary ───────────────────────────────────── */}
+        <Block no="4" title="Recommended Action" accent="var(--risk-low)">
+          {topAction && topAction.reductionAedMn > 0 ? (
+            <>
+              <div
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  lineHeight: 1.4,
+                }}
+              >
+                {topAction.actionName}
+              </div>
+              <Row
+                label="Expected risk reduction"
+                value={`-${fmtAbsMn(topAction.reductionAedMn)} (${topActionReductionPct.toFixed(1)}%)`}
+                color="var(--risk-low)"
+                strong
+              />
+              <Row label="Owner" value={topAction.ownerRole} color="var(--text-secondary)" />
+              <Row label="Time to act" value={topAction.timeToAct} color="var(--text-secondary)" />
+              <Caption text={`Addresses: ${topAction.riskName}`} />
+            </>
+          ) : (
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', fontStyle: 'italic' }}>
+              No critical action required at current settings.
+            </div>
+          )}
+        </Block>
+      </div>
 
       <div style={{ fontSize: 10, color: 'var(--text-tertiary)', textAlign: 'right' }}>
-        Mode: <b style={{ color: 'var(--text-secondary)' }}>{mode}</b> · all figures are risk-weighted exposure values, not accounting losses
+        Mode: <b style={{ color: 'var(--text-secondary)' }}>{mode}</b> · figures are risk-weighted exposure (probability × impact × financial base), refreshed on every slider move
       </div>
+    </div>
+  )
+}
+
+// ─── small presentational helpers ────────────────────────────────────────────
+function Row({
+  label,
+  value,
+  color,
+  strong,
+}: {
+  label: string
+  value: string
+  color: string
+  strong?: boolean
+}) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'baseline',
+        gap: 8,
+        fontSize: strong ? 12 : 11,
+      }}
+    >
+      <span style={{ color: 'var(--text-secondary)' }}>{label}</span>
+      <span style={{ color, fontWeight: strong ? 800 : 600, whiteSpace: 'nowrap' }}>{value}</span>
+    </div>
+  )
+}
+
+function Caption({ text }: { text: string }) {
+  return (
+    <div
+      style={{
+        fontSize: 10,
+        color: 'var(--text-tertiary)',
+        fontStyle: 'italic',
+        marginTop: 2,
+      }}
+    >
+      {text}
     </div>
   )
 }
