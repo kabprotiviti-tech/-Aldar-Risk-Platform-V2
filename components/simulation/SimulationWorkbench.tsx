@@ -24,6 +24,7 @@ import { DriverControlPanel } from './DriverControlPanel'
 import { ScenarioControlPanel } from './ScenarioControlPanel'
 import { ScenarioImpactPanel } from './ScenarioImpactPanel'
 import { ScenarioSliderPanel } from './ScenarioSliderPanel'
+import { LiveBusinessImpact } from './LiveBusinessImpact'
 import { BaselineVsSimulationPanel } from './BaselineVsSimulationPanel'
 import { ExplainabilityPanel } from './ExplainabilityPanel'
 import { DecisionPanel } from './DecisionPanel'
@@ -122,6 +123,9 @@ function WorkbenchBody() {
       <ScenarioControlPanel />
       <ScenarioImpactPanel />
       <ScenarioSliderPanel />
+      {/* Immediate "so what for Aldar" readout — sits under the sliders so
+          every drag shows P&L / NOI / GDV consequences without scrolling. */}
+      <LiveBusinessImpact />
 
       <DriverControlPanel />
 
