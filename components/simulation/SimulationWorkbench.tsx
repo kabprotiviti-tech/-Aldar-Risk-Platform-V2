@@ -11,10 +11,14 @@
  *
  * Wraps everything in its own SimulationProvider so callers don't need to
  * modify the app layout. Does NOT alter or conflict with any existing UI.
+ *
+ * Board Mode (toggle top-right) hides detail-heavy panels for a 90-sec
+ * board-room demo; the full analyst view is available to everyone else.
  */
 
 import React from 'react'
 import { SimulationProvider } from '@/lib/context/SimulationContext'
+import { BoardModeProvider, useBoardMode } from '@/lib/context/BoardModeContext'
 import { DriverControlPanel } from './DriverControlPanel'
 import { BaselineVsSimulationPanel } from './BaselineVsSimulationPanel'
 import { ExplainabilityPanel } from './ExplainabilityPanel'
@@ -23,6 +27,7 @@ import { RegisterCriticPanel } from './RegisterCriticPanel'
 import { ExternalSignalCouplingPanel } from './ExternalSignalCouplingPanel'
 import { NewsIntelligenceCards } from './NewsIntelligenceCards'
 import { AssumptionsFooter } from './AssumptionsFooter'
+import { BoardModeToggle } from './BoardModeToggle'
 
 const SEED_HEADLINES = [
   'Steel prices surge 18% on China demand',
@@ -33,12 +38,31 @@ const SEED_HEADLINES = [
 export function SimulationWorkbench() {
   return (
     <SimulationProvider>
+      <BoardModeProvider>
+        <WorkbenchBody />
+      </BoardModeProvider>
+    </SimulationProvider>
+  )
+}
+
+function WorkbenchBody() {
+  const { boardMode } = useBoardMode()
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 16,
+        padding: '16px 0',
+      }}
+    >
       <div
         style={{
           display: 'flex',
-          flexDirection: 'column',
-          gap: 16,
-          padding: '16px 0',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 12,
         }}
       >
         <div
@@ -50,28 +74,31 @@ export function SimulationWorkbench() {
             letterSpacing: 1,
           }}
         >
-          Intelligence Workbench
+          Intelligence Workbench {boardMode && '· Board View'}
         </div>
-
-        <DriverControlPanel />
-        <NewsIntelligenceCards headlines={SEED_HEADLINES} />
-        <ExternalSignalCouplingPanel seedHeadlines={SEED_HEADLINES} />
-        <BaselineVsSimulationPanel />
-
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
-            gap: 16,
-          }}
-        >
-          <ExplainabilityPanel />
-          <DecisionPanel />
-        </div>
-
-        <RegisterCriticPanel />
-        <AssumptionsFooter />
+        <BoardModeToggle />
       </div>
-    </SimulationProvider>
+
+      <DriverControlPanel />
+
+      {!boardMode && <NewsIntelligenceCards headlines={SEED_HEADLINES} />}
+      {!boardMode && <ExternalSignalCouplingPanel seedHeadlines={SEED_HEADLINES} />}
+
+      <BaselineVsSimulationPanel />
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: boardMode ? '1fr' : 'repeat(auto-fit, minmax(360px, 1fr))',
+          gap: 16,
+        }}
+      >
+        {!boardMode && <ExplainabilityPanel />}
+        <DecisionPanel />
+      </div>
+
+      {!boardMode && <RegisterCriticPanel />}
+      {!boardMode && <AssumptionsFooter />}
+    </div>
   )
 }
