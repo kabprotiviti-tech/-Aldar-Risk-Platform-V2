@@ -23,6 +23,7 @@ import { useDerivedRisks } from '@/lib/context/DerivedRisksContext'
 import { DriverControlPanel } from './DriverControlPanel'
 import { ScenarioControlPanel } from './ScenarioControlPanel'
 import { ScenarioImpactPanel } from './ScenarioImpactPanel'
+import { ScenarioSliderPanel } from './ScenarioSliderPanel'
 import { BaselineVsSimulationPanel } from './BaselineVsSimulationPanel'
 import { ExplainabilityPanel } from './ExplainabilityPanel'
 import { DecisionPanel } from './DecisionPanel'
@@ -120,6 +121,7 @@ function WorkbenchBody() {
 
       <ScenarioControlPanel />
       <ScenarioImpactPanel />
+      <ScenarioSliderPanel />
 
       <DriverControlPanel />
 
