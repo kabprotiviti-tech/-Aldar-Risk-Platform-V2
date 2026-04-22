@@ -205,7 +205,7 @@ export function LiveBusinessImpact() {
       driverAedMap.set(cd.driverId, prev)
     }
   }
-  const driverBreakdown = [...driverAedMap.entries()]
+  const driverBreakdown = Array.from(driverAedMap.entries())
     .map(([id, v]) => ({
       id,
       name: v.name,
