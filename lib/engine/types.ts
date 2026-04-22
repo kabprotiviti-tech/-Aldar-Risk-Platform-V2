@@ -10,6 +10,14 @@ export type DriverId =
   | 'DRV-06' // Contractor Performance
   | 'DRV-07' // Liquidity / Cash Flow
   | 'DRV-08' // Supply Chain
+  // KRI-based drivers (additive — do not replace existing ones)
+  | 'DRV-09' // Residential Occupancy %
+  | 'DRV-10' // Commercial Occupancy %
+  | 'DRV-11' // Project Delay KRI %
+  | 'DRV-12' // Handover Delay %
+  | 'DRV-13' // Sales Default Rate
+  | 'DRV-14' // Residential Price Index
+  | 'DRV-15' // Commercial Rent Index
 
 export type Sensitivity = 'low' | 'medium' | 'high'
 export type Rating = 'Low' | 'Medium' | 'High' | 'Critical'

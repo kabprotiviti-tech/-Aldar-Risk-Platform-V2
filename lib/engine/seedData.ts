@@ -24,6 +24,14 @@ export const INITIAL_DRIVERS: Driver[] = [
   { id: 'DRV-06', name: 'Contractor Performance',unit: '%',    baseValue: 100, adjustedValue: 100, sliderMin: -30, sliderMax: 0,  deltaPct: 0 },
   { id: 'DRV-07', name: 'Liquidity',             unit: '%',    baseValue: 100, adjustedValue: 100, sliderMin: -45, sliderMax: 0,  deltaPct: 0 },
   { id: 'DRV-08', name: 'Supply Chain Stability',unit: '%',    baseValue: 100, adjustedValue: 100, sliderMin: -45, sliderMax: 0,  deltaPct: 0 },
+  // ── KRI-based drivers (client-derived) ──────────────────────────────────────
+  { id: 'DRV-09', name: 'Residential Occupancy',   unit: '%',   baseValue: 100, adjustedValue: 100, sliderMin: -50, sliderMax: 10, deltaPct: 0 },
+  { id: 'DRV-10', name: 'Commercial Occupancy',    unit: '%',   baseValue: 100, adjustedValue: 100, sliderMin: -50, sliderMax: 10, deltaPct: 0 },
+  { id: 'DRV-11', name: 'Project Delay KRI',       unit: 'idx', baseValue: 100, adjustedValue: 100, sliderMin: 0,   sliderMax: 120,deltaPct: 0 },
+  { id: 'DRV-12', name: 'Handover Delay',          unit: '%',   baseValue: 100, adjustedValue: 100, sliderMin: 0,   sliderMax: 100,deltaPct: 0 },
+  { id: 'DRV-13', name: 'Sales Default Rate',      unit: 'idx', baseValue: 100, adjustedValue: 100, sliderMin: 0,   sliderMax: 200,deltaPct: 0 },
+  { id: 'DRV-14', name: 'Residential Price Index', unit: 'idx', baseValue: 100, adjustedValue: 100, sliderMin: -60, sliderMax: 20, deltaPct: 0 },
+  { id: 'DRV-15', name: 'Commercial Rent Index',   unit: 'idx', baseValue: 100, adjustedValue: 100, sliderMin: -50, sliderMax: 20, deltaPct: 0 },
 ]
 
 export const RISKS: RiskDef[] = [
@@ -40,6 +48,8 @@ export const RISKS: RiskDef[] = [
       { driverId: 'DRV-08', weight: -0.55, sensitivity: 'medium' },
       { driverId: 'DRV-06', weight: -0.35, sensitivity: 'medium' },
       { driverId: 'DRV-05', weight: 0.40, sensitivity: 'medium' },
+      // KRI additions
+      { driverId: 'DRV-11', weight: 0.35, sensitivity: 'medium' },
     ],
     controls: [
       { name: 'GMP contracts', type: 'Preventive', effectiveness: 0.65 },
@@ -64,6 +74,9 @@ export const RISKS: RiskDef[] = [
       { driverId: 'DRV-06', weight: -0.70, sensitivity: 'high' },
       { driverId: 'DRV-08', weight: -0.45, sensitivity: 'medium' },
       { driverId: 'DRV-01', weight: 0.25, sensitivity: 'low' },
+      // KRI additions
+      { driverId: 'DRV-11', weight: 0.70, sensitivity: 'high' },
+      { driverId: 'DRV-12', weight: 0.60, sensitivity: 'high' },
     ],
     controls: [
       { name: 'Primavera milestone tracking', type: 'Detective', effectiveness: 0.60 },
@@ -87,6 +100,10 @@ export const RISKS: RiskDef[] = [
       { driverId: 'DRV-02', weight: -0.95, sensitivity: 'high' },
       { driverId: 'DRV-07', weight: -0.40, sensitivity: 'medium' },
       { driverId: 'DRV-03', weight: -0.25, sensitivity: 'low' },
+      // KRI additions
+      { driverId: 'DRV-13', weight: 0.75, sensitivity: 'high' },  // up = bad
+      { driverId: 'DRV-14', weight: -0.80, sensitivity: 'high' }, // down = bad
+      { driverId: 'DRV-12', weight: 0.30, sensitivity: 'medium' },
     ],
     controls: [
       { name: 'Dynamic pricing committee', type: 'Directive', effectiveness: 0.55 },
@@ -110,6 +127,10 @@ export const RISKS: RiskDef[] = [
       { driverId: 'DRV-03', weight: -0.85, sensitivity: 'high' },
       { driverId: 'DRV-04', weight: -0.75, sensitivity: 'high' },
       { driverId: 'DRV-02', weight: -0.20, sensitivity: 'low' },
+      // KRI additions
+      { driverId: 'DRV-10', weight: -0.80, sensitivity: 'high' }, // commercial occupancy down
+      { driverId: 'DRV-15', weight: -0.85, sensitivity: 'high' }, // commercial rent index down
+      { driverId: 'DRV-09', weight: -0.30, sensitivity: 'medium' },
     ],
     controls: [
       { name: 'Anchor tenant retention', type: 'Preventive', effectiveness: 0.60 },
@@ -132,6 +153,10 @@ export const RISKS: RiskDef[] = [
     driverImpacts: [
       { driverId: 'DRV-04', weight: -0.90, sensitivity: 'high' },
       { driverId: 'DRV-03', weight: -0.40, sensitivity: 'medium' },
+      // KRI additions
+      { driverId: 'DRV-09', weight: -0.75, sensitivity: 'high' },
+      { driverId: 'DRV-10', weight: -0.55, sensitivity: 'medium' },
+      { driverId: 'DRV-15', weight: -0.35, sensitivity: 'medium' },
     ],
     controls: [
       { name: 'Direct booking / loyalty', type: 'Preventive', effectiveness: 0.50 },
@@ -201,6 +226,10 @@ export const RISKS: RiskDef[] = [
       { driverId: 'DRV-02', weight: -0.65, sensitivity: 'high' },
       { driverId: 'DRV-04', weight: -0.40, sensitivity: 'medium' },
       { driverId: 'DRV-03', weight: -0.30, sensitivity: 'low' },
+      // KRI additions
+      { driverId: 'DRV-13', weight: 0.55, sensitivity: 'high' },  // defaults up = liquidity hit
+      { driverId: 'DRV-14', weight: -0.45, sensitivity: 'medium' },
+      { driverId: 'DRV-09', weight: -0.35, sensitivity: 'medium' },
     ],
     controls: [
       { name: '13-week rolling cashflow', type: 'Detective', effectiveness: 0.70 },

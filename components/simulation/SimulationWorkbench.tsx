@@ -21,6 +21,8 @@ import { SimulationProvider } from '@/lib/context/SimulationContext'
 import { BoardModeProvider, useBoardMode } from '@/lib/context/BoardModeContext'
 import { useDerivedRisks } from '@/lib/context/DerivedRisksContext'
 import { DriverControlPanel } from './DriverControlPanel'
+import { ScenarioControlPanel } from './ScenarioControlPanel'
+import { ScenarioImpactPanel } from './ScenarioImpactPanel'
 import { BaselineVsSimulationPanel } from './BaselineVsSimulationPanel'
 import { ExplainabilityPanel } from './ExplainabilityPanel'
 import { DecisionPanel } from './DecisionPanel'
@@ -115,6 +117,9 @@ function WorkbenchBody() {
           </button>
         </div>
       )}
+
+      <ScenarioControlPanel />
+      <ScenarioImpactPanel />
 
       <DriverControlPanel />
 
