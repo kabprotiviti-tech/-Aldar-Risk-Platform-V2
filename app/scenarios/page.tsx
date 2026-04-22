@@ -19,6 +19,7 @@ import { AIInsightBox } from '@/components/ui/AIInsightBox'
 import { FinancialCalculationPanel, ViewCalcButton, type FinancialCalcContext } from '@/components/FinancialCalculationPanel'
 import { scenarioTemplates, portfolioNames, type Portfolio } from '@/lib/simulated-data'
 import { ScenarioEngine } from '@/components/ScenarioEngine'
+import { SimulationWorkbench } from '@/components/simulation/SimulationWorkbench'
 
 type Intensity = 'mild' | 'moderate' | 'severe'
 
@@ -295,6 +296,40 @@ export default function ScenariosPage() {
 
   return (
     <div className="space-y-6">
+
+      {/* ══════════════════════════════════════════════════════════════════
+          INTELLIGENCE WORKBENCH — new real-time stress-test layer.
+          Mounted at the top of the Scenarios page so executives land on it
+          first. Includes:
+            • Pre-built Scenario Cards (Mild/Moderate/Severe)
+            • Scenario Impact Readout
+            • Executive Stress-Test Sliders (8 curated drivers)
+            • Full Driver Controls (15 drivers incl. KRI-based)
+            • Baseline vs Simulation / Decision / Explainability panels
+          ══════════════════════════════════════════════════════════════════ */}
+      <div
+        style={{
+          background: 'var(--bg-primary)',
+          border: '2px solid var(--accent-primary)',
+          borderRadius: 12,
+          padding: 16,
+          marginBottom: 8,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 10,
+            fontWeight: 700,
+            color: 'var(--accent-primary)',
+            textTransform: 'uppercase',
+            letterSpacing: 1.2,
+            marginBottom: 4,
+          }}
+        >
+          NEW · Real-time Intelligence Workbench
+        </div>
+        <SimulationWorkbench />
+      </div>
 
       {/* Quick Scenario Engine */}
       <ScenarioEngine />
