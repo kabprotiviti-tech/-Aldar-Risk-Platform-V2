@@ -3,11 +3,12 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Building2, FlaskConical, FileText, ScrollText } from 'lucide-react'
+import { LayoutDashboard, Building2, FlaskConical, FileText, ScrollText, ListChecks } from 'lucide-react'
 
 const navItems = [
   { href: '/dashboard',       label: 'Dashboard',  icon: LayoutDashboard },
   { href: '/portfolio',       label: 'Portfolio',  icon: Building2 },
+  { href: '/risk-register',   label: 'Register',   icon: ListChecks },
   { href: '/scenarios',       label: 'Scenarios',  icon: FlaskConical },
   { href: '/documents',       label: 'Documents',  icon: FileText },
   { href: '/executive-brief', label: 'Brief',      icon: ScrollText },

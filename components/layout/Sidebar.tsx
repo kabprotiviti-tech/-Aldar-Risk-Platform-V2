@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Cpu,
   Shield,
+  ListChecks,
 } from 'lucide-react'
 import { clsx } from 'clsx'
 
@@ -28,6 +29,12 @@ const navItems = [
     label: 'Portfolio Risk',
     icon: Building2,
     description: 'Portfolio Analysis',
+  },
+  {
+    href: '/risk-register',
+    label: 'Risk Register',
+    icon: ListChecks,
+    description: 'Cause-Event-Impact register',
   },
   {
     href: '/scenarios',
