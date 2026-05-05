@@ -12,10 +12,20 @@
  */
 
 import React, { useMemo, useState } from 'react'
+import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { SimulationProvider, useSimulation } from '@/lib/context/SimulationContext'
+import { RiskDraftProvider, useRiskDrafts, type RiskDraft } from '@/lib/context/RiskDraftContext'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { RiskDetailDrawer } from '@/components/risk-register/RiskDetailDrawer'
+import { RiskFormModal } from '@/components/risk-register/RiskFormModal'
 import type { RiskState, Rating } from '@/lib/engine/types'
+
+// A unified row type that covers both engine RiskState and user draft.
+// Drafts have only the static RiskDef fields so engine-derived columns
+// (residual, exposure, contributing drivers) are absent — shown as "—".
+type RegisterRow =
+  | { kind: 'engine'; risk: RiskState }
+  | { kind: 'draft'; draft: RiskDraft }
 
 // ── Rating colour helper ────────────────────────────────────────────────
 function ratingColor(r: Rating): string {
@@ -58,29 +68,47 @@ function RatingPill({ rating }: { rating: Rating }) {
 // ── Inner content (uses simulation context) ─────────────────────────────
 function RiskRegisterContent() {
   const { risks } = useSimulation()
+  const { drafts, removeDraft } = useRiskDrafts()
   const [query, setQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [selected, setSelected] = useState<RiskState | null>(null)
+  const [formOpen, setFormOpen] = useState(false)
+  const [editing, setEditing] = useState<RiskDraft | null>(null)
+
+  // Combined rows: engine first, then drafts
+  const allRows: RegisterRow[] = useMemo(() => {
+    return [
+      ...risks.map<RegisterRow>((r) => ({ kind: 'engine', risk: r })),
+      ...drafts.map<RegisterRow>((d) => ({ kind: 'draft', draft: d })),
+    ]
+  }, [risks, drafts])
 
   const categories = useMemo(() => {
     const set = new Set<string>()
-    risks.forEach((r) => set.add(r.category))
+    allRows.forEach((row) => {
+      if (row.kind === 'engine') set.add(row.risk.category)
+      else set.add(row.draft.category)
+    })
     return ['all', ...Array.from(set).sort()]
-  }, [risks])
+  }, [allRows])
 
-  const filtered: RiskState[] = useMemo(() => {
+  const filtered: RegisterRow[] = useMemo(() => {
     const q = query.trim().toLowerCase()
-    return risks.filter((r) => {
-      if (categoryFilter !== 'all' && r.category !== categoryFilter) return false
+    return allRows.filter((row) => {
+      const cat = row.kind === 'engine' ? row.risk.category : row.draft.category
+      if (categoryFilter !== 'all' && cat !== categoryFilter) return false
       if (!q) return true
+      const id = row.kind === 'engine' ? row.risk.id : row.draft.id
+      const name = row.kind === 'engine' ? row.risk.name : row.draft.name
+      const owner = row.kind === 'engine' ? row.risk.owner : row.draft.owner
       return (
-        r.id.toLowerCase().includes(q) ||
-        r.name.toLowerCase().includes(q) ||
-        r.owner.toLowerCase().includes(q) ||
-        r.category.toLowerCase().includes(q)
+        id.toLowerCase().includes(q) ||
+        name.toLowerCase().includes(q) ||
+        owner.toLowerCase().includes(q) ||
+        cat.toLowerCase().includes(q)
       )
     })
-  }, [risks, query, categoryFilter])
+  }, [allRows, query, categoryFilter])
 
   return (
     <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -114,13 +142,42 @@ function RiskRegisterContent() {
               lineHeight: 1.5,
             }}
           >
-            Cause-Event-Impact register for Aldar Group. Inherent and residual scores are
-            computed from the simulation engine&rsquo;s baseline drivers.
-            Click any row for details · Add/Edit / Mitigation actions / Status workflow
-            ship in subsequent patches (C2-C7).
+            Cause-Event-Impact register for Aldar Group. Inherent and residual scores
+            for engine risks come from the simulation. User-added risks are stored
+            locally as DRAFT and persist between sessions in this browser.
+            Mitigation actions / Status workflow / Heatmap ship in C4-C7.
           </p>
         </div>
-        <StatusBadge tier="LIVE" note={`${risks.length} risks · sourced from engine`} />
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => {
+              setEditing(null)
+              setFormOpen(true)
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              background: 'var(--accent-primary)',
+              color: 'var(--on-accent)',
+              border: 'none',
+              padding: '8px 14px',
+              borderRadius: 6,
+              fontSize: 12,
+              fontWeight: 700,
+              cursor: 'pointer',
+              letterSpacing: 0.4,
+              textTransform: 'uppercase',
+            }}
+          >
+            <Plus size={14} />
+            Add Risk
+          </button>
+          <StatusBadge
+            tier="LIVE"
+            note={`${risks.length} engine + ${drafts.length} draft`}
+          />
+        </div>
       </div>
 
       {/* Search + filter row */}
@@ -203,13 +260,14 @@ function RiskRegisterContent() {
               <Th right>Residual</Th>
               <Th>Rating</Th>
               <Th right>Exposure (AED mn)</Th>
+              <Th>Actions</Th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 && (
               <tr>
                 <td
-                  colSpan={8}
+                  colSpan={9}
                   style={{
                     padding: 32,
                     textAlign: 'center',
@@ -221,41 +279,105 @@ function RiskRegisterContent() {
                 </td>
               </tr>
             )}
-            {filtered.map((r) => (
-              <tr
-                key={r.id}
-                style={{
-                  borderTop: '1px solid var(--border-color)',
-                  cursor: 'pointer',
-                  transition: 'background 80ms ease',
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = 'var(--bg-hover)')
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = 'transparent')
-                }
-                onClick={() => setSelected(r)}
-                title="Open detail drawer"
-              >
-                <Td mono>{r.id}</Td>
-                <Td>{r.name}</Td>
-                <Td>{r.category}</Td>
-                <Td muted>{r.owner}</Td>
-                <Td right mono>
-                  {r.newInherent.toFixed(1)}
-                </Td>
-                <Td right mono>
-                  {r.newResidual.toFixed(1)}
-                </Td>
-                <Td>
-                  <RatingPill rating={r.ratingTo} />
-                </Td>
-                <Td right mono>
-                  {r.exposureAedMn.toFixed(0)}
-                </Td>
-              </tr>
-            ))}
+            {filtered.map((row) =>
+              row.kind === 'engine' ? (
+                <tr
+                  key={row.risk.id}
+                  style={{
+                    borderTop: '1px solid var(--border-color)',
+                    cursor: 'pointer',
+                    transition: 'background 80ms ease',
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background = 'var(--bg-hover)')
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background = 'transparent')
+                  }
+                  onClick={() => setSelected(row.risk)}
+                  title="Open detail drawer"
+                >
+                  <Td mono>{row.risk.id}</Td>
+                  <Td>{row.risk.name}</Td>
+                  <Td>{row.risk.category}</Td>
+                  <Td muted>{row.risk.owner}</Td>
+                  <Td right mono>{row.risk.newInherent.toFixed(1)}</Td>
+                  <Td right mono>{row.risk.newResidual.toFixed(1)}</Td>
+                  <Td><RatingPill rating={row.risk.ratingTo} /></Td>
+                  <Td right mono>{row.risk.exposureAedMn.toFixed(0)}</Td>
+                  <Td>
+                    <span
+                      style={{
+                        fontSize: 9,
+                        color: 'var(--text-tertiary)',
+                        fontStyle: 'italic',
+                      }}
+                    >
+                      engine
+                    </span>
+                  </Td>
+                </tr>
+              ) : (
+                <tr
+                  key={row.draft.id}
+                  style={{
+                    borderTop: '1px solid var(--border-color)',
+                    background: 'rgba(245,197,24,0.04)',
+                  }}
+                >
+                  <Td mono>{row.draft.id}</Td>
+                  <Td>
+                    {row.draft.name}{' '}
+                    <DraftBadge />
+                  </Td>
+                  <Td>{row.draft.category}</Td>
+                  <Td muted>{row.draft.owner}</Td>
+                  <Td right mono>
+                    {(row.draft.baseLikelihood * row.draft.baseImpact).toFixed(1)}
+                  </Td>
+                  <Td right mono muted>—</Td>
+                  <Td>
+                    <span
+                      style={{
+                        fontSize: 9,
+                        color: 'var(--text-tertiary)',
+                        fontStyle: 'italic',
+                      }}
+                    >
+                      pending calibration
+                    </span>
+                  </Td>
+                  <Td right mono muted>—</Td>
+                  <Td>
+                    <div style={{ display: 'inline-flex', gap: 6 }}>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setEditing(row.draft)
+                          setFormOpen(true)
+                        }}
+                        title="Edit draft"
+                        style={iconButtonStyle}
+                      >
+                        <Pencil size={12} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (confirm(`Delete ${row.draft.id} — ${row.draft.name}?`)) {
+                            removeDraft(row.draft.id)
+                          }
+                        }}
+                        title="Delete draft"
+                        style={{ ...iconButtonStyle, color: 'var(--risk-critical)' }}
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </Td>
+                </tr>
+              ),
+            )}
           </tbody>
         </table>
       </div>
@@ -278,8 +400,53 @@ function RiskRegisterContent() {
 
       {/* Slide-in detail drawer */}
       <RiskDetailDrawer risk={selected} onClose={() => setSelected(null)} />
+
+      {/* Add / Edit risk modal */}
+      <RiskFormModal
+        open={formOpen}
+        mode={editing ? 'edit' : 'create'}
+        initial={editing}
+        onClose={() => {
+          setFormOpen(false)
+          setEditing(null)
+        }}
+      />
     </div>
   )
+}
+
+function DraftBadge() {
+  return (
+    <span
+      style={{
+        marginLeft: 8,
+        display: 'inline-block',
+        background: 'rgba(245,197,24,0.18)',
+        color: '#F5C518',
+        border: '1px solid rgba(245,197,24,0.35)',
+        padding: '1px 6px',
+        borderRadius: 3,
+        fontSize: 9,
+        fontWeight: 700,
+        letterSpacing: 0.5,
+        textTransform: 'uppercase',
+      }}
+    >
+      Draft
+    </span>
+  )
+}
+
+const iconButtonStyle: React.CSSProperties = {
+  background: 'transparent',
+  border: '1px solid var(--border-color)',
+  color: 'var(--text-secondary)',
+  borderRadius: 4,
+  padding: 4,
+  cursor: 'pointer',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
 }
 
 // ── Tiny presentational helpers ─────────────────────────────────────────
@@ -335,11 +502,13 @@ function Td({
   )
 }
 
-// ── Page wrapper that provides simulation context ───────────────────────
+// ── Page wrapper that provides simulation + draft contexts ──────────────
 export default function RiskRegisterPage() {
   return (
     <SimulationProvider>
-      <RiskRegisterContent />
+      <RiskDraftProvider>
+        <RiskRegisterContent />
+      </RiskDraftProvider>
     </SimulationProvider>
   )
 }
