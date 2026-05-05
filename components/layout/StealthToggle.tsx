@@ -17,7 +17,14 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 const STORAGE_KEY = 'client-stealth-mode'
 
 // Ordered longest-first so "Aldar Properties" matches before "Aldar".
+// The URL rule MUST run before the generic `aldar` rule, otherwise
+// "https://aldar.com/..." would become "https://abc.com/..." (a real,
+// unrelated company), leaking what we tried to anonymise. Replace any
+// URL containing aldar.com (or sub-domain) with a neutral marker.
 const REPLACEMENTS: Array<[RegExp, string]> = [
+  // 1. URL redaction (covers href + cdn URLs in src strings)
+  [/https?:\/\/[^\s"'<>)]*aldar[^\s"'<>)]*/gi, '#source-redacted-anonymisation-mode'],
+  // 2. Brand strings — longest-first
   [/Aldar Properties PJSC/g, 'ABC Holdings PJSC'],
   [/Aldar Properties/g, 'ABC Holdings'],
   [/ALDAR PROPERTIES/g, 'ABC HOLDINGS'],
@@ -26,6 +33,9 @@ const REPLACEMENTS: Array<[RegExp, string]> = [
   [/aldar/g, 'abc'],
 ]
 
+// Note: REVERSE cannot losslessly restore redacted URLs (the original
+// path is gone). Toggling stealth OFF triggers a page reload to restore
+// the original DOM rather than relying on regex un-mangling.
 const REVERSE: Array<[RegExp, string]> = [
   [/ABC Holdings PJSC/g, 'Aldar Properties PJSC'],
   [/ABC Holdings/g, 'Aldar Properties'],
@@ -34,7 +44,10 @@ const REVERSE: Array<[RegExp, string]> = [
   [/\babc\b/g, 'aldar'],
 ]
 
-const ATTRS_TO_SCAN = ['title', 'placeholder', 'aria-label', 'alt', 'value']
+// Attributes the walker scans. `href` is included so source links in
+// the provenance click-through don't navigate to the real client URL
+// while in anonymisation mode.
+const ATTRS_TO_SCAN = ['title', 'placeholder', 'aria-label', 'alt', 'value', 'href']
 
 function applyReplacements(text: string, rules: Array<[RegExp, string]>): string {
   let out = text
@@ -152,6 +165,14 @@ export function StealthToggle() {
       try {
         localStorage.setItem(STORAGE_KEY, String(next))
       } catch {}
+      // Toggling stealth OFF cannot losslessly restore redacted source
+      // URLs (we destroy the original path on the way in). Reload the
+      // page so href attributes come back from the React render tree.
+      // Toggling ON: keep the in-place DOM mutation flow (faster, no flash).
+      if (prev === true) {
+        // Use a microtask so localStorage writes flush before navigation.
+        Promise.resolve().then(() => window.location.reload())
+      }
       return next
     })
   }, [])
