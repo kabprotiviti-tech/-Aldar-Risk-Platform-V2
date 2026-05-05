@@ -31,6 +31,26 @@ export const SRC_ALDAR_FY24_AR: Source = {
   note: 'Public investor document. Use only figures explicitly disclosed; do not interpolate.',
 }
 
+export const SRC_ALDAR_FY25_RESULTS: Source = {
+  id: 'src.aldar.fy25.results',
+  kind: 'annual_report',
+  title: 'Aldar Properties PJSC — FY2025 Q4 Financial Results (announced Feb 2026)',
+  url: 'https://www.aldar.com/en/news-and-media/aldar-q4-fy-2025-financial-results',
+  fetchedAt: '2026-05-05',
+  fetchedBy: 'system',
+  note: 'Public press release. Group revenue AED 33.8B, EBITDA AED 11.2B, net profit AED 8.8B.',
+}
+
+export const SRC_ALDAR_Q1_2026: Source = {
+  id: 'src.aldar.q1.2026',
+  kind: 'adx_disclosure',
+  title: 'Aldar Properties PJSC — Q1 FY2026 Financial Results (announced Apr 28, 2026)',
+  url: 'https://www.aldar.com/en/news-and-media/aldar-q1-fy-2026-financial-results',
+  fetchedAt: '2026-05-05',
+  fetchedBy: 'system',
+  note: 'Public Q1 release. Revenue AED 8.7B, EBITDA AED 3.0B, net profit AED 2.3B, backlog AED 72.1B.',
+}
+
 export const SRC_ALDAR_ADX_PROFILE: Source = {
   id: 'src.aldar.adx.profile',
   kind: 'adx_disclosure',
@@ -88,6 +108,8 @@ export const SRC_COSO_ERM: Source = {
 
 export const ALL_SOURCES: Source[] = [
   SRC_ALDAR_FY24_AR,
+  SRC_ALDAR_FY25_RESULTS,
+  SRC_ALDAR_Q1_2026,
   SRC_ALDAR_ADX_PROFILE,
   SRC_CBUAE_RATES,
   SRC_ADREC_MARKET,
