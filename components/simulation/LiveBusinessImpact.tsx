@@ -23,6 +23,13 @@ import React, { useState } from 'react'
 import { useSimulation } from '@/lib/context/SimulationContext'
 import { costOfDelay, ceoSummary } from '@/lib/engine/decisionEngine'
 import type { DriverId } from '@/lib/engine/types'
+import { NumericValue } from '@/components/provenance/NumericValue'
+import {
+  ALDAR_FY25_GROUP_REVENUE,
+  ALDAR_FY25_GROUP_EBITDA,
+  ALDAR_FY25_NET_PROFIT_AFTER_TAX,
+  ALDAR_Q1_26_BACKLOG,
+} from '@/lib/data/aldar-financials'
 
 // ─── Driver source classification (metadata only — no new math) ──────────────
 // Tags each driver as Internal (sourced from ERP / CRM / Projects / Leasing /
@@ -277,6 +284,47 @@ export function LiveBusinessImpact() {
         >
           {headline}
         </div>
+      </div>
+
+      {/* ── Aldar FY25 / Q1 2026 Anchor Strip — every figure clicks through to source ── */}
+      <div
+        style={{
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--border-primary)',
+          borderRadius: 8,
+          padding: '8px 12px',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 18,
+          alignItems: 'center',
+          fontSize: 12,
+        }}
+      >
+        <span
+          style={{
+            fontSize: 9,
+            fontWeight: 700,
+            color: 'var(--text-tertiary)',
+            textTransform: 'uppercase',
+            letterSpacing: 0.8,
+          }}
+        >
+          Anchored against Aldar
+        </span>
+        <AnchorItem label="FY25 Revenue" data={ALDAR_FY25_GROUP_REVENUE} />
+        <AnchorItem label="FY25 EBITDA" data={ALDAR_FY25_GROUP_EBITDA} />
+        <AnchorItem label="FY25 Net Profit" data={ALDAR_FY25_NET_PROFIT_AFTER_TAX} />
+        <AnchorItem label="Q1'26 Backlog" data={ALDAR_Q1_26_BACKLOG} />
+        <span
+          style={{
+            marginLeft: 'auto',
+            fontSize: 10,
+            color: 'var(--text-tertiary)',
+            fontStyle: 'italic',
+          }}
+        >
+          Click ⓘ on any figure for source.
+        </span>
       </div>
 
       {/* 4 blocks in a responsive grid */}
@@ -729,6 +777,41 @@ function Row({
     >
       <span style={{ color: 'var(--text-secondary)' }}>{label}</span>
       <span style={{ color, fontWeight: strong ? 800 : 600, whiteSpace: 'nowrap' }}>{value}</span>
+    </div>
+  )
+}
+
+function AnchorItem({
+  label,
+  data,
+}: {
+  label: string
+  data: import('@/lib/provenance/types').DataPoint
+}) {
+  // Display in AED bn for readability when value >= 1000 AED mn
+  const displayInBn = data.unit === 'AED mn' && data.value >= 1000
+  return (
+    <div style={{ display: 'inline-flex', flexDirection: 'column', gap: 1 }}>
+      <span
+        style={{
+          fontSize: 9,
+          color: 'var(--text-tertiary)',
+          textTransform: 'uppercase',
+          letterSpacing: 0.6,
+          fontWeight: 600,
+        }}
+      >
+        {label}
+      </span>
+      <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+        <NumericValue
+          data={data}
+          format={(v) =>
+            displayInBn ? `${(v / 1000).toFixed(1)}` : v.toLocaleString()
+          }
+          unitOverride={displayInBn ? 'AED bn' : data.unit}
+        />
+      </span>
     </div>
   )
 }
