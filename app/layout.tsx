@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/lib/context/ThemeContext'
 import { DerivedRisksProvider } from '@/lib/context/DerivedRisksContext'
 import { UploadedDocumentProvider } from '@/lib/context/UploadedDocumentContext'
 import { AppChrome } from '@/components/layout/AppChrome'
+import { EnvironmentBanner } from '@/components/provenance/EnvironmentBanner'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -42,6 +43,7 @@ export default function RootLayout({
         <ThemeProvider>
           <UploadedDocumentProvider>
             <DerivedRisksProvider>
+              <EnvironmentBanner env="demo" />
               <AppChrome>{children}</AppChrome>
             </DerivedRisksProvider>
           </UploadedDocumentProvider>
