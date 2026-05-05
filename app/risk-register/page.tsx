@@ -14,6 +14,7 @@
 import React, { useMemo, useState } from 'react'
 import { SimulationProvider, useSimulation } from '@/lib/context/SimulationContext'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
+import { RiskDetailDrawer } from '@/components/risk-register/RiskDetailDrawer'
 import type { RiskState, Rating } from '@/lib/engine/types'
 
 // ── Rating colour helper ────────────────────────────────────────────────
@@ -59,6 +60,7 @@ function RiskRegisterContent() {
   const { risks } = useSimulation()
   const [query, setQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
+  const [selected, setSelected] = useState<RiskState | null>(null)
 
   const categories = useMemo(() => {
     const set = new Set<string>()
@@ -233,11 +235,8 @@ function RiskRegisterContent() {
                 onMouseLeave={(e) =>
                   (e.currentTarget.style.background = 'transparent')
                 }
-                onClick={() => {
-                  // C2 will replace this with a real drawer
-                  console.log('Risk row clicked', r.id)
-                }}
-                title="Detail drawer ships in Patch C2"
+                onClick={() => setSelected(r)}
+                title="Open detail drawer"
               >
                 <Td mono>{r.id}</Td>
                 <Td>{r.name}</Td>
@@ -272,9 +271,13 @@ function RiskRegisterContent() {
       >
         Inherent / Residual scores derive from the simulation engine&rsquo;s
         baseline drivers (see CLAUDE.md). Exposure (AED mn) uses each
-        risk&rsquo;s financial-anchor reference — click ⓘ on any anchor in the
-        Executive Impact Panel for the source-vs-Aldar comparison.
+        risk&rsquo;s financial-anchor reference — click any row to open the
+        detail drawer (Cause/Event/Impact, controls, contributing drivers,
+        provenance).
       </div>
+
+      {/* Slide-in detail drawer */}
+      <RiskDetailDrawer risk={selected} onClose={() => setSelected(null)} />
     </div>
   )
 }
