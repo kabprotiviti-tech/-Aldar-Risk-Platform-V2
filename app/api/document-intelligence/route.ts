@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     // Check API key before calling Claude
     if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json(
-        { error: 'ANTHROPIC_API_KEY is not configured. Add it to Vercel Environment Variables.' },
+        { error: 'AI service is not configured. Please contact your administrator.' },
         { status: 500 }
       )
     }
@@ -139,7 +139,7 @@ Respond with ONLY a valid JSON object. Do NOT wrap it in markdown fences or back
     // Rate limit or quota error
     if (message.toLowerCase().includes('rate') || message.toLowerCase().includes('429') || message.toLowerCase().includes('quota')) {
       return NextResponse.json(
-        { error: 'Claude API rate limit reached. Please wait a moment and try again.' },
+        { error: 'AI service rate limit reached. Please wait a moment and try again.' },
         { status: 429 }
       )
     }

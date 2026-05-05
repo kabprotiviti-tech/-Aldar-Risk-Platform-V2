@@ -401,7 +401,7 @@ function NewsModal({
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Cpu size={13} style={{ color: 'var(--accent-primary)' }} />
                 <span style={{ color: 'var(--accent-primary)', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.06em' }}>
-                  AI INSIGHT — CLAUDE SONNET
+                  AI INSIGHT
                 </span>
               </div>
             </div>

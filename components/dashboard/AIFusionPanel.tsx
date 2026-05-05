@@ -490,7 +490,7 @@ export function AIFusionPanel() {
               borderRadius: '4px',
             }}
           >
-            CLAUDE SONNET
+            AI
           </span>
         </div>
         <button

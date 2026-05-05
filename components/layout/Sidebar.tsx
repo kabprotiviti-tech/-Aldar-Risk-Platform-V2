@@ -204,7 +204,7 @@ export function Sidebar() {
                 AI ENGINE ACTIVE
               </div>
               <div style={{ color: 'var(--text-muted)', fontSize: '0.6rem' }}>
-                Claude Sonnet · Live
+                AI · Live
               </div>
             </div>
             <Cpu size={14} style={{ color: '#22C55E', marginLeft: 'auto', flexShrink: 0 }} />

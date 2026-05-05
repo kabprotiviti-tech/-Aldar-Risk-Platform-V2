@@ -195,7 +195,7 @@ Respond with a JSON array of exactly ${batch.length} objects in the same order:
     return NextResponse.json({
       results: fallbacks,
       source: 'fallback',
-      error: keyMissing ? 'ANTHROPIC_API_KEY not configured on server' : errMsg,
+      error: keyMissing ? 'AI service not configured on server' : errMsg,
     })
   }
 }

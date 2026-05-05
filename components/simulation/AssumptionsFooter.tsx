@@ -89,7 +89,7 @@ export function AssumptionsFooter() {
           </Block>
 
           <Block title="AI Layer Transparency">
-            <Row k="Model" v="Claude (anthropic-sdk)" />
+            <Row k="Model" v="AI Assistant" />
             <Row k="Register Critic" v="On-demand; deterministic scores render instantly" />
             <Row k="Fallback" v="Hard-coded second-line findings when API unreachable" />
             <Row k="Signal classifier" v="Deterministic keyword rules (registerCritic.ts)" />

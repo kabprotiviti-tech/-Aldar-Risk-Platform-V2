@@ -298,7 +298,7 @@ export function AIRiskAdvisor() {
                     className="animate-pulse"
                   />
                   <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem' }}>
-                    Claude Sonnet · Live context
+                    AI · Live context
                   </span>
                 </div>
               </div>
@@ -642,7 +642,7 @@ export function AIRiskAdvisor() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', borderTop: '1px solid var(--border-color)', paddingTop: '8px' }}>
                         <Sparkles size={9} style={{ color: 'var(--text-muted)' }} />
                         <span style={{ color: 'var(--text-muted)', fontSize: '0.62rem' }}>
-                          Claude Sonnet · {result.answeredAt ? new Date(result.answeredAt).toLocaleTimeString('en-AE', { timeZone: 'Asia/Dubai' }) : ''} GST
+                          AI · {result.answeredAt ? new Date(result.answeredAt).toLocaleTimeString('en-AE', { timeZone: 'Asia/Dubai' }) : ''} GST
                         </span>
                       </div>
                     </div>

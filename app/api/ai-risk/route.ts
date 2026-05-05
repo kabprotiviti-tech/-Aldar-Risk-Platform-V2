@@ -59,7 +59,7 @@ Respond with ONLY a valid JSON object (no markdown fences):
     console.error('AI Risk API error:', error)
     if (error instanceof Error && error.message.includes('API key')) {
       return NextResponse.json(
-        { error: 'Anthropic API key not configured. Please add ANTHROPIC_API_KEY to .env.local' },
+        { error: 'AI service not configured. Please contact your administrator.' },
         { status: 500 }
       )
     }

@@ -14,10 +14,35 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react'
-import { X } from 'lucide-react'
+import { X, AlertTriangle } from 'lucide-react'
 import { useRiskDrafts, type RiskDraft } from '@/lib/context/RiskDraftContext'
+import { useSimulation } from '@/lib/context/SimulationContext'
 import { FINANCIAL_ANCHORS } from '@/lib/engine/seedData'
 import type { RiskDef } from '@/lib/engine/types'
+
+// ── Duplicate-detection helpers ─────────────────────────────────────────
+function normalize(s: string): string {
+  return s.trim().toLowerCase().replace(/\s+/g, ' ')
+}
+
+/** Token-based Jaccard similarity, 0..1. Cheap, no external deps. */
+function similarity(a: string, b: string): number {
+  const ta = new Set(normalize(a).split(/\W+/).filter((t) => t.length >= 3))
+  const tb = new Set(normalize(b).split(/\W+/).filter((t) => t.length >= 3))
+  if (ta.size === 0 || tb.size === 0) return 0
+  let inter = 0
+  ta.forEach((t) => { if (tb.has(t)) inter += 1 })
+  const union = ta.size + tb.size - inter
+  return union === 0 ? 0 : inter / union
+}
+
+/** Result of a dup check against the existing register. */
+interface DupCheck {
+  /** Exact normalized-name match — must block save. */
+  exactMatch: { id: string; name: string; source: 'engine' | 'draft' } | null
+  /** Similar matches (similarity >= 0.55), shown as warnings. */
+  similar: Array<{ id: string; name: string; source: 'engine' | 'draft'; score: number }>
+}
 
 type Mode = 'create' | 'edit'
 
@@ -105,9 +130,49 @@ function fromDraft(draft: RiskDraft): FormState {
 }
 
 export function RiskFormModal({ open, mode, initial, onClose, onSaved }: Props) {
-  const { addDraft, updateDraft, nextDraftId } = useRiskDrafts()
+  const { addDraft, updateDraft, nextDraftId, drafts } = useRiskDrafts()
+  const { risks: engineRisks } = useSimulation()
   const [form, setForm] = useState<FormState>(emptyForm('DRAFT-001'))
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [overrideSimilar, setOverrideSimilar] = useState(false)
+
+  // Duplicate detection — runs live as user types the name.
+  const dupCheck = useMemo<DupCheck>(() => {
+    const name = form.name.trim()
+    if (name.length < 3) return { exactMatch: null, similar: [] }
+    const norm = normalize(name)
+    const editingId = mode === 'edit' && initial ? initial.id : null
+
+    type Candidate = { id: string; name: string; source: 'engine' | 'draft' }
+    const candidates: Candidate[] = [
+      ...engineRisks
+        .filter((r) => r.id !== editingId)
+        .map<Candidate>((r) => ({ id: r.id, name: r.name, source: 'engine' as const })),
+      ...drafts
+        .filter((d) => d.id !== editingId)
+        .map<Candidate>((d) => ({ id: d.id, name: d.name, source: 'draft' as const })),
+    ]
+
+    let exact: DupCheck['exactMatch'] = null
+    const similar: DupCheck['similar'] = []
+    for (const c of candidates) {
+      if (normalize(c.name) === norm) {
+        exact = { id: c.id, name: c.name, source: c.source }
+        continue
+      }
+      const score = similarity(name, c.name)
+      if (score >= 0.55) {
+        similar.push({ ...c, score })
+      }
+    }
+    similar.sort((a, b) => b.score - a.score)
+    return { exactMatch: exact, similar: similar.slice(0, 3) }
+  }, [form.name, engineRisks, drafts, mode, initial])
+
+  // Reset override flag whenever the name changes
+  useEffect(() => {
+    setOverrideSimilar(false)
+  }, [form.name])
 
   // Reset form when modal opens
   useEffect(() => {
@@ -136,6 +201,14 @@ export function RiskFormModal({ open, mode, initial, onClose, onSaved }: Props) 
     const e: Record<string, string> = {}
     if (form.name.trim().length < 5) e.name = 'Name must be at least 5 characters'
     if (form.name.trim().length > 120) e.name = 'Name too long (max 120)'
+    // Hard block on exact duplicate
+    if (dupCheck.exactMatch) {
+      e.name = `Duplicate: a risk with this name already exists (${dupCheck.exactMatch.id} ${dupCheck.exactMatch.source === 'engine' ? '· engine' : '· draft'}). Edit that risk instead, or rename this one.`
+    }
+    // Soft block on similar — needs override checkbox
+    if (!dupCheck.exactMatch && dupCheck.similar.length > 0 && !overrideSimilar) {
+      e.name = e.name || 'Possible duplicate detected — review the similar risks below and confirm to proceed.'
+    }
     if (form.owner.trim().length < 2) e.owner = 'Owner is required'
     if (form.cause.trim().length < 10) e.cause = 'Cause must be at least 10 characters'
     if (form.event.trim().length < 10) e.event = 'Event must be at least 10 characters'
@@ -266,9 +339,102 @@ export function RiskFormModal({ open, mode, initial, onClose, onSaved }: Props) 
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="e.g. Off-plan Buyer Default Spike"
-              style={inputStyle}
+              style={{
+                ...inputStyle,
+                borderColor: dupCheck.exactMatch
+                  ? 'var(--risk-critical)'
+                  : dupCheck.similar.length > 0
+                  ? 'var(--risk-medium)'
+                  : 'var(--border-color)',
+              }}
             />
           </Field>
+
+          {/* Duplicate / similar-risk detection panel */}
+          {(dupCheck.exactMatch || dupCheck.similar.length > 0) && (
+            <div
+              style={{
+                padding: 10,
+                background: dupCheck.exactMatch
+                  ? 'rgba(255,59,59,0.10)'
+                  : 'rgba(245,197,24,0.10)',
+                border: `1px solid ${
+                  dupCheck.exactMatch
+                    ? 'rgba(255,59,59,0.45)'
+                    : 'rgba(245,197,24,0.40)'
+                }`,
+                borderRadius: 6,
+                fontSize: 11,
+                display: 'flex',
+                gap: 8,
+              }}
+            >
+              <AlertTriangle
+                size={14}
+                style={{
+                  flexShrink: 0,
+                  color: dupCheck.exactMatch
+                    ? 'var(--risk-critical)'
+                    : 'var(--risk-medium)',
+                  marginTop: 2,
+                }}
+              />
+              <div style={{ flex: 1, lineHeight: 1.5 }}>
+                {dupCheck.exactMatch && (
+                  <>
+                    <strong style={{ color: 'var(--risk-critical)' }}>
+                      Duplicate risk detected.
+                    </strong>{' '}
+                    A risk with this exact name already exists:{' '}
+                    <strong>{dupCheck.exactMatch.id}</strong>{' '}
+                    <span style={{ color: 'var(--text-tertiary)' }}>
+                      ({dupCheck.exactMatch.source === 'engine' ? 'engine register' : 'existing draft'})
+                    </span>{' '}
+                    — <em>{dupCheck.exactMatch.name}</em>. Edit that risk instead, or
+                    rename this one.
+                  </>
+                )}
+                {!dupCheck.exactMatch && dupCheck.similar.length > 0 && (
+                  <>
+                    <strong style={{ color: 'var(--risk-medium)' }}>
+                      Possible duplicate.
+                    </strong>{' '}
+                    {dupCheck.similar.length} similar risk
+                    {dupCheck.similar.length > 1 ? 's' : ''} already in the register:
+                    <ul style={{ margin: '6px 0 0', paddingLeft: 18 }}>
+                      {dupCheck.similar.map((s) => (
+                        <li key={s.id} style={{ marginBottom: 2 }}>
+                          <strong>{s.id}</strong>{' '}
+                          <span style={{ color: 'var(--text-tertiary)' }}>
+                            ({s.source === 'engine' ? 'engine' : 'draft'},{' '}
+                            {(s.score * 100).toFixed(0)}% match)
+                          </span>{' '}
+                          — {s.name}
+                        </li>
+                      ))}
+                    </ul>
+                    <label
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        marginTop: 8,
+                        cursor: 'pointer',
+                        color: 'var(--text-primary)',
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={overrideSimilar}
+                        onChange={(e) => setOverrideSimilar(e.target.checked)}
+                      />
+                      Confirm this is a distinct risk and proceed.
+                    </label>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <Field label="Category" required>

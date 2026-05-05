@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!process.env.ANTHROPIC_API_KEY) {
-      return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 })
+      return NextResponse.json({ error: 'AI service not configured' }, { status: 500 })
     }
 
     const stateBlock = portfolioState

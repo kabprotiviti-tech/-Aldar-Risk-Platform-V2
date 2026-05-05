@@ -147,6 +147,6 @@ export const PLACEHOLDER_SOURCE: Source = {
 export const AI_SOURCE: Source = {
   id: 'src.ai',
   kind: 'ai_generated',
-  title: 'AI hypothesis (Claude)',
+  title: 'AI hypothesis',
   note: 'Generated suggestion. Requires human review before being treated as fact.',
 }

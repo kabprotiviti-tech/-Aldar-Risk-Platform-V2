@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     const { risks, portfolioMetrics, timeframe, portfolioState, fusionInsight, scenario } = body
 
     if (!process.env.ANTHROPIC_API_KEY) {
-      return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 })
+      return NextResponse.json({ error: 'AI service not configured' }, { status: 500 })
     }
 
     const risksJson = risks ? JSON.stringify(risks.slice(0, 8)) : 'No risk register data provided'
