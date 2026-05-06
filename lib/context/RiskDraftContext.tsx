@@ -22,12 +22,18 @@ import type { RiskDef } from '@/lib/engine/types'
 
 const STORAGE_KEY = 'aldar-risk-drafts-v1'
 
+/** Risk-level workflow status. Open by default until mitigation underway. */
+export type RiskStatus = 'open' | 'in_progress' | 'closed'
+
 /**
  * A draft contains the full RiskDef shape PLUS metadata about its
- * provenance and edit history. Only the static fields are user-set;
- * driverImpacts / controls default to empty until the pilot wires them.
+ * provenance, workflow status, and edit history. Only the static fields
+ * are user-set; driverImpacts / controls default to empty until the
+ * pilot wires them.
  */
 export interface RiskDraft extends RiskDef {
+  /** Workflow status — defaults to 'open'. */
+  status: RiskStatus
   /** ISO timestamp of creation. */
   createdAt: string
   /** ISO timestamp of last edit. */
@@ -57,7 +63,15 @@ export function RiskDraftProvider({ children }: { children: React.ReactNode }) {
       const raw = localStorage.getItem(STORAGE_KEY)
       if (raw) {
         const parsed = JSON.parse(raw) as RiskDraft[]
-        if (Array.isArray(parsed)) setDrafts(parsed)
+        if (Array.isArray(parsed)) {
+          // Forward-compatible migration: older drafts didn't have status.
+          // Default missing status to 'open' so the UI never renders empty.
+          const migrated = parsed.map((d) => ({
+            ...d,
+            status: (d.status as RiskStatus) || 'open',
+          }))
+          setDrafts(migrated)
+        }
       }
     } catch {
       // ignore — corrupt storage just resets to empty
@@ -90,6 +104,8 @@ export function RiskDraftProvider({ children }: { children: React.ReactNode }) {
     (draft, author = 'Risk Champion (demo)') => {
       const now = new Date().toISOString()
       const full: RiskDraft = {
+        // Default status to 'open' if caller didn't provide one (older payloads).
+        status: 'open',
         ...draft,
         createdAt: now,
         updatedAt: now,

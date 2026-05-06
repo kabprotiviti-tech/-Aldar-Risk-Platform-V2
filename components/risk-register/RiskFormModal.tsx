@@ -15,7 +15,11 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 import { X, AlertTriangle } from 'lucide-react'
-import { useRiskDrafts, type RiskDraft } from '@/lib/context/RiskDraftContext'
+import {
+  useRiskDrafts,
+  type RiskDraft,
+  type RiskStatus,
+} from '@/lib/context/RiskDraftContext'
 import { useSimulation } from '@/lib/context/SimulationContext'
 import { FINANCIAL_ANCHORS } from '@/lib/engine/seedData'
 import type { RiskDef } from '@/lib/engine/types'
@@ -85,6 +89,7 @@ interface FormState {
   anchorKey: keyof typeof FINANCIAL_ANCHORS
   sensitivityCoefficient: number
   financialWeight: number
+  status: RiskStatus
 }
 
 function emptyForm(nextId: string): FormState {
@@ -101,6 +106,7 @@ function emptyForm(nextId: string): FormState {
     anchorKey: 'portfolioRevenueAedMn',
     sensitivityCoefficient: 0.05,
     financialWeight: 0.05,
+    status: 'open',
   }
 }
 
@@ -126,6 +132,7 @@ function fromDraft(draft: RiskDraft): FormState {
     anchorKey: key,
     sensitivityCoefficient: draft.sensitivityCoefficient,
     financialWeight: draft.financialWeight,
+    status: draft.status || 'open',
   }
 }
 
@@ -242,6 +249,7 @@ export function RiskFormModal({ open, mode, initial, onClose, onSaved }: Props) 
       sensitivityCoefficient: form.sensitivityCoefficient,
       financialWeight: form.financialWeight,
       source: 'manual_entry' as RiskDef['source'],
+      status: form.status,
     }
     let saved: RiskDraft | null = null
     if (mode === 'edit' && initial) {
@@ -529,6 +537,18 @@ export function RiskFormModal({ open, mode, initial, onClose, onSaved }: Props) 
               </div>
             </Field>
           </div>
+
+          <Field label="Workflow Status">
+            <select
+              value={form.status}
+              onChange={(e) => setForm({ ...form, status: e.target.value as RiskStatus })}
+              style={inputStyle}
+            >
+              <option value="open">Open</option>
+              <option value="in_progress">In Progress</option>
+              <option value="closed">Closed</option>
+            </select>
+          </Field>
 
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 12 }}>
             <Field label="Financial Anchor" required>

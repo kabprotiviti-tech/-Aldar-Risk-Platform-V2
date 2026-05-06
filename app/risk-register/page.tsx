@@ -14,7 +14,7 @@
 import React, { useMemo, useState } from 'react'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { SimulationProvider, useSimulation } from '@/lib/context/SimulationContext'
-import { RiskDraftProvider, useRiskDrafts, type RiskDraft } from '@/lib/context/RiskDraftContext'
+import { RiskDraftProvider, useRiskDrafts, type RiskDraft, type RiskStatus } from '@/lib/context/RiskDraftContext'
 import { MitigationActionsProvider, useMitigationActions } from '@/lib/context/MitigationActionsContext'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { RiskDetailDrawer } from '@/components/risk-register/RiskDetailDrawer'
@@ -70,11 +70,21 @@ function RatingPill({ rating }: { rating: Rating }) {
 function RiskRegisterContent() {
   const { risks } = useSimulation()
   const { drafts, removeDraft } = useRiskDrafts()
+  const { actionsForRisk, isOverdue } = useMitigationActions()
   const [query, setQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
   const [selected, setSelected] = useState<RiskState | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<RiskDraft | null>(null)
+
+  // Per-risk action summary helper.
+  function summarizeActions(riskId: string) {
+    const list = actionsForRisk(riskId)
+    const total = list.length
+    const overdue = list.filter(isOverdue).length
+    return { total, overdue }
+  }
 
   // Combined rows: engine first, then drafts
   const allRows: RegisterRow[] = useMemo(() => {
@@ -98,6 +108,32 @@ function RiskRegisterContent() {
     return allRows.filter((row) => {
       const cat = row.kind === 'engine' ? row.risk.category : row.draft.category
       if (categoryFilter !== 'all' && cat !== categoryFilter) return false
+
+      // Status filter
+      if (statusFilter !== 'all') {
+        const id = row.kind === 'engine' ? row.risk.id : row.draft.id
+        const summary = summarizeActions(id)
+        if (statusFilter === 'overdue') {
+          if (summary.overdue === 0) return false
+        } else {
+          // For drafts use explicit status. For engine risks derive from actions:
+          //   no actions or all closed → 'closed'
+          //   any open action → 'open'
+          //   any in_progress (and none open) → 'in_progress'
+          let derived: string
+          if (row.kind === 'draft') {
+            derived = row.draft.status || 'open'
+          } else {
+            const acts = actionsForRisk(row.risk.id)
+            if (acts.length === 0) derived = 'open'
+            else if (acts.every((a) => a.status === 'closed')) derived = 'closed'
+            else if (acts.some((a) => a.status === 'open')) derived = 'open'
+            else derived = 'in_progress'
+          }
+          if (derived !== statusFilter) return false
+        }
+      }
+
       if (!q) return true
       const id = row.kind === 'engine' ? row.risk.id : row.draft.id
       const name = row.kind === 'engine' ? row.risk.name : row.draft.name
@@ -109,7 +145,7 @@ function RiskRegisterContent() {
         cat.toLowerCase().includes(q)
       )
     })
-  }, [allRows, query, categoryFilter])
+  }, [allRows, query, categoryFilter, statusFilter, actionsForRisk, summarizeActions])
 
   return (
     <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -224,6 +260,25 @@ function RiskRegisterContent() {
             </option>
           ))}
         </select>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          style={{
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 6,
+            color: 'var(--text-primary)',
+            padding: '8px 12px',
+            fontSize: 13,
+            minWidth: 160,
+          }}
+        >
+          <option value="all">All statuses</option>
+          <option value="open">Open</option>
+          <option value="in_progress">In Progress</option>
+          <option value="closed">Closed</option>
+          <option value="overdue">Has overdue actions</option>
+        </select>
         <span
           style={{
             fontSize: 11,
@@ -261,14 +316,15 @@ function RiskRegisterContent() {
               <Th right>Residual</Th>
               <Th>Rating</Th>
               <Th right>Exposure (AED mn)</Th>
-              <Th>Actions</Th>
+              <Th>Mitigations</Th>
+              <Th>Manage</Th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 && (
               <tr>
                 <td
-                  colSpan={9}
+                  colSpan={10}
                   style={{
                     padding: 32,
                     textAlign: 'center',
@@ -307,6 +363,9 @@ function RiskRegisterContent() {
                   <Td><RatingPill rating={row.risk.ratingTo} /></Td>
                   <Td right mono>{row.risk.exposureAedMn.toFixed(0)}</Td>
                   <Td>
+                    <ActionSummary {...summarizeActions(row.risk.id)} />
+                  </Td>
+                  <Td>
                     <span
                       style={{
                         fontSize: 9,
@@ -338,17 +397,12 @@ function RiskRegisterContent() {
                   </Td>
                   <Td right mono muted>—</Td>
                   <Td>
-                    <span
-                      style={{
-                        fontSize: 9,
-                        color: 'var(--text-tertiary)',
-                        fontStyle: 'italic',
-                      }}
-                    >
-                      pending calibration
-                    </span>
+                    <DraftStatusPill status={row.draft.status || 'open'} />
                   </Td>
                   <Td right mono muted>—</Td>
+                  <Td>
+                    <ActionSummary {...summarizeActions(row.draft.id)} />
+                  </Td>
                   <Td>
                     <div style={{ display: 'inline-flex', gap: 6 }}>
                       <button
@@ -413,6 +467,67 @@ function RiskRegisterContent() {
         }}
       />
     </div>
+  )
+}
+
+function ActionSummary({ total, overdue }: { total: number; overdue: number }) {
+  if (total === 0) {
+    return (
+      <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontStyle: 'italic' }}>
+        none
+      </span>
+    )
+  }
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11 }}>
+      <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{total}</span>
+      {overdue > 0 && (
+        <span
+          style={{
+            background: 'rgba(255,59,59,0.18)',
+            color: 'var(--risk-critical)',
+            border: '1px solid rgba(255,59,59,0.45)',
+            padding: '0 6px',
+            borderRadius: 3,
+            fontSize: 9,
+            fontWeight: 700,
+            letterSpacing: 0.5,
+            textTransform: 'uppercase',
+          }}
+        >
+          {overdue} overdue
+        </span>
+      )}
+    </span>
+  )
+}
+
+const DRAFT_STATUS_META: Record<RiskStatus, { label: string; color: string }> = {
+  open: { label: 'Open', color: 'var(--text-secondary)' },
+  in_progress: { label: 'In Progress', color: 'var(--accent-primary)' },
+  closed: { label: 'Closed', color: 'var(--risk-low)' },
+}
+
+function DraftStatusPill({ status }: { status: RiskStatus }) {
+  const m = DRAFT_STATUS_META[status]
+  return (
+    <span
+      style={{
+        display: 'inline-block',
+        background: `${m.color}1f`,
+        color: m.color,
+        border: `1px solid ${m.color}66`,
+        padding: '2px 8px',
+        borderRadius: 4,
+        fontSize: 9,
+        fontWeight: 700,
+        letterSpacing: 0.4,
+        textTransform: 'uppercase',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {m.label}
+    </span>
   )
 }
 
