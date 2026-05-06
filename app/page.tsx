@@ -617,7 +617,7 @@ export default function LandingPage() {
             eyebrow="04 · REGISTER"
             title="Risk Register"
             description="Cause-Event-Impact register across the group. Add and edit risks with built-in duplicate detection and provenance click-through on every figure."
-            metric={`${aggregateKPIs.totalRisks ?? 10}`}
+            metric={`${aggregateKPIs.criticalRisks + aggregateKPIs.highRisks + aggregateKPIs.mediumRisks + aggregateKPIs.lowRisks}`}
             metricLabel="Risks Tracked"
             icon={<ListChecks size={18} />}
             delay={270}
