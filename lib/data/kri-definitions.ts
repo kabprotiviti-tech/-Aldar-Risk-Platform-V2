@@ -21,6 +21,26 @@ import type { DataPoint } from '@/lib/provenance/types'
 
 export type KRIFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly'
 
+/**
+ * Direction of "good" for the metric.
+ *  - higher_is_better → e.g. occupancy: green when high, red when low
+ *  - lower_is_better  → e.g. default rate, delay: green when low, red when high
+ */
+export type KRIDirection = 'higher_is_better' | 'lower_is_better'
+
+/**
+ * Default threshold suggestion (illustrative). Pilot will calibrate to
+ * actual Aldar appetite & tolerance. Boundaries are inclusive on the
+ * AMBER side (green strictly better, red strictly worse).
+ *   For higher_is_better: green ≥ amberBoundary, amber [redBoundary, amberBoundary), red < redBoundary
+ *   For lower_is_better : green ≤ amberBoundary, amber (amberBoundary, redBoundary], red > redBoundary
+ */
+export interface KRIThresholds {
+  amberBoundary: number
+  redBoundary: number
+  unit: string // for display next to the threshold inputs
+}
+
 export interface KRIDefinition {
   /** Stable id, e.g. "KRI-09". Mirrors the linked driver id. */
   id: string
@@ -37,6 +57,10 @@ export interface KRIDefinition {
   baselineProvenance: DataPoint
   /** Risk IDs (R-001 etc.) that reference this KRI's driver in their driverImpacts. */
   linkedRiskIds: string[]
+  /** Direction of "good" — used by traffic-light logic in D4. */
+  direction: KRIDirection
+  /** Suggested default thresholds (illustrative; user-editable in D2). */
+  defaultThresholds: KRIThresholds
 }
 
 /**
@@ -63,6 +87,8 @@ export const KRI_DEFINITIONS: KRIDefinition[] = [
       'Occupied residential units (under Aldar Investment portfolio) as % of available stock. Trips amber/red as occupancy drops below appetite.',
     baselineProvenance: DRIVER_BASELINE_PROVENANCE['DRV-09'],
     linkedRiskIds: risksReferencingDriver('DRV-09'),
+    direction: 'higher_is_better',
+    defaultThresholds: { amberBoundary: 90, redBoundary: 80, unit: 'index' },
   },
   {
     id: 'KRI-10',
@@ -74,6 +100,8 @@ export const KRI_DEFINITIONS: KRIDefinition[] = [
       'Leased commercial GLA as % of total leasable area across investment portfolio. Aldar FY24 retail occupancy was 97% (Yas Mall 99%).',
     baselineProvenance: DRIVER_BASELINE_PROVENANCE['DRV-10'],
     linkedRiskIds: risksReferencingDriver('DRV-10'),
+    direction: 'higher_is_better',
+    defaultThresholds: { amberBoundary: 90, redBoundary: 80, unit: 'index' },
   },
   {
     id: 'KRI-11',
@@ -85,6 +113,8 @@ export const KRI_DEFINITIONS: KRIDefinition[] = [
       '% of project phases delayed beyond contractual milestones across active development portfolio.',
     baselineProvenance: DRIVER_BASELINE_PROVENANCE['DRV-11'],
     linkedRiskIds: risksReferencingDriver('DRV-11'),
+    direction: 'lower_is_better',
+    defaultThresholds: { amberBoundary: 110, redBoundary: 130, unit: 'index' },
   },
   {
     id: 'KRI-12',
@@ -96,6 +126,8 @@ export const KRI_DEFINITIONS: KRIDefinition[] = [
       '% of units handed over beyond contractual handover date — directly tied to DLD penalties and revenue deferral.',
     baselineProvenance: DRIVER_BASELINE_PROVENANCE['DRV-12'],
     linkedRiskIds: risksReferencingDriver('DRV-12'),
+    direction: 'lower_is_better',
+    defaultThresholds: { amberBoundary: 110, redBoundary: 130, unit: 'index' },
   },
   {
     id: 'KRI-13',
@@ -107,6 +139,8 @@ export const KRI_DEFINITIONS: KRIDefinition[] = [
       'Default rate uplift on UAE-resident buyer escrow installments vs. baseline.',
     baselineProvenance: DRIVER_BASELINE_PROVENANCE['DRV-13'],
     linkedRiskIds: risksReferencingDriver('DRV-13'),
+    direction: 'lower_is_better',
+    defaultThresholds: { amberBoundary: 130, redBoundary: 170, unit: 'index' },
   },
   {
     id: 'KRI-14',
@@ -118,6 +152,8 @@ export const KRI_DEFINITIONS: KRIDefinition[] = [
       'ADREC / Bayut benchmark residential price index vs. budget. -25% / -35% / -50% map to Mild / Moderate / Severe scenario intensities.',
     baselineProvenance: DRIVER_BASELINE_PROVENANCE['DRV-14'],
     linkedRiskIds: risksReferencingDriver('DRV-14'),
+    direction: 'higher_is_better',
+    defaultThresholds: { amberBoundary: 90, redBoundary: 75, unit: 'index' },
   },
   {
     id: 'KRI-15',
@@ -129,6 +165,8 @@ export const KRI_DEFINITIONS: KRIDefinition[] = [
       'Commercial rent re-basing index vs. budget. Tracks rental market softness on renewals.',
     baselineProvenance: DRIVER_BASELINE_PROVENANCE['DRV-15'],
     linkedRiskIds: risksReferencingDriver('DRV-15'),
+    direction: 'higher_is_better',
+    defaultThresholds: { amberBoundary: 90, redBoundary: 75, unit: 'index' },
   },
   {
     id: 'KRI-16',
@@ -140,6 +178,8 @@ export const KRI_DEFINITIONS: KRIDefinition[] = [
       'Default rate uplift on overseas / expat buyer escrow installments. Q1 2026: 88% of UAE sales were to overseas/expat customers — KRI is high-leverage.',
     baselineProvenance: DRIVER_BASELINE_PROVENANCE['DRV-16'],
     linkedRiskIds: risksReferencingDriver('DRV-16'),
+    direction: 'lower_is_better',
+    defaultThresholds: { amberBoundary: 130, redBoundary: 170, unit: 'index' },
   },
 ]
 

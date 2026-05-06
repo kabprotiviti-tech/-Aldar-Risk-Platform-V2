@@ -12,15 +12,25 @@
  * provenance (most are `illustrative` indices) — labels are honest.
  */
 
-import React from 'react'
+import React, { useState } from 'react'
+import { Pencil } from 'lucide-react'
 import { SimulationProvider, useSimulation } from '@/lib/context/SimulationContext'
+import {
+  KRIThresholdsProvider,
+  useKRIThresholds,
+} from '@/lib/context/KRIThresholdsContext'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { NumericValue } from '@/components/provenance/NumericValue'
+import { KRIThresholdEditor } from '@/components/kri/KRIThresholdEditor'
 import { KRI_DEFINITIONS, type KRIDefinition } from '@/lib/data/kri-definitions'
 import type { Driver } from '@/lib/engine/types'
 
 function KRIContent() {
   const { drivers } = useSimulation()
+  const [editingKriId, setEditingKriId] = useState<string | null>(null)
+  const editingKri = editingKriId
+    ? KRI_DEFINITIONS.find((k) => k.id === editingKriId) ?? null
+    : null
 
   return (
     <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -55,9 +65,10 @@ function KRIContent() {
           >
             The 8 KRIs Aldar tracks across the development, investment,
             and sales pipelines. Current values flow from the simulation
-            engine drivers; thresholds, manual entry, traffic-light
-            status, breach events and trend charts ship in patches D2–D7.
-            Risk-appetite linkage ships in D8.
+            engine drivers; thresholds are user-editable per KRI and
+            persist locally. Manual entry, traffic-light status, breach
+            events and trend charts ship in patches D3–D7. Risk-appetite
+            linkage ships in D8.
           </p>
         </div>
         <StatusBadge tier="MVP" note={`${KRI_DEFINITIONS.length} KRIs · thresholds in D2`} />
@@ -79,13 +90,19 @@ function KRIContent() {
               <Th>Owner</Th>
               <Th>Frequency</Th>
               <Th right>Current Value</Th>
+              <Th>Thresholds</Th>
               <Th>Linked Risks</Th>
               <Th>Source</Th>
             </tr>
           </thead>
           <tbody>
             {KRI_DEFINITIONS.map((kri) => (
-              <KRIRow key={kri.id} kri={kri} drivers={drivers} />
+              <KRIRow
+                key={kri.id}
+                kri={kri}
+                drivers={drivers}
+                onEditThresholds={() => setEditingKriId(kri.id)}
+              />
             ))}
           </tbody>
         </table>
@@ -103,12 +120,53 @@ function KRIContent() {
         — click ⓘ on any value to see source and calibration plan. Live
         feeds from Aldar PMS / Yardi / SAP are wired in pilot.
       </div>
+
+      {/* Threshold editor modal (D2) */}
+      {editingKri && (
+        <>
+          <div
+            onClick={() => setEditingKriId(null)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0,0,0,0.55)',
+              backdropFilter: 'blur(2px)',
+              zIndex: 9100,
+            }}
+          />
+          <div
+            style={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 9101,
+            }}
+          >
+            <KRIThresholdEditor
+              kri={editingKri}
+              onClose={() => setEditingKriId(null)}
+            />
+          </div>
+        </>
+      )}
     </div>
   )
 }
 
-function KRIRow({ kri, drivers }: { kri: KRIDefinition; drivers: Driver[] }) {
+function KRIRow({
+  kri,
+  drivers,
+  onEditThresholds,
+}: {
+  kri: KRIDefinition
+  drivers: Driver[]
+  onEditThresholds: () => void
+}) {
   const driver = drivers.find((d) => d.id === kri.driverId)
+  const { thresholdsFor, isOverridden } = useKRIThresholds()
+  const t = thresholdsFor(kri)
+  const overridden = isOverridden(kri.id)
   return (
     <tr style={{ borderTop: '1px solid var(--border-color)' }}>
       <Td mono>{kri.id}</Td>
@@ -141,6 +199,64 @@ function KRIRow({ kri, drivers }: { kri: KRIDefinition; drivers: Driver[] }) {
             value: driver ? driver.adjustedValue : kri.baselineProvenance.value,
           }}
         />
+      </Td>
+      <Td>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span
+            style={{
+              fontSize: 9,
+              fontWeight: 700,
+              color: 'var(--risk-medium)',
+              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+            }}
+          >
+            A:{t.amberBoundary}
+          </span>
+          <span
+            style={{
+              fontSize: 9,
+              fontWeight: 700,
+              color: 'var(--risk-critical)',
+              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+            }}
+          >
+            R:{t.redBoundary}
+          </span>
+          {overridden && (
+            <span
+              title="Overridden — click Edit to view"
+              style={{
+                fontSize: 8,
+                fontWeight: 700,
+                background: 'rgba(168,85,247,0.18)',
+                color: '#A855F7',
+                border: '1px solid rgba(168,85,247,0.45)',
+                padding: '0 4px',
+                borderRadius: 3,
+                letterSpacing: 0.5,
+                textTransform: 'uppercase',
+              }}
+            >
+              custom
+            </span>
+          )}
+          <button
+            onClick={onEditThresholds}
+            title="Edit thresholds"
+            style={{
+              background: 'transparent',
+              border: '1px solid var(--border-color)',
+              color: 'var(--text-secondary)',
+              borderRadius: 3,
+              padding: 3,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+            }}
+          >
+            <Pencil size={10} />
+          </button>
+        </div>
       </Td>
       <Td>
         {kri.linkedRiskIds.length === 0 ? (
@@ -255,7 +371,9 @@ function Td({
 export default function KRIPage() {
   return (
     <SimulationProvider>
-      <KRIContent />
+      <KRIThresholdsProvider>
+        <KRIContent />
+      </KRIThresholdsProvider>
     </SimulationProvider>
   )
 }
