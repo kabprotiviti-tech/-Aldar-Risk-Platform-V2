@@ -1,0 +1,144 @@
+'use client'
+
+/**
+ * KRIEntriesContext
+ * -----------------
+ * User-entered monthly KRI values, persisted to localStorage. Each
+ * entry is keyed by kriId + period (yyyy-mm) — re-submitting the same
+ * period replaces the prior value.
+ *
+ * Entries are user-attributed (no AI / no auto-fill). The traffic-light
+ * status (D4) and trend chart (D5) consume these entries.
+ */
+
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
+
+const STORAGE_KEY = 'aldar-kri-entries-v1'
+
+export interface KRIEntry {
+  id: string
+  kriId: string
+  /** yyyy-mm (e.g. "2026-04"). Unique per kriId. */
+  period: string
+  value: number
+  enteredBy: string
+  /** ISO timestamp when the entry was last saved. */
+  enteredAt: string
+  note?: string
+}
+
+interface CtxValue {
+  entries: KRIEntry[]
+  entriesFor: (kriId: string) => KRIEntry[]
+  /** Returns the most recent entry for a KRI (by period desc), or null. */
+  latestFor: (kriId: string) => KRIEntry | null
+  upsertEntry: (
+    input: Omit<KRIEntry, 'id' | 'enteredAt'> & { id?: string },
+  ) => KRIEntry
+  removeEntry: (id: string) => void
+}
+
+const Ctx = createContext<CtxValue | null>(null)
+
+function uid(): string {
+  return `kri-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+}
+
+export function KRIEntriesProvider({ children }: { children: React.ReactNode }) {
+  const [entries, setEntries] = useState<KRIEntry[]>([])
+  const [hydrated, setHydrated] = useState(false)
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY)
+      if (raw) {
+        const parsed = JSON.parse(raw) as KRIEntry[]
+        if (Array.isArray(parsed)) setEntries(parsed)
+      }
+    } catch {}
+    setHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    if (!hydrated) return
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries))
+    } catch {}
+  }, [entries, hydrated])
+
+  const entriesFor = useCallback<CtxValue['entriesFor']>(
+    (kriId) =>
+      entries
+        .filter((e) => e.kriId === kriId)
+        .sort((a, b) => (a.period < b.period ? -1 : a.period > b.period ? 1 : 0)),
+    [entries],
+  )
+
+  const latestFor = useCallback<CtxValue['latestFor']>(
+    (kriId) => {
+      const list = entries.filter((e) => e.kriId === kriId)
+      if (list.length === 0) return null
+      return list.reduce((acc, cur) => (cur.period > acc.period ? cur : acc))
+    },
+    [entries],
+  )
+
+  const upsertEntry = useCallback<CtxValue['upsertEntry']>((input) => {
+    const now = new Date().toISOString()
+    // Strip optional `id` from spread to avoid duplicate-key TS warning when
+    // we re-assign it below.
+    const { id: providedId, ...rest } = input
+    let saved!: KRIEntry
+    setEntries((prev) => {
+      // Match by kriId+period (replace existing month) OR by id if supplied
+      const idx = providedId
+        ? prev.findIndex((e) => e.id === providedId)
+        : prev.findIndex(
+            (e) => e.kriId === rest.kriId && e.period === rest.period,
+          )
+      if (idx >= 0) {
+        const next = [...prev]
+        const existing = next[idx]
+        saved = {
+          ...existing,
+          ...rest,
+          id: existing.id,
+          enteredAt: now,
+        }
+        next[idx] = saved
+        return next
+      }
+      saved = {
+        ...rest,
+        id: providedId || uid(),
+        enteredAt: now,
+      }
+      return [...prev, saved]
+    })
+    return saved
+  }, [])
+
+  const removeEntry = useCallback<CtxValue['removeEntry']>((id) => {
+    setEntries((prev) => prev.filter((e) => e.id !== id))
+  }, [])
+
+  const value = useMemo<CtxValue>(
+    () => ({ entries, entriesFor, latestFor, upsertEntry, removeEntry }),
+    [entries, entriesFor, latestFor, upsertEntry, removeEntry],
+  )
+
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>
+}
+
+export function useKRIEntries(): CtxValue {
+  const ctx = useContext(Ctx)
+  if (!ctx) throw new Error('useKRIEntries must be used inside <KRIEntriesProvider>')
+  return ctx
+}

@@ -13,23 +13,32 @@
  */
 
 import React, { useState } from 'react'
-import { Pencil } from 'lucide-react'
+import { Pencil, PlusCircle } from 'lucide-react'
 import { SimulationProvider, useSimulation } from '@/lib/context/SimulationContext'
 import {
   KRIThresholdsProvider,
   useKRIThresholds,
 } from '@/lib/context/KRIThresholdsContext'
+import {
+  KRIEntriesProvider,
+  useKRIEntries,
+} from '@/lib/context/KRIEntriesContext'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { NumericValue } from '@/components/provenance/NumericValue'
 import { KRIThresholdEditor } from '@/components/kri/KRIThresholdEditor'
+import { KRIEntryEditor } from '@/components/kri/KRIEntryEditor'
 import { KRI_DEFINITIONS, type KRIDefinition } from '@/lib/data/kri-definitions'
 import type { Driver } from '@/lib/engine/types'
 
 function KRIContent() {
   const { drivers } = useSimulation()
   const [editingKriId, setEditingKriId] = useState<string | null>(null)
+  const [entryKriId, setEntryKriId] = useState<string | null>(null)
   const editingKri = editingKriId
     ? KRI_DEFINITIONS.find((k) => k.id === editingKriId) ?? null
+    : null
+  const entryKri = entryKriId
+    ? KRI_DEFINITIONS.find((k) => k.id === entryKriId) ?? null
     : null
 
   return (
@@ -90,6 +99,7 @@ function KRIContent() {
               <Th>Owner</Th>
               <Th>Frequency</Th>
               <Th right>Current Value</Th>
+              <Th>Latest Entry</Th>
               <Th>Thresholds</Th>
               <Th>Linked Risks</Th>
               <Th>Source</Th>
@@ -102,6 +112,7 @@ function KRIContent() {
                 kri={kri}
                 drivers={drivers}
                 onEditThresholds={() => setEditingKriId(kri.id)}
+                onAddEntry={() => setEntryKriId(kri.id)}
               />
             ))}
           </tbody>
@@ -150,6 +161,11 @@ function KRIContent() {
           </div>
         </>
       )}
+
+      {/* Manual entry modal (D3) */}
+      {entryKri && (
+        <KRIEntryEditor kri={entryKri} onClose={() => setEntryKriId(null)} />
+      )}
     </div>
   )
 }
@@ -158,15 +174,19 @@ function KRIRow({
   kri,
   drivers,
   onEditThresholds,
+  onAddEntry,
 }: {
   kri: KRIDefinition
   drivers: Driver[]
   onEditThresholds: () => void
+  onAddEntry: () => void
 }) {
   const driver = drivers.find((d) => d.id === kri.driverId)
   const { thresholdsFor, isOverridden } = useKRIThresholds()
+  const { latestFor } = useKRIEntries()
   const t = thresholdsFor(kri)
   const overridden = isOverridden(kri.id)
+  const latest = latestFor(kri.id)
   return (
     <tr style={{ borderTop: '1px solid var(--border-color)' }}>
       <Td mono>{kri.id}</Td>
@@ -199,6 +219,69 @@ function KRIRow({
             value: driver ? driver.adjustedValue : kri.baselineProvenance.value,
           }}
         />
+      </Td>
+      <Td>
+        {latest ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <span style={{ fontSize: 11, color: 'var(--text-primary)', fontWeight: 700 }}>
+              {latest.value}{' '}
+              <span style={{ color: 'var(--text-tertiary)', fontWeight: 400, fontSize: 10 }}>
+                {kri.defaultThresholds.unit}
+              </span>
+            </span>
+            <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>
+              {latest.period} · {latest.enteredBy}
+            </span>
+          </div>
+        ) : (
+          <button
+            onClick={onAddEntry}
+            title="Add first manual entry"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              background: 'transparent',
+              border: '1px dashed var(--border-color)',
+              color: 'var(--accent-primary)',
+              borderRadius: 4,
+              padding: '3px 8px',
+              fontSize: 10,
+              fontWeight: 700,
+              cursor: 'pointer',
+              letterSpacing: 0.4,
+              textTransform: 'uppercase',
+            }}
+          >
+            <PlusCircle size={11} />
+            Add value
+          </button>
+        )}
+        {latest && (
+          <button
+            onClick={onAddEntry}
+            title="Add or update an entry"
+            style={{
+              display: 'inline-flex',
+              marginTop: 4,
+              alignItems: 'center',
+              gap: 3,
+              background: 'transparent',
+              border: '1px solid var(--border-color)',
+              color: 'var(--text-secondary)',
+              borderRadius: 3,
+              padding: '2px 6px',
+              fontSize: 9,
+              fontWeight: 700,
+              cursor: 'pointer',
+              letterSpacing: 0.4,
+              textTransform: 'uppercase',
+            }}
+          >
+            <PlusCircle size={9} />
+            New
+          </button>
+        )}
       </Td>
       <Td>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -372,7 +455,9 @@ export default function KRIPage() {
   return (
     <SimulationProvider>
       <KRIThresholdsProvider>
-        <KRIContent />
+        <KRIEntriesProvider>
+          <KRIContent />
+        </KRIEntriesProvider>
       </KRIThresholdsProvider>
     </SimulationProvider>
   )
