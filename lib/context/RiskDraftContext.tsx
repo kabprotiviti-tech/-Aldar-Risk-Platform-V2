@@ -45,7 +45,7 @@ export interface RiskDraft extends RiskDef {
 interface RiskDraftContextValue {
   drafts: RiskDraft[]
   addDraft: (draft: Omit<RiskDraft, 'createdAt' | 'updatedAt' | 'createdBy'>, author?: string) => RiskDraft
-  updateDraft: (id: string, patch: Partial<RiskDef>, author?: string) => RiskDraft | null
+  updateDraft: (id: string, patch: Partial<RiskDraft>, author?: string) => RiskDraft | null
   removeDraft: (id: string) => void
   /** Generate the next available DRAFT-NNN id given existing drafts. */
   nextDraftId: () => string
@@ -103,10 +103,11 @@ export function RiskDraftProvider({ children }: { children: React.ReactNode }) {
   const addDraft = useCallback<RiskDraftContextValue['addDraft']>(
     (draft, author = 'Risk Champion (demo)') => {
       const now = new Date().toISOString()
+      // Spread first, then ensure required fields are set with defaults.
+      // Avoids TS error about `status` appearing twice.
       const full: RiskDraft = {
-        // Default status to 'open' if caller didn't provide one (older payloads).
-        status: 'open',
         ...draft,
+        status: draft.status || 'open',
         createdAt: now,
         updatedAt: now,
         createdBy: author,
