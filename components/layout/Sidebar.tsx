@@ -14,6 +14,7 @@ import {
   Cpu,
   Shield,
   ListChecks,
+  Gauge,
 } from 'lucide-react'
 import { clsx } from 'clsx'
 
@@ -35,6 +36,12 @@ const navItems = [
     label: 'Risk Register',
     icon: ListChecks,
     description: 'Cause-Event-Impact register',
+  },
+  {
+    href: '/kri',
+    label: 'KRIs',
+    icon: Gauge,
+    description: 'Key Risk Indicators',
   },
   {
     href: '/scenarios',
