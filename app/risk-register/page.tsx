@@ -15,6 +15,7 @@ import React, { useMemo, useState } from 'react'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { SimulationProvider, useSimulation } from '@/lib/context/SimulationContext'
 import { RiskDraftProvider, useRiskDrafts, type RiskDraft } from '@/lib/context/RiskDraftContext'
+import { MitigationActionsProvider, useMitigationActions } from '@/lib/context/MitigationActionsContext'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { RiskDetailDrawer } from '@/components/risk-register/RiskDetailDrawer'
 import { RiskFormModal } from '@/components/risk-register/RiskFormModal'
@@ -502,12 +503,14 @@ function Td({
   )
 }
 
-// ── Page wrapper that provides simulation + draft contexts ──────────────
+// ── Page wrapper that provides simulation + draft + mitigation contexts ──
 export default function RiskRegisterPage() {
   return (
     <SimulationProvider>
       <RiskDraftProvider>
-        <RiskRegisterContent />
+        <MitigationActionsProvider>
+          <RiskRegisterContent />
+        </MitigationActionsProvider>
       </RiskDraftProvider>
     </SimulationProvider>
   )

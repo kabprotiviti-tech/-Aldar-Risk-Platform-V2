@@ -24,6 +24,7 @@ import { useSimulation } from '@/lib/context/SimulationContext'
 import { RISKS, FINANCIAL_ANCHORS } from '@/lib/engine/seedData'
 import { NumericValue } from '@/components/provenance/NumericValue'
 import { getAnchorReference } from '@/lib/data/risk-financial-provenance'
+import { MitigationActionsSection } from './MitigationActionsSection'
 
 interface Props {
   risk: RiskState | null
@@ -388,6 +389,9 @@ export function RiskDetailDrawer({ risk, onClose }: Props) {
             </Section>
           )}
 
+          {/* Mitigation actions sub-table (C4) */}
+          <MitigationActionsSection riskId={risk.id} />
+
           {/* Footnote */}
           <div
             style={{
@@ -398,8 +402,8 @@ export function RiskDetailDrawer({ risk, onClose }: Props) {
               borderTop: '1px solid var(--border-color)',
             }}
           >
-            Add / Edit / Mitigation Actions / Status Workflow ship in subsequent
-            patches (C3-C5). AI Register Critic ships in C7.
+            Status workflow auto-promotion / Heatmap / AI Register Critic ship
+            in subsequent patches (C5-C7).
           </div>
         </div>
       </aside>
