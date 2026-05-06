@@ -392,7 +392,7 @@ function RiskRegisterContent() {
         }}
       >
         Inherent / Residual scores derive from the simulation engine&rsquo;s
-        baseline drivers (see CLAUDE.md). Exposure (AED mn) uses each
+        baseline drivers. Exposure (AED mn) uses each
         risk&rsquo;s financial-anchor reference — click any row to open the
         detail drawer (Cause/Event/Impact, controls, contributing drivers,
         provenance).

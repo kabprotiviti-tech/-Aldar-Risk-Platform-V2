@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   CornerDownLeft,
   Radio,
+  ListChecks,
 } from 'lucide-react'
 import { ThemeSelector } from '@/components/layout/ThemeSelector'
 import { aggregateKPIs, externalNews, kpiData } from '@/lib/simulated-data'
@@ -612,14 +613,24 @@ export default function LandingPage() {
             delay={180}
           />
           <EntryCard
+            href="/risk-register"
+            eyebrow="04 · REGISTER"
+            title="Risk Register"
+            description="Cause-Event-Impact register across the group. Add and edit risks with built-in duplicate detection and provenance click-through on every figure."
+            metric={`${aggregateKPIs.totalRisks ?? 10}`}
+            metricLabel="Risks Tracked"
+            icon={<ListChecks size={18} />}
+            delay={270}
+          />
+          <EntryCard
             href="/scenarios"
-            eyebrow="04 · SCENARIOS"
+            eyebrow="05 · SCENARIOS"
             title="Scenario Lab"
             description="Stress-test board scenarios with AI-simulated cascade effects across risk, control and financial lines."
             metric="12"
             metricLabel="Playbooks Ready"
             icon={<GitBranch size={18} />}
-            delay={270}
+            delay={360}
           />
         </div>
       </section>
