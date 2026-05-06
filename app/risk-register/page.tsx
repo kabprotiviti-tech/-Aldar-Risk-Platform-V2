@@ -20,6 +20,7 @@ import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { RiskDetailDrawer } from '@/components/risk-register/RiskDetailDrawer'
 import { RiskFormModal } from '@/components/risk-register/RiskFormModal'
 import { RiskHeatmap } from '@/components/risk-register/RiskHeatmap'
+import { AIRegisterCriticPanel } from '@/components/risk-register/AIRegisterCriticPanel'
 import type { RiskState, Rating } from '@/lib/engine/types'
 
 // A unified row type that covers both engine RiskState and user draft.
@@ -290,6 +291,9 @@ function RiskRegisterContent() {
           Showing {filtered.length} of {risks.length}
         </span>
       </div>
+
+      {/* AI Register Critic (C7) */}
+      <AIRegisterCriticPanel />
 
       {/* Heatmap (C6) — sits above the register table */}
       <RiskHeatmap onSelectRisk={(r) => setSelected(r)} />
