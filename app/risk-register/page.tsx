@@ -19,6 +19,7 @@ import { MitigationActionsProvider, useMitigationActions } from '@/lib/context/M
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { RiskDetailDrawer } from '@/components/risk-register/RiskDetailDrawer'
 import { RiskFormModal } from '@/components/risk-register/RiskFormModal'
+import { RiskHeatmap } from '@/components/risk-register/RiskHeatmap'
 import type { RiskState, Rating } from '@/lib/engine/types'
 
 // A unified row type that covers both engine RiskState and user draft.
@@ -289,6 +290,9 @@ function RiskRegisterContent() {
           Showing {filtered.length} of {risks.length}
         </span>
       </div>
+
+      {/* Heatmap (C6) — sits above the register table */}
+      <RiskHeatmap onSelectRisk={(r) => setSelected(r)} />
 
       {/* Register table */}
       <div
