@@ -21,9 +21,16 @@ import React from 'react'
 import { X } from 'lucide-react'
 import type { RiskState, Rating } from '@/lib/engine/types'
 import { useSimulation } from '@/lib/context/SimulationContext'
+import { useKRIThresholds } from '@/lib/context/KRIThresholdsContext'
+import { useKRIEntries } from '@/lib/context/KRIEntriesContext'
 import { RISKS, FINANCIAL_ANCHORS } from '@/lib/engine/seedData'
 import { NumericValue } from '@/components/provenance/NumericValue'
 import { getAnchorReference } from '@/lib/data/risk-financial-provenance'
+import {
+  linkedKRIsForRiskId,
+  type KRIDefinition,
+} from '@/lib/data/kri-definitions'
+import { computeKRIStatus, STATUS_META } from '@/lib/data/kri-status'
 import { MitigationActionsSection } from './MitigationActionsSection'
 
 interface Props {
@@ -341,6 +348,9 @@ export function RiskDetailDrawer({ risk, onClose }: Props) {
               })}
           </Section>
 
+          {/* Linked KRIs (D7) — bidirectional linkage from KRI module */}
+          <LinkedKRIsSection riskId={risk.id} />
+
           {/* Controls */}
           {seed && seed.controls.length > 0 && (
             <Section title={`Controls (${seed.controls.length})`}>
@@ -412,6 +422,151 @@ export function RiskDetailDrawer({ risk, onClose }: Props) {
 }
 
 // ── presentational helpers ──────────────────────────────────────────────
+function LinkedKRIsSection({ riskId }: { riskId: string }) {
+  const linked = linkedKRIsForRiskId(riskId)
+  const { thresholdsFor } = useKRIThresholds()
+  const { latestFor } = useKRIEntries()
+
+  if (linked.length === 0) {
+    return (
+      <Section title="Linked KRIs (0)">
+        <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontStyle: 'italic' }}>
+          No KRIs reference this risk&rsquo;s drivers yet.
+        </span>
+      </Section>
+    )
+  }
+
+  return (
+    <Section title={`Linked KRIs (${linked.length})`}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {linked.map((kri) => (
+          <LinkedKRIRow
+            key={kri.id}
+            kri={kri}
+            thresholds={thresholdsFor(kri)}
+            latestValue={latestFor(kri.id)?.value ?? null}
+            latestPeriod={latestFor(kri.id)?.period ?? null}
+          />
+        ))}
+      </div>
+      <div
+        style={{
+          marginTop: 6,
+          fontSize: 9,
+          color: 'var(--text-tertiary)',
+          fontStyle: 'italic',
+        }}
+      >
+        Status pills derive from each KRI&rsquo;s most-recent manual entry vs
+        active thresholds. See /kri for trends, breach history, and threshold
+        edits.
+      </div>
+    </Section>
+  )
+}
+
+function LinkedKRIRow({
+  kri,
+  thresholds,
+  latestValue,
+  latestPeriod,
+}: {
+  kri: KRIDefinition
+  thresholds: import('@/lib/data/kri-definitions').KRIThresholds
+  latestValue: number | null
+  latestPeriod: string | null
+}) {
+  const status =
+    latestValue === null ? null : computeKRIStatus(latestValue, thresholds, kri.direction)
+  const meta = status ? STATUS_META[status] : null
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '70px 1fr auto',
+        gap: 8,
+        alignItems: 'center',
+        padding: '6px 10px',
+        background: 'var(--bg-secondary)',
+        border: '1px solid var(--border-color)',
+        borderLeft: `3px solid ${meta ? meta.color : 'var(--text-tertiary)'}`,
+        borderRadius: 4,
+        fontSize: 11,
+      }}
+    >
+      <span
+        style={{
+          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+          fontWeight: 700,
+          color: 'var(--text-tertiary)',
+        }}
+      >
+        {kri.id}
+      </span>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+        <span
+          style={{
+            color: 'var(--text-primary)',
+            fontWeight: 600,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {kri.name}
+        </span>
+        <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
+          {latestValue !== null ? (
+            <>
+              Latest <strong style={{ color: 'var(--text-secondary)' }}>{latestValue}</strong>{' '}
+              {kri.defaultThresholds.unit} ({latestPeriod})
+            </>
+          ) : (
+            'No entries yet'
+          )}
+        </span>
+      </div>
+      {meta ? (
+        <span
+          style={{
+            display: 'inline-block',
+            background: meta.bg,
+            color: meta.color,
+            border: `1px solid ${meta.border}`,
+            padding: '2px 8px',
+            borderRadius: 3,
+            fontSize: 9,
+            fontWeight: 700,
+            letterSpacing: 0.4,
+            textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {meta.label}
+        </span>
+      ) : (
+        <span
+          style={{
+            display: 'inline-block',
+            background: 'rgba(120,120,120,0.18)',
+            color: 'var(--text-tertiary)',
+            border: '1px solid rgba(120,120,120,0.45)',
+            padding: '2px 8px',
+            borderRadius: 3,
+            fontSize: 9,
+            fontWeight: 700,
+            letterSpacing: 0.4,
+            textTransform: 'uppercase',
+          }}
+        >
+          ⚪ No Data
+        </span>
+      )}
+    </div>
+  )
+}
+
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

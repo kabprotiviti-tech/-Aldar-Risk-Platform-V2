@@ -192,3 +192,15 @@ export function getKRI(id: string): KRIDefinition | undefined {
 export function kriByDriver(driverId: DriverId): KRIDefinition | undefined {
   return KRI_DEFINITIONS.find((k) => k.driverId === driverId)
 }
+
+/**
+ * Reverse-lookup: given a risk id, return every KRI whose underlying
+ * driver appears in that risk's driverImpacts. Used by the risk detail
+ * drawer to surface the bidirectional KRI <-> Risk linkage.
+ */
+export function linkedKRIsForRiskId(riskId: string): KRIDefinition[] {
+  const risk = RISKS.find((r) => r.id === riskId)
+  if (!risk) return []
+  const driverIds = new Set(risk.driverImpacts.map((di) => di.driverId))
+  return KRI_DEFINITIONS.filter((k) => driverIds.has(k.driverId))
+}

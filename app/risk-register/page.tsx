@@ -16,6 +16,8 @@ import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { SimulationProvider, useSimulation } from '@/lib/context/SimulationContext'
 import { RiskDraftProvider, useRiskDrafts, type RiskDraft, type RiskStatus } from '@/lib/context/RiskDraftContext'
 import { MitigationActionsProvider, useMitigationActions } from '@/lib/context/MitigationActionsContext'
+import { KRIThresholdsProvider } from '@/lib/context/KRIThresholdsContext'
+import { KRIEntriesProvider } from '@/lib/context/KRIEntriesContext'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { RiskDetailDrawer } from '@/components/risk-register/RiskDetailDrawer'
 import { RiskFormModal } from '@/components/risk-register/RiskFormModal'
@@ -626,13 +628,17 @@ function Td({
   )
 }
 
-// ── Page wrapper that provides simulation + draft + mitigation contexts ──
+// ── Page wrapper that provides simulation + draft + mitigation + KRI contexts ──
 export default function RiskRegisterPage() {
   return (
     <SimulationProvider>
       <RiskDraftProvider>
         <MitigationActionsProvider>
-          <RiskRegisterContent />
+          <KRIThresholdsProvider>
+            <KRIEntriesProvider>
+              <RiskRegisterContent />
+            </KRIEntriesProvider>
+          </KRIThresholdsProvider>
         </MitigationActionsProvider>
       </RiskDraftProvider>
     </SimulationProvider>
