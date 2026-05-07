@@ -19,6 +19,7 @@ import {
 import { ThemeSelector } from '@/components/layout/ThemeSelector'
 import { aggregateKPIs, externalNews, kpiData } from '@/lib/simulated-data'
 import { controlSummary } from '@/lib/controlData'
+import { RISKS } from '@/lib/engine/seedData'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Hooks
@@ -617,7 +618,7 @@ export default function LandingPage() {
             eyebrow="04 · REGISTER"
             title="Risk Register"
             description="Cause-Event-Impact register across the group. Add and edit risks with built-in duplicate detection and provenance click-through on every figure."
-            metric={`${aggregateKPIs.criticalRisks + aggregateKPIs.highRisks + aggregateKPIs.mediumRisks + aggregateKPIs.lowRisks}`}
+            metric={`${RISKS.length}`}
             metricLabel="Risks Tracked"
             icon={<ListChecks size={18} />}
             delay={270}
