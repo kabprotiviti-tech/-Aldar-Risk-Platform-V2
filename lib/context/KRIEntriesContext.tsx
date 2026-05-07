@@ -19,8 +19,15 @@ import React, {
   useMemo,
   useState,
 } from 'react'
+import { buildKRIDemoEntries } from '@/lib/data/kri-demo-seed'
 
 const STORAGE_KEY = 'aldar-kri-entries-v1'
+/**
+ * Sentinel marking that the demo seed has run for this browser. Once
+ * set, we never auto-seed again — even if the user deletes everything.
+ * (User can clear localStorage manually to reset.)
+ */
+const SEEDED_KEY = 'aldar-kri-entries-seeded-v1'
 
 export interface KRIEntry {
   id: string
@@ -56,13 +63,31 @@ export function KRIEntriesProvider({ children }: { children: React.ReactNode }) 
   const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
+    let loaded: KRIEntry[] = []
     try {
       const raw = localStorage.getItem(STORAGE_KEY)
       if (raw) {
         const parsed = JSON.parse(raw) as KRIEntry[]
-        if (Array.isArray(parsed)) setEntries(parsed)
+        if (Array.isArray(parsed)) loaded = parsed
       }
     } catch {}
+
+    // First-visit auto-seed: if nothing in storage AND we have not
+    // already seeded this browser, load the illustrative demo history.
+    // Never overwrite real user data.
+    let seedFlag = false
+    try {
+      seedFlag = localStorage.getItem(SEEDED_KEY) === '1'
+    } catch {}
+
+    if (loaded.length === 0 && !seedFlag) {
+      loaded = buildKRIDemoEntries()
+      try {
+        localStorage.setItem(SEEDED_KEY, '1')
+      } catch {}
+    }
+
+    setEntries(loaded)
     setHydrated(true)
   }, [])
 
