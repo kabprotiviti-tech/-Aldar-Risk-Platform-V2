@@ -41,6 +41,23 @@ export interface KRIThresholds {
   unit: string // for display next to the threshold inputs
 }
 
+/**
+ * Risk Appetite anchor for a KRI. The narrative justification for the
+ * threshold values — what tolerance level was sanctioned by which body.
+ *
+ * D8 surfaces this so the user can see WHY the amber/red boundaries are
+ * what they are. G1 (Risk Appetite Statements module) will let
+ * Group ERM Head edit these centrally with approval workflow.
+ */
+export interface KRIRiskAppetite {
+  /** One-line plain-English appetite statement. */
+  statement: string
+  /** Approving body (illustrative — pilot wires real governance). */
+  approvedBy: string
+  /** When this appetite was last reviewed. ISO date. */
+  lastReviewed: string
+}
+
 export interface KRIDefinition {
   /** Stable id, e.g. "KRI-09". Mirrors the linked driver id. */
   id: string
@@ -61,6 +78,8 @@ export interface KRIDefinition {
   direction: KRIDirection
   /** Suggested default thresholds (illustrative; user-editable in D2). */
   defaultThresholds: KRIThresholds
+  /** Risk Appetite Statement that anchors the threshold (D8). */
+  riskAppetite: KRIRiskAppetite
 }
 
 /**
@@ -89,6 +108,12 @@ export const KRI_DEFINITIONS: KRIDefinition[] = [
     linkedRiskIds: risksReferencingDriver('DRV-09'),
     direction: 'higher_is_better',
     defaultThresholds: { amberBoundary: 90, redBoundary: 80, unit: 'index' },
+    riskAppetite: {
+      statement:
+        'Minimum residential occupancy 90% across the investment portfolio; below 80% triggers a top-of-house review.',
+      approvedBy: 'Group ERM Head (illustrative)',
+      lastReviewed: '2026-01-15',
+    },
   },
   {
     id: 'KRI-10',
@@ -102,6 +127,12 @@ export const KRI_DEFINITIONS: KRIDefinition[] = [
     linkedRiskIds: risksReferencingDriver('DRV-10'),
     direction: 'higher_is_better',
     defaultThresholds: { amberBoundary: 90, redBoundary: 80, unit: 'index' },
+    riskAppetite: {
+      statement:
+        'Minimum commercial leased GLA 90% per investment property mandate; sustained drop below 80% requires re-pricing strategy review.',
+      approvedBy: 'Group ERM Head (illustrative)',
+      lastReviewed: '2026-01-15',
+    },
   },
   {
     id: 'KRI-11',
@@ -115,6 +146,12 @@ export const KRI_DEFINITIONS: KRIDefinition[] = [
     linkedRiskIds: risksReferencingDriver('DRV-11'),
     direction: 'lower_is_better',
     defaultThresholds: { amberBoundary: 110, redBoundary: 130, unit: 'index' },
+    riskAppetite: {
+      statement:
+        'Project phase delay tolerance ≤10% above plan; sustained ≥30% above plan triggers ARC escalation.',
+      approvedBy: 'Audit & Risk Committee (illustrative)',
+      lastReviewed: '2025-11-20',
+    },
   },
   {
     id: 'KRI-12',
@@ -128,6 +165,12 @@ export const KRI_DEFINITIONS: KRIDefinition[] = [
     linkedRiskIds: risksReferencingDriver('DRV-12'),
     direction: 'lower_is_better',
     defaultThresholds: { amberBoundary: 110, redBoundary: 130, unit: 'index' },
+    riskAppetite: {
+      statement:
+        'Handover delay tolerance ≤10% above contractual milestones to limit DLD penalty exposure and revenue deferral.',
+      approvedBy: 'Audit & Risk Committee (illustrative)',
+      lastReviewed: '2025-11-20',
+    },
   },
   {
     id: 'KRI-13',
@@ -141,6 +184,12 @@ export const KRI_DEFINITIONS: KRIDefinition[] = [
     linkedRiskIds: risksReferencingDriver('DRV-13'),
     direction: 'lower_is_better',
     defaultThresholds: { amberBoundary: 130, redBoundary: 170, unit: 'index' },
+    riskAppetite: {
+      statement:
+        'UAE-resident buyer default uplift ≤30% above baseline acceptable; >70% requires Treasury-led collection action.',
+      approvedBy: 'Group Treasury (illustrative)',
+      lastReviewed: '2026-02-10',
+    },
   },
   {
     id: 'KRI-14',
@@ -154,6 +203,12 @@ export const KRI_DEFINITIONS: KRIDefinition[] = [
     linkedRiskIds: risksReferencingDriver('DRV-14'),
     direction: 'higher_is_better',
     defaultThresholds: { amberBoundary: 90, redBoundary: 75, unit: 'index' },
+    riskAppetite: {
+      statement:
+        'Residential price index tolerance ≥90% of plan; sustained <75% triggers GDV reforecast and project mix review.',
+      approvedBy: 'Group ERM Head (illustrative)',
+      lastReviewed: '2026-01-15',
+    },
   },
   {
     id: 'KRI-15',
@@ -167,6 +222,12 @@ export const KRI_DEFINITIONS: KRIDefinition[] = [
     linkedRiskIds: risksReferencingDriver('DRV-15'),
     direction: 'higher_is_better',
     defaultThresholds: { amberBoundary: 90, redBoundary: 75, unit: 'index' },
+    riskAppetite: {
+      statement:
+        'Commercial rent index tolerance ≥90% of budget on renewals; <75% requires NOI reforecast and tenant-mix review.',
+      approvedBy: 'Group ERM Head (illustrative)',
+      lastReviewed: '2026-01-15',
+    },
   },
   {
     id: 'KRI-16',
@@ -180,6 +241,12 @@ export const KRI_DEFINITIONS: KRIDefinition[] = [
     linkedRiskIds: risksReferencingDriver('DRV-16'),
     direction: 'lower_is_better',
     defaultThresholds: { amberBoundary: 130, redBoundary: 170, unit: 'index' },
+    riskAppetite: {
+      statement:
+        'Overseas / expat buyer default uplift ≤30% above baseline; >70% triggers ARC review given 88% of FY26 UAE sales are overseas-resident.',
+      approvedBy: 'Audit & Risk Committee (illustrative)',
+      lastReviewed: '2026-02-10',
+    },
   },
 ]
 

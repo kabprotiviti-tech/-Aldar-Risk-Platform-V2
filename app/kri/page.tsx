@@ -185,6 +185,100 @@ function KRIContent() {
   )
 }
 
+function AppetiteChip({ kri }: { kri: KRIDefinition }) {
+  const [open, setOpen] = useState(false)
+  const ref = React.useRef<HTMLSpanElement>(null)
+
+  React.useEffect(() => {
+    if (!open) return
+    const onClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [open])
+
+  const a = kri.riskAppetite
+  return (
+    <span ref={ref} style={{ position: 'relative', display: 'inline-flex' }}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        title={`Risk Appetite — approved ${a.approvedBy}, last reviewed ${a.lastReviewed}`}
+        style={{
+          background: 'transparent',
+          border: '1px solid rgba(45,158,255,0.45)',
+          color: '#2D9EFF',
+          borderRadius: 3,
+          padding: '1px 5px',
+          cursor: 'pointer',
+          fontSize: 8,
+          fontWeight: 700,
+          letterSpacing: 0.5,
+          textTransform: 'uppercase',
+          lineHeight: 1.2,
+        }}
+      >
+        Appetite
+      </button>
+      {open && (
+        <div
+          role="dialog"
+          style={{
+            position: 'absolute',
+            top: 'calc(100% + 4px)',
+            left: 0,
+            zIndex: 50,
+            width: 280,
+            background: 'var(--bg-card)',
+            border: '1px solid rgba(45,158,255,0.45)',
+            borderRadius: 6,
+            padding: 10,
+            boxShadow: '0 10px 24px rgba(0,0,0,0.45)',
+            fontSize: 11,
+            color: 'var(--text-primary)',
+            textAlign: 'left',
+            lineHeight: 1.55,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 9,
+              fontWeight: 700,
+              color: '#2D9EFF',
+              letterSpacing: 0.6,
+              textTransform: 'uppercase',
+              marginBottom: 4,
+            }}
+          >
+            Risk Appetite Statement
+          </div>
+          <div style={{ color: 'var(--text-primary)', marginBottom: 6 }}>
+            {a.statement}
+          </div>
+          <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>
+            Approved by <strong style={{ color: 'var(--text-secondary)' }}>{a.approvedBy}</strong>
+            {' · '}Last reviewed <strong style={{ color: 'var(--text-secondary)' }}>{a.lastReviewed}</strong>
+          </div>
+          <div
+            style={{
+              marginTop: 8,
+              fontSize: 9,
+              color: 'var(--text-tertiary)',
+              fontStyle: 'italic',
+              borderTop: '1px dashed var(--border-color)',
+              paddingTop: 6,
+            }}
+          >
+            Thresholds anchor to this appetite. Editing thresholds in
+            production will flow through the appetite-governance process
+            (G1 module — pending).
+          </div>
+        </div>
+      )}
+    </span>
+  )
+}
+
 function BreachCell({
   totalBreaches,
   recentBreach,
@@ -425,6 +519,7 @@ function KRIRow({
               custom
             </span>
           )}
+          <AppetiteChip kri={kri} />
           <button
             onClick={onEditThresholds}
             title="Edit thresholds"
