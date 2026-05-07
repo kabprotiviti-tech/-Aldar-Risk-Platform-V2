@@ -27,6 +27,7 @@ import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { NumericValue } from '@/components/provenance/NumericValue'
 import { KRIThresholdEditor } from '@/components/kri/KRIThresholdEditor'
 import { KRIEntryEditor } from '@/components/kri/KRIEntryEditor'
+import { KRISparkline } from '@/components/kri/KRISparkline'
 import { KRI_DEFINITIONS, type KRIDefinition } from '@/lib/data/kri-definitions'
 import { computeKRIStatus, STATUS_META, type KRIStatus } from '@/lib/data/kri-status'
 import type { Driver } from '@/lib/engine/types'
@@ -102,6 +103,7 @@ function KRIContent() {
               <Th right>Current Value</Th>
               <Th>Latest Entry</Th>
               <Th>Status</Th>
+              <Th>6-mo Trend</Th>
               <Th>Thresholds</Th>
               <Th>Linked Risks</Th>
               <Th>Source</Th>
@@ -185,10 +187,11 @@ function KRIRow({
 }) {
   const driver = drivers.find((d) => d.id === kri.driverId)
   const { thresholdsFor, isOverridden } = useKRIThresholds()
-  const { latestFor } = useKRIEntries()
+  const { latestFor, entriesFor } = useKRIEntries()
   const t = thresholdsFor(kri)
   const overridden = isOverridden(kri.id)
   const latest = latestFor(kri.id)
+  const history = entriesFor(kri.id)
   return (
     <tr style={{ borderTop: '1px solid var(--border-color)' }}>
       <Td mono>{kri.id}</Td>
@@ -288,6 +291,13 @@ function KRIRow({
       <Td>
         <StatusPill
           value={latest ? latest.value : null}
+          thresholds={t}
+          direction={kri.direction}
+        />
+      </Td>
+      <Td>
+        <KRISparkline
+          entries={history}
           thresholds={t}
           direction={kri.direction}
         />
