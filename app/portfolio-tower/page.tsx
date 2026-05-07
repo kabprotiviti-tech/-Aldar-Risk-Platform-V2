@@ -18,10 +18,14 @@
 
 import React from 'react'
 import { SimulationProvider, useSimulation } from '@/lib/context/SimulationContext'
+import { MitigationActionsProvider } from '@/lib/context/MitigationActionsContext'
+import { KRIThresholdsProvider } from '@/lib/context/KRIThresholdsContext'
+import { KRIEntriesProvider } from '@/lib/context/KRIEntriesContext'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { Top10RisksTable } from '@/components/portfolio-tower/Top10RisksTable'
 import { ERMAnnualPlan } from '@/components/portfolio-tower/ERMAnnualPlan'
 import { ConcentrationPanel } from '@/components/portfolio-tower/ConcentrationPanel'
+import { ERMScorecard } from '@/components/portfolio-tower/ERMScorecard'
 import { ENTITIES, HOLDING, SUBSIDIARIES, HIERARCHY_DISCLAIMER } from '@/lib/entities/hierarchy'
 import { entityForRisk, type EntityId } from '@/lib/data/risk-entity-mapping'
 import type { RiskState, Rating } from '@/lib/engine/types'
@@ -86,6 +90,9 @@ function PortfolioTowerContent() {
         </div>
         <StatusBadge tier="MVP" note={`${risks.length} risks across ${ENTITIES.length} entities`} />
       </div>
+
+      {/* E4 — ERM Scorecard at top so the CRO sees KPI roll-up first */}
+      <ERMScorecard />
 
       {/* Group-level heatmap */}
       <EntityHeatmap
@@ -405,7 +412,13 @@ function RatingChip({
 export default function PortfolioTowerPage() {
   return (
     <SimulationProvider>
-      <PortfolioTowerContent />
+      <MitigationActionsProvider>
+        <KRIThresholdsProvider>
+          <KRIEntriesProvider>
+            <PortfolioTowerContent />
+          </KRIEntriesProvider>
+        </KRIThresholdsProvider>
+      </MitigationActionsProvider>
     </SimulationProvider>
   )
 }
