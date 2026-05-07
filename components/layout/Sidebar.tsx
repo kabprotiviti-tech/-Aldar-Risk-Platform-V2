@@ -15,6 +15,7 @@ import {
   Shield,
   ListChecks,
   Gauge,
+  Network,
 } from 'lucide-react'
 import { clsx } from 'clsx'
 
@@ -42,6 +43,12 @@ const navItems = [
     label: 'KRIs',
     icon: Gauge,
     description: 'Key Risk Indicators',
+  },
+  {
+    href: '/portfolio-tower',
+    label: 'Portfolio Tower',
+    icon: Network,
+    description: 'Group + Subsidiaries',
   },
   {
     href: '/scenarios',
