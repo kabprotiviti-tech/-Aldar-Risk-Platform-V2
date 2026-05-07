@@ -16,6 +16,7 @@ import {
   ListChecks,
   Gauge,
   Network,
+  FileBarChart,
 } from 'lucide-react'
 import { clsx } from 'clsx'
 
@@ -49,6 +50,12 @@ const navItems = [
     label: 'Portfolio Tower',
     icon: Network,
     description: 'Group + Subsidiaries',
+  },
+  {
+    href: '/arc-pack',
+    label: 'ARC Pack',
+    icon: FileBarChart,
+    description: 'Board-ready report',
   },
   {
     href: '/scenarios',
