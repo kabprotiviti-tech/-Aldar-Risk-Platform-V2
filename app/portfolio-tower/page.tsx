@@ -19,6 +19,8 @@
 import React from 'react'
 import { SimulationProvider, useSimulation } from '@/lib/context/SimulationContext'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
+import { Top10RisksTable } from '@/components/portfolio-tower/Top10RisksTable'
+import { ERMAnnualPlan } from '@/components/portfolio-tower/ERMAnnualPlan'
 import { ENTITIES, HOLDING, SUBSIDIARIES, HIERARCHY_DISCLAIMER } from '@/lib/entities/hierarchy'
 import { entityForRisk, type EntityId } from '@/lib/data/risk-entity-mapping'
 import type { RiskState, Rating } from '@/lib/engine/types'
@@ -111,6 +113,12 @@ function PortfolioTowerContent() {
           />
         ))}
       </div>
+
+      {/* M4.2 — Top-10 Group risks */}
+      <Top10RisksTable />
+
+      {/* M4.2 — ERM Annual Plan */}
+      <ERMAnnualPlan />
 
       {/* Hierarchy disclaimer */}
       <div
