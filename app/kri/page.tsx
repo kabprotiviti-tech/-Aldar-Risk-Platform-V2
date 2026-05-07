@@ -28,19 +28,25 @@ import { NumericValue } from '@/components/provenance/NumericValue'
 import { KRIThresholdEditor } from '@/components/kri/KRIThresholdEditor'
 import { KRIEntryEditor } from '@/components/kri/KRIEntryEditor'
 import { KRISparkline } from '@/components/kri/KRISparkline'
+import { KRIBreachHistoryModal } from '@/components/kri/KRIBreachHistoryModal'
 import { KRI_DEFINITIONS, type KRIDefinition } from '@/lib/data/kri-definitions'
 import { computeKRIStatus, STATUS_META, type KRIStatus } from '@/lib/data/kri-status'
+import { computeBreachHistory } from '@/lib/data/kri-breach-history'
 import type { Driver } from '@/lib/engine/types'
 
 function KRIContent() {
   const { drivers } = useSimulation()
   const [editingKriId, setEditingKriId] = useState<string | null>(null)
   const [entryKriId, setEntryKriId] = useState<string | null>(null)
+  const [breachKriId, setBreachKriId] = useState<string | null>(null)
   const editingKri = editingKriId
     ? KRI_DEFINITIONS.find((k) => k.id === editingKriId) ?? null
     : null
   const entryKri = entryKriId
     ? KRI_DEFINITIONS.find((k) => k.id === entryKriId) ?? null
+    : null
+  const breachKri = breachKriId
+    ? KRI_DEFINITIONS.find((k) => k.id === breachKriId) ?? null
     : null
 
   return (
@@ -104,6 +110,7 @@ function KRIContent() {
               <Th>Latest Entry</Th>
               <Th>Status</Th>
               <Th>6-mo Trend</Th>
+              <Th>Breaches</Th>
               <Th>Thresholds</Th>
               <Th>Linked Risks</Th>
               <Th>Source</Th>
@@ -117,6 +124,7 @@ function KRIContent() {
                 drivers={drivers}
                 onEditThresholds={() => setEditingKriId(kri.id)}
                 onAddEntry={() => setEntryKriId(kri.id)}
+                onOpenBreaches={() => setBreachKriId(kri.id)}
               />
             ))}
           </tbody>
@@ -170,7 +178,70 @@ function KRIContent() {
       {entryKri && (
         <KRIEntryEditor kri={entryKri} onClose={() => setEntryKriId(null)} />
       )}
+
+      {/* Breach history modal (D6) */}
+      <KRIBreachHistoryModal kri={breachKri} onClose={() => setBreachKriId(null)} />
     </div>
+  )
+}
+
+function BreachCell({
+  totalBreaches,
+  recentBreach,
+  onClick,
+}: {
+  totalBreaches: number
+  recentBreach: import('@/lib/data/kri-breach-history').BreachEvent | null
+  onClick: () => void
+}) {
+  if (totalBreaches === 0) {
+    return (
+      <span
+        style={{
+          fontSize: 10,
+          color: 'var(--text-tertiary)',
+          fontStyle: 'italic',
+        }}
+        title="No status transitions in entry history"
+      >
+        none
+      </span>
+    )
+  }
+  const accent =
+    recentBreach && recentBreach.newStatus === 'red'
+      ? 'var(--risk-critical)'
+      : recentBreach && recentBreach.newStatus === 'amber'
+        ? 'var(--risk-medium)'
+        : 'var(--risk-low)'
+  return (
+    <button
+      onClick={onClick}
+      title="Click to open breach history"
+      style={{
+        display: 'inline-flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        gap: 1,
+        background: 'transparent',
+        border: '1px solid var(--border-color)',
+        borderLeft: `3px solid ${accent}`,
+        borderRadius: 4,
+        padding: '4px 8px',
+        cursor: 'pointer',
+        textAlign: 'left',
+      }}
+    >
+      <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>
+        {totalBreaches} event{totalBreaches === 1 ? '' : 's'}
+      </span>
+      {recentBreach && (
+        <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>
+          {recentBreach.period} ·{' '}
+          {recentBreach.previousStatus ?? 'first'} → {recentBreach.newStatus}
+        </span>
+      )}
+    </button>
   )
 }
 
@@ -179,11 +250,13 @@ function KRIRow({
   drivers,
   onEditThresholds,
   onAddEntry,
+  onOpenBreaches,
 }: {
   kri: KRIDefinition
   drivers: Driver[]
   onEditThresholds: () => void
   onAddEntry: () => void
+  onOpenBreaches: () => void
 }) {
   const driver = drivers.find((d) => d.id === kri.driverId)
   const { thresholdsFor, isOverridden } = useKRIThresholds()
@@ -192,6 +265,9 @@ function KRIRow({
   const overridden = isOverridden(kri.id)
   const latest = latestFor(kri.id)
   const history = entriesFor(kri.id)
+  const breachEvents = computeBreachHistory(history, t, kri.direction)
+  const totalBreaches = breachEvents.length
+  const recentBreach = breachEvents.length > 0 ? breachEvents[breachEvents.length - 1] : null
   return (
     <tr style={{ borderTop: '1px solid var(--border-color)' }}>
       <Td mono>{kri.id}</Td>
@@ -300,6 +376,13 @@ function KRIRow({
           entries={history}
           thresholds={t}
           direction={kri.direction}
+        />
+      </Td>
+      <Td>
+        <BreachCell
+          totalBreaches={totalBreaches}
+          recentBreach={recentBreach}
+          onClick={onOpenBreaches}
         />
       </Td>
       <Td>
