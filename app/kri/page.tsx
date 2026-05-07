@@ -28,6 +28,7 @@ import { NumericValue } from '@/components/provenance/NumericValue'
 import { KRIThresholdEditor } from '@/components/kri/KRIThresholdEditor'
 import { KRIEntryEditor } from '@/components/kri/KRIEntryEditor'
 import { KRI_DEFINITIONS, type KRIDefinition } from '@/lib/data/kri-definitions'
+import { computeKRIStatus, STATUS_META, type KRIStatus } from '@/lib/data/kri-status'
 import type { Driver } from '@/lib/engine/types'
 
 function KRIContent() {
@@ -100,6 +101,7 @@ function KRIContent() {
               <Th>Frequency</Th>
               <Th right>Current Value</Th>
               <Th>Latest Entry</Th>
+              <Th>Status</Th>
               <Th>Thresholds</Th>
               <Th>Linked Risks</Th>
               <Th>Source</Th>
@@ -284,6 +286,13 @@ function KRIRow({
         )}
       </Td>
       <Td>
+        <StatusPill
+          value={latest ? latest.value : null}
+          thresholds={t}
+          direction={kri.direction}
+        />
+      </Td>
+      <Td>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span
             style={{
@@ -381,6 +390,66 @@ const TIER_META = {
   placeholder: { label: 'Placeholder', color: '#FF8C00' },
   ai_hypothesis: { label: 'AI Hypothesis', color: '#A855F7' },
 } as const
+
+function StatusPill({
+  value,
+  thresholds,
+  direction,
+}: {
+  value: number | null
+  thresholds: { amberBoundary: number; redBoundary: number; unit: string }
+  direction: 'higher_is_better' | 'lower_is_better'
+}) {
+  if (value === null) {
+    return (
+      <span
+        title="No manual entry yet — add one to compute traffic-light status"
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 4,
+          padding: '2px 8px',
+          background: 'rgba(120,120,120,0.18)',
+          color: 'var(--text-tertiary)',
+          border: '1px solid rgba(120,120,120,0.45)',
+          borderRadius: 4,
+          fontSize: 10,
+          fontWeight: 700,
+          letterSpacing: 0.4,
+          textTransform: 'uppercase',
+        }}
+      >
+        ⚪ No Data
+      </span>
+    )
+  }
+  const status: KRIStatus = computeKRIStatus(value, thresholds, direction)
+  const m = STATUS_META[status]
+  const dot = status === 'green' ? '🟢' : status === 'amber' ? '🟡' : '🔴'
+  return (
+    <span
+      title={`${m.label} — value ${value} vs amber ${thresholds.amberBoundary}, red ${thresholds.redBoundary}`}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 4,
+        padding: '2px 8px',
+        background: m.bg,
+        color: m.color,
+        border: `1px solid ${m.border}`,
+        borderRadius: 4,
+        fontSize: 10,
+        fontWeight: 700,
+        letterSpacing: 0.4,
+        textTransform: 'uppercase',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      <span aria-hidden>{dot}</span>
+      {m.label}
+    </span>
+  )
+}
 
 function ReliabilityChip({ tier }: { tier: keyof typeof TIER_META }) {
   const m = TIER_META[tier]
