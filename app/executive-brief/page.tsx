@@ -10,6 +10,7 @@ import {
 import { Card, CardHeader, CardTitle, CardBody } from '@/components/ui/Card'
 import { ConfidenceBadge } from '@/components/ui/Badge'
 import { AIInsightBox } from '@/components/ui/AIInsightBox'
+import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { riskRegister, portfolioMetrics } from '@/lib/simulated-data'
 import { internalSnapshot } from '@/lib/internalData'
 
@@ -155,6 +156,7 @@ export default function ExecutiveBriefPage() {
 
   return (
     <div className="space-y-6">
+      <IllustrativeDataBanner />
 
       {/* ── Generate Controls ─────────────────────────────────────────────── */}
       <Card accent glow>

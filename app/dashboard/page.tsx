@@ -28,6 +28,7 @@ import { KPIDrillDownPanel, AI_ALERT_COUNT, type KPIView } from '@/components/KP
 import { FinancialCalculationPanel, ViewCalcButton, type FinancialCalcContext } from '@/components/FinancialCalculationPanel'
 import { TopActionsPanel } from '@/components/TopActionsPanel'
 import { ActionDetailPanel } from '@/components/ActionDetailPanel'
+import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { type Action } from '@/lib/actionEngine'
 import Link from 'next/link'
 import { controlSummary } from '@/lib/controlData'
@@ -474,6 +475,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      <IllustrativeDataBanner />
       {/* Last Updated Bar */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">

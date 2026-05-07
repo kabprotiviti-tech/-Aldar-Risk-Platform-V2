@@ -28,6 +28,7 @@ import { AIInsightBox } from '@/components/ui/AIInsightBox'
 import { RiskDrillDownPanel } from '@/components/RiskDrillDownPanel'
 import { PortfolioDrillDownPanel, type DrillDownView } from '@/components/PortfolioDrillDownPanel'
 import { FinancialCalculationPanel, ViewCalcButton, type FinancialCalcContext } from '@/components/FinancialCalculationPanel'
+import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { PROPAGATION_EXPLANATIONS, CURRENT_SIGNALS, DERIVED_STATE, PROPAGATED_METRICS } from '@/lib/riskPropagationEngine'
 import {
   riskRegister,
@@ -986,6 +987,7 @@ export default function PortfolioPage() {
 
   return (
     <div className="space-y-6">
+      <IllustrativeDataBanner />
 
       {/* ─── Enterprise Risk Overview ─────────────────────────────────────── */}
       <div>

@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardBody } from '@/components/ui/Card'
 import { controls, controlSummary, type Control, type ControlStatus } from '@/lib/controlData'
+import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { evaluateControlStatus, testingSummary, TEST_RESULT_COLOR } from '@/lib/controlTestingEngine'
 import { CONTROL_FAILURE_ACTIONS } from '@/lib/controlActionBridge'
 import { AUDIT_TRAIL, TREND_COLOR, TREND_ICON } from '@/lib/controlAuditTrail'
@@ -473,6 +474,7 @@ function ControlCommandCenterInner() {
 
   return (
     <div className="space-y-6">
+      <IllustrativeDataBanner />
       {/* ── SECTION 1: Page header ─────────────────────────────────────────── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

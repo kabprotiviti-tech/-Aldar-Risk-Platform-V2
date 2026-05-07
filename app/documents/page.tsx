@@ -28,6 +28,7 @@ import { RiskBadge, ConfidenceBadge } from '@/components/ui/Badge'
 import { AIInsightBox } from '@/components/ui/AIInsightBox'
 import { DocumentUpload } from '@/components/DocumentUpload'
 import { DocumentControlExtractor } from '@/components/controls/DocumentControlExtractor'
+import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { ControlAssessmentPanel } from '@/components/simulation/ControlAssessmentPanel'
 
 // ─── Document Intelligence (paste) ───────────────────────────────────────────
@@ -895,6 +896,7 @@ export default function DocumentsPage() {
 
   return (
     <div className="space-y-6">
+      <IllustrativeDataBanner />
       {/* Tab Switcher */}
       <div className="flex items-center gap-1" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0' }}>
         {[
