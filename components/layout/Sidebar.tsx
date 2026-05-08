@@ -19,6 +19,7 @@ import {
   FileBarChart,
   ShieldCheck,
   ShieldQuestion,
+  ShieldHalf,
 } from 'lucide-react'
 import { clsx } from 'clsx'
 
@@ -64,6 +65,12 @@ const navItems = [
     label: 'Risk Appetite',
     icon: ShieldQuestion,
     description: 'Appetite statements',
+  },
+  {
+    href: '/three-lines-of-defense',
+    label: '3 Lines of Defense',
+    icon: ShieldHalf,
+    description: 'Operating model',
   },
   {
     href: '/audit-trail',
