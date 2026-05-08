@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   ShieldQuestion,
   ShieldHalf,
+  Landmark,
 } from 'lucide-react'
 import { clsx } from 'clsx'
 
@@ -71,6 +72,12 @@ const navItems = [
     label: '3 Lines of Defense',
     icon: ShieldHalf,
     description: 'Operating model',
+  },
+  {
+    href: '/regulator-map',
+    label: 'Regulator Map',
+    icon: Landmark,
+    description: 'UAE regulatory bodies',
   },
   {
     href: '/audit-trail',
