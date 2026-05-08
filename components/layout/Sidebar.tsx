@@ -18,6 +18,7 @@ import {
   Network,
   FileBarChart,
   ShieldCheck,
+  ShieldQuestion,
 } from 'lucide-react'
 import { clsx } from 'clsx'
 
@@ -57,6 +58,12 @@ const navItems = [
     label: 'ARC Pack',
     icon: FileBarChart,
     description: 'Board-ready report',
+  },
+  {
+    href: '/risk-appetite',
+    label: 'Risk Appetite',
+    icon: ShieldQuestion,
+    description: 'Appetite statements',
   },
   {
     href: '/audit-trail',
