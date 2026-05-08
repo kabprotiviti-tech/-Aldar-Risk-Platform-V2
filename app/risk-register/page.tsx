@@ -18,6 +18,7 @@ import { RiskDraftProvider, useRiskDrafts, type RiskDraft, type RiskStatus } fro
 import { MitigationActionsProvider, useMitigationActions } from '@/lib/context/MitigationActionsContext'
 import { KRIThresholdsProvider } from '@/lib/context/KRIThresholdsContext'
 import { KRIEntriesProvider } from '@/lib/context/KRIEntriesContext'
+import { EscalationsProvider } from '@/lib/context/EscalationsContext'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { RiskDetailDrawer } from '@/components/risk-register/RiskDetailDrawer'
@@ -630,7 +631,7 @@ function Td({
   )
 }
 
-// ── Page wrapper that provides simulation + draft + mitigation + KRI contexts ──
+// ── Page wrapper providing simulation + draft + mitigation + KRI + escalations ──
 export default function RiskRegisterPage() {
   return (
     <SimulationProvider>
@@ -638,7 +639,9 @@ export default function RiskRegisterPage() {
         <MitigationActionsProvider>
           <KRIThresholdsProvider>
             <KRIEntriesProvider>
-              <RiskRegisterContent />
+              <EscalationsProvider>
+                <RiskRegisterContent />
+              </EscalationsProvider>
             </KRIEntriesProvider>
           </KRIThresholdsProvider>
         </MitigationActionsProvider>

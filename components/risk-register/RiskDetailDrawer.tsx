@@ -17,8 +17,8 @@
  * (live state) or is wrapped in a NumericValue with provenance.
  */
 
-import React from 'react'
-import { X } from 'lucide-react'
+import React, { useState } from 'react'
+import { X, ArrowUpCircle } from 'lucide-react'
 import type { RiskState, Rating } from '@/lib/engine/types'
 import { useSimulation } from '@/lib/context/SimulationContext'
 import { useKRIThresholds } from '@/lib/context/KRIThresholdsContext'
@@ -31,7 +31,9 @@ import {
   type KRIDefinition,
 } from '@/lib/data/kri-definitions'
 import { computeKRIStatus, STATUS_META } from '@/lib/data/kri-status'
+import { useEscalations } from '@/lib/context/EscalationsContext'
 import { MitigationActionsSection } from './MitigationActionsSection'
+import { EscalateToGroupModal } from './EscalateToGroupModal'
 
 interface Props {
   risk: RiskState | null
@@ -73,6 +75,9 @@ function RatingPill({ rating }: { rating: Rating }) {
 
 export function RiskDetailDrawer({ risk, onClose }: Props) {
   const { drivers } = useSimulation()
+  const { pendingFor } = useEscalations()
+  const [escalateOpen, setEscalateOpen] = useState(false)
+  const hasPending = risk ? !!pendingFor(risk.id) : false
 
   // Resolve back to the seed RiskDef for static fields the engine state
   // doesn't carry (cause / event / impact / controls / financialBase ref).
@@ -189,6 +194,33 @@ export function RiskDetailDrawer({ risk, onClose }: Props) {
               Owner: <strong style={{ color: 'var(--text-primary)' }}>{risk.owner}</strong>
             </div>
           </div>
+          <button
+            onClick={() => setEscalateOpen(true)}
+            title="Escalate to Group"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              background: hasPending
+                ? 'rgba(245,197,24,0.18)'
+                : 'var(--accent-primary)',
+              color: hasPending ? 'var(--risk-medium)' : 'var(--on-accent)',
+              border: hasPending
+                ? '1px solid rgba(245,197,24,0.55)'
+                : 'none',
+              padding: '6px 10px',
+              borderRadius: 6,
+              fontSize: 10,
+              fontWeight: 700,
+              cursor: 'pointer',
+              letterSpacing: 0.5,
+              textTransform: 'uppercase',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <ArrowUpCircle size={11} />
+            {hasPending ? 'Re-escalate' : 'Escalate'}
+          </button>
           <button
             onClick={onClose}
             aria-label="Close"
@@ -417,6 +449,12 @@ export function RiskDetailDrawer({ risk, onClose }: Props) {
           </div>
         </div>
       </aside>
+
+      {/* E10 — Escalate to Group modal */}
+      <EscalateToGroupModal
+        risk={escalateOpen ? risk : null}
+        onClose={() => setEscalateOpen(false)}
+      />
     </>
   )
 }
