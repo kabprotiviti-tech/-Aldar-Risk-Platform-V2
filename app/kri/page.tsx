@@ -24,6 +24,7 @@ import {
   useKRIEntries,
 } from '@/lib/context/KRIEntriesContext'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
+import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { NumericValue } from '@/components/provenance/NumericValue'
 import { KRIThresholdEditor } from '@/components/kri/KRIThresholdEditor'
 import { KRIEntryEditor } from '@/components/kri/KRIEntryEditor'
@@ -51,6 +52,7 @@ function KRIContent() {
 
   return (
     <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <IllustrativeDataBanner pilotFeeds="Aldar PMS / Yardi / SAP for live KRI feeds" />
       <div
         style={{
           display: 'flex',

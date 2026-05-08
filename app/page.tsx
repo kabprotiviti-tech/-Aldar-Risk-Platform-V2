@@ -26,18 +26,33 @@ import { RISKS } from '@/lib/engine/seedData'
 // ═══════════════════════════════════════════════════════════════════════════
 
 function useCountUp(target: number, duration = 1600) {
-  const [value, setValue] = useState(0)
+  // Lazy-init with the target so SSR renders the real value immediately
+  // (no flash from "0" to actual on first paint). Animation only runs
+  // when the target subsequently changes. Hydration-safe: server and
+  // client both render the same initial value.
+  const [value, setValue] = useState(target)
+  const previousTargetRef = React.useRef(target)
   useEffect(() => {
+    // Skip animation on the very first effect run — value already equals
+    // target from the lazy initializer.
+    if (previousTargetRef.current === target && value === target) {
+      previousTargetRef.current = target
+      return
+    }
     const t0 = performance.now()
+    const start = previousTargetRef.current
+    const delta = target - start
     let raf = 0
     const tick = (t: number) => {
       const p = Math.min(1, (t - t0) / duration)
       const eased = 1 - Math.pow(1 - p, 3)
-      setValue(Math.round(target * eased))
+      setValue(Math.round(start + delta * eased))
       if (p < 1) raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
+    previousTargetRef.current = target
     return () => cancelAnimationFrame(raf)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [target, duration])
   return value
 }

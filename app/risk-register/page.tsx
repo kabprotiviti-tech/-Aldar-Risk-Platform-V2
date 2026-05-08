@@ -19,6 +19,7 @@ import { MitigationActionsProvider, useMitigationActions } from '@/lib/context/M
 import { KRIThresholdsProvider } from '@/lib/context/KRIThresholdsContext'
 import { KRIEntriesProvider } from '@/lib/context/KRIEntriesContext'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
+import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { RiskDetailDrawer } from '@/components/risk-register/RiskDetailDrawer'
 import { RiskFormModal } from '@/components/risk-register/RiskFormModal'
 import { RiskHeatmap } from '@/components/risk-register/RiskHeatmap'
@@ -153,6 +154,7 @@ function RiskRegisterContent() {
 
   return (
     <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <IllustrativeDataBanner pilotFeeds="Aldar segment P&L for AED exposure baselines" />
       {/* Header + status badge */}
       <div
         style={{

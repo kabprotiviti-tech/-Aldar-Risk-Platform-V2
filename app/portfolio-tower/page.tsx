@@ -22,6 +22,7 @@ import { MitigationActionsProvider } from '@/lib/context/MitigationActionsContex
 import { KRIThresholdsProvider } from '@/lib/context/KRIThresholdsContext'
 import { KRIEntriesProvider } from '@/lib/context/KRIEntriesContext'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
+import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { Top10RisksTable } from '@/components/portfolio-tower/Top10RisksTable'
 import { ERMAnnualPlan } from '@/components/portfolio-tower/ERMAnnualPlan'
 import { ConcentrationPanel } from '@/components/portfolio-tower/ConcentrationPanel'
@@ -53,6 +54,7 @@ function PortfolioTowerContent() {
 
   return (
     <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <IllustrativeDataBanner pilotFeeds="Aldar segment P&L for AED exposure baselines" />
       <div
         style={{
           display: 'flex',

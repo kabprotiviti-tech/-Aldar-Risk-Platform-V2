@@ -59,7 +59,13 @@ function uid(): string {
 }
 
 export function KRIEntriesProvider({ children }: { children: React.ReactNode }) {
-  const [entries, setEntries] = useState<KRIEntry[]>([])
+  // Lazy-init with the demo seed so SSR renders the seeded values
+  // immediately (no flash from "No Data" on first paint). The seed is
+  // deterministic (no Date.now / Math.random) so SSR and client produce
+  // identical output — no hydration mismatch.
+  // On hydration, the effect below replaces this with whatever
+  // localStorage has (real user data wins).
+  const [entries, setEntries] = useState<KRIEntry[]>(() => buildKRIDemoEntries())
   const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
