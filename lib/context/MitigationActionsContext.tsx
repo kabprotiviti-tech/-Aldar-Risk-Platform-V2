@@ -117,19 +117,20 @@ export function MitigationActionsProvider({ children }: { children: React.ReactN
         return updated
       }),
     )
-    if (updated) {
+    const u = updated as MitigationAction | null
+    if (u) {
       const isStatus = 'status' in patch
       recordAuditEventDirect({
         category: 'mitigation',
         action: isStatus ? 'status_change' : 'update',
-        actor: updated.owner || 'unknown',
-        targetId: updated.riskId,
+        actor: u.owner || 'unknown',
+        targetId: u.riskId,
         summary: isStatus
-          ? `Mitigation "${updated.name}" on ${updated.riskId} → ${updated.status}.`
-          : `Mitigation "${updated.name}" on ${updated.riskId} updated (${Object.keys(patch).join(', ')}).`,
+          ? `Mitigation "${u.name}" on ${u.riskId} → ${u.status}.`
+          : `Mitigation "${u.name}" on ${u.riskId} updated (${Object.keys(patch).join(', ')}).`,
       })
     }
-    return updated
+    return u
   }, [])
 
   const removeAction = useCallback<CtxValue['removeAction']>((id) => {
