@@ -21,6 +21,7 @@ import {
   ShieldQuestion,
   ShieldHalf,
   Landmark,
+  BookOpen,
 } from 'lucide-react'
 import { clsx } from 'clsx'
 
@@ -78,6 +79,12 @@ const navItems = [
     label: 'Regulator Map',
     icon: Landmark,
     description: 'UAE regulatory bodies',
+  },
+  {
+    href: '/risk-library',
+    label: 'Risk Library',
+    icon: BookOpen,
+    description: 'UAE risks + peer benchmark',
   },
   {
     href: '/audit-trail',
