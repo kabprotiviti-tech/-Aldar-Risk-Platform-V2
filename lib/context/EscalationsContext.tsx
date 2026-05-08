@@ -25,6 +25,7 @@ import {
   createPersistedContext,
   uid,
 } from '@/lib/context/createPersistedContext'
+import { recordAuditEventDirect } from '@/lib/context/AuditTrailContext'
 
 export type EscalationStatus = 'pending' | 'acknowledged' | 'closed'
 
@@ -108,19 +109,54 @@ function EscalationsInner({ children }: { children: React.ReactNode }) {
         status: 'pending',
       }
       setState((prev) => [...prev, full])
+      recordAuditEventDirect({
+        category: 'escalation',
+        action: 'create',
+        actor: full.escalatedBy || 'unknown',
+        targetId: full.riskId,
+        summary: `Escalated ${full.riskId} ${full.riskName} to Group (residual ${full.snapshot.residualScore.toFixed(1)}, rating ${full.snapshot.rating}).`,
+      })
       return full
     },
     [setState],
   )
 
   const setStatus = useCallback<CtxValue['setStatus']>(
-    (id, status) =>
-      setState((prev) => prev.map((e) => (e.id === id ? { ...e, status } : e))),
+    (id, status) => {
+      setState((prev) => {
+        const next = prev.map((e) => (e.id === id ? { ...e, status } : e))
+        const target = prev.find((e) => e.id === id)
+        if (target) {
+          recordAuditEventDirect({
+            category: 'escalation',
+            action: 'status_change',
+            actor: 'group_erm',
+            targetId: target.riskId,
+            summary: `Escalation ${id} for ${target.riskId} marked ${status}.`,
+          })
+        }
+        return next
+      })
+    },
     [setState],
   )
 
   const removeEscalation = useCallback<CtxValue['removeEscalation']>(
-    (id) => setState((prev) => prev.filter((e) => e.id !== id)),
+    (id) => {
+      setState((prev) => {
+        const target = prev.find((e) => e.id === id)
+        if (target) {
+          recordAuditEventDirect({
+            category: 'escalation',
+            action: 'delete',
+            actor: 'group_erm',
+            targetId: target.riskId,
+            summary: `Escalation ${id} for ${target.riskId} removed.`,
+          })
+        }
+        return prev.filter((e) => e.id !== id)
+      })
+    },
     [setState],
   )
 

@@ -19,6 +19,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { RiskDef } from '@/lib/engine/types'
+import { recordAuditEventDirect } from '@/lib/context/AuditTrailContext'
 
 const STORAGE_KEY = 'aldar-risk-drafts-v1'
 
@@ -113,6 +114,13 @@ export function RiskDraftProvider({ children }: { children: React.ReactNode }) {
         createdBy: author,
       }
       setDrafts((prev) => [...prev, full])
+      recordAuditEventDirect({
+        category: 'risk',
+        action: 'create',
+        actor: author,
+        targetId: full.id,
+        summary: `New draft risk ${full.id} ${full.name} added.`,
+      })
       return full
     },
     [],
@@ -135,6 +143,18 @@ export function RiskDraftProvider({ children }: { children: React.ReactNode }) {
           return updated
         }),
       )
+      if (updated) {
+        const isStatus = 'status' in patch
+        recordAuditEventDirect({
+          category: 'risk',
+          action: isStatus ? 'status_change' : 'update',
+          actor: author,
+          targetId: id,
+          summary: isStatus
+            ? `Draft ${id} status set to ${(patch as { status?: string }).status ?? 'unknown'}.`
+            : `Draft ${id} updated (${Object.keys(patch).join(', ')}).`,
+        })
+      }
       return updated
     },
     [],
@@ -142,6 +162,13 @@ export function RiskDraftProvider({ children }: { children: React.ReactNode }) {
 
   const removeDraft = useCallback<RiskDraftContextValue['removeDraft']>((id) => {
     setDrafts((prev) => prev.filter((d) => d.id !== id))
+    recordAuditEventDirect({
+      category: 'risk',
+      action: 'delete',
+      actor: 'Risk Champion (demo)',
+      targetId: id,
+      summary: `Draft ${id} removed.`,
+    })
   }, [])
 
   const value = useMemo<RiskDraftContextValue>(

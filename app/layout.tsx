@@ -5,6 +5,7 @@ import './globals.css'
 import { ThemeProvider } from '@/lib/context/ThemeContext'
 import { DerivedRisksProvider } from '@/lib/context/DerivedRisksContext'
 import { UploadedDocumentProvider } from '@/lib/context/UploadedDocumentContext'
+import { AuditTrailProvider } from '@/lib/context/AuditTrailContext'
 import { AppChrome } from '@/components/layout/AppChrome'
 import { EnvironmentBanner } from '@/components/provenance/EnvironmentBanner'
 
@@ -41,12 +42,14 @@ export default function RootLayout({
       </head>
       <body className={inter.variable} suppressHydrationWarning>
         <ThemeProvider>
-          <UploadedDocumentProvider>
-            <DerivedRisksProvider>
-              <EnvironmentBanner env="demo" />
-              <AppChrome>{children}</AppChrome>
-            </DerivedRisksProvider>
-          </UploadedDocumentProvider>
+          <AuditTrailProvider>
+            <UploadedDocumentProvider>
+              <DerivedRisksProvider>
+                <EnvironmentBanner env="demo" />
+                <AppChrome>{children}</AppChrome>
+              </DerivedRisksProvider>
+            </UploadedDocumentProvider>
+          </AuditTrailProvider>
         </ThemeProvider>
       </body>
     </html>

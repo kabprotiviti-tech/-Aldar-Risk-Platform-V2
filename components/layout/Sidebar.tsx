@@ -17,6 +17,7 @@ import {
   Gauge,
   Network,
   FileBarChart,
+  ShieldCheck,
 } from 'lucide-react'
 import { clsx } from 'clsx'
 
@@ -56,6 +57,12 @@ const navItems = [
     label: 'ARC Pack',
     icon: FileBarChart,
     description: 'Board-ready report',
+  },
+  {
+    href: '/audit-trail',
+    label: 'Audit Trail',
+    icon: ShieldCheck,
+    description: 'Append-only event log',
   },
   {
     href: '/scenarios',

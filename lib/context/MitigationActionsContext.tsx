@@ -20,6 +20,7 @@ import React, {
   useMemo,
   useState,
 } from 'react'
+import { recordAuditEventDirect } from '@/lib/context/AuditTrailContext'
 
 const STORAGE_KEY = 'aldar-mitigation-actions-v1'
 
@@ -91,6 +92,13 @@ export function MitigationActionsProvider({ children }: { children: React.ReactN
       updatedAt: now,
     }
     setActions((prev) => [...prev, full])
+    recordAuditEventDirect({
+      category: 'mitigation',
+      action: 'create',
+      actor: full.owner || 'unknown',
+      targetId: full.riskId,
+      summary: `New mitigation "${full.name}" added on ${full.riskId} (due ${full.dueDate}).`,
+    })
     return full
   }, [])
 
@@ -109,11 +117,35 @@ export function MitigationActionsProvider({ children }: { children: React.ReactN
         return updated
       }),
     )
+    if (updated) {
+      const isStatus = 'status' in patch
+      recordAuditEventDirect({
+        category: 'mitigation',
+        action: isStatus ? 'status_change' : 'update',
+        actor: updated.owner || 'unknown',
+        targetId: updated.riskId,
+        summary: isStatus
+          ? `Mitigation "${updated.name}" on ${updated.riskId} → ${updated.status}.`
+          : `Mitigation "${updated.name}" on ${updated.riskId} updated (${Object.keys(patch).join(', ')}).`,
+      })
+    }
     return updated
   }, [])
 
   const removeAction = useCallback<CtxValue['removeAction']>((id) => {
-    setActions((prev) => prev.filter((a) => a.id !== id))
+    setActions((prev) => {
+      const target = prev.find((a) => a.id === id)
+      if (target) {
+        recordAuditEventDirect({
+          category: 'mitigation',
+          action: 'delete',
+          actor: target.owner || 'unknown',
+          targetId: target.riskId,
+          summary: `Mitigation "${target.name}" on ${target.riskId} removed.`,
+        })
+      }
+      return prev.filter((a) => a.id !== id)
+    })
   }, [])
 
   const isOverdue = useCallback<CtxValue['isOverdue']>((a) => {

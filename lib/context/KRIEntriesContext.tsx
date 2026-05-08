@@ -20,6 +20,7 @@ import React, {
   useState,
 } from 'react'
 import { buildKRIDemoEntries } from '@/lib/data/kri-demo-seed'
+import { recordAuditEventDirect } from '@/lib/context/AuditTrailContext'
 
 const STORAGE_KEY = 'aldar-kri-entries-v1'
 /**
@@ -153,11 +154,35 @@ export function KRIEntriesProvider({ children }: { children: React.ReactNode }) 
       }
       return [...prev, saved]
     })
+    // Record after the state-update closure so `saved` is set.
+    queueMicrotask(() => {
+      if (!saved) return
+      const isUpdate = !!providedId || (!!rest.kriId && !!rest.period)
+      recordAuditEventDirect({
+        category: 'kri_entry',
+        action: isUpdate ? 'update' : 'create',
+        actor: saved.enteredBy || 'unknown',
+        targetId: saved.kriId,
+        summary: `KRI ${saved.kriId} ${saved.period}: value ${saved.value} entered.`,
+      })
+    })
     return saved
   }, [])
 
   const removeEntry = useCallback<CtxValue['removeEntry']>((id) => {
-    setEntries((prev) => prev.filter((e) => e.id !== id))
+    setEntries((prev) => {
+      const target = prev.find((e) => e.id === id)
+      if (target) {
+        recordAuditEventDirect({
+          category: 'kri_entry',
+          action: 'delete',
+          actor: target.enteredBy || 'unknown',
+          targetId: target.kriId,
+          summary: `KRI ${target.kriId} ${target.period} entry removed.`,
+        })
+      }
+      return prev.filter((e) => e.id !== id)
+    })
   }, [])
 
   const value = useMemo<CtxValue>(

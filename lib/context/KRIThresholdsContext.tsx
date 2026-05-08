@@ -21,6 +21,7 @@ import React, {
   useState,
 } from 'react'
 import type { KRIDefinition, KRIThresholds } from '@/lib/data/kri-definitions'
+import { recordAuditEventDirect } from '@/lib/context/AuditTrailContext'
 
 const STORAGE_KEY = 'aldar-kri-thresholds-v1'
 
@@ -73,6 +74,13 @@ export function KRIThresholdsProvider({ children }: { children: React.ReactNode 
 
   const setThresholds = useCallback<CtxValue['setThresholds']>((kriId, t) => {
     setOverrides((prev) => ({ ...prev, [kriId]: t }))
+    recordAuditEventDirect({
+      category: 'kri_threshold',
+      action: 'update',
+      actor: 'KRI Owner (demo)',
+      targetId: kriId,
+      summary: `KRI ${kriId} thresholds set: amber=${t.amberBoundary}, red=${t.redBoundary}.`,
+    })
   }, [])
 
   const resetThresholds = useCallback<CtxValue['resetThresholds']>((kriId) => {
@@ -80,6 +88,13 @@ export function KRIThresholdsProvider({ children }: { children: React.ReactNode 
       const next = { ...prev }
       delete next[kriId]
       return next
+    })
+    recordAuditEventDirect({
+      category: 'kri_threshold',
+      action: 'delete',
+      actor: 'KRI Owner (demo)',
+      targetId: kriId,
+      summary: `KRI ${kriId} threshold override removed (reverted to default).`,
     })
   }, [])
 
