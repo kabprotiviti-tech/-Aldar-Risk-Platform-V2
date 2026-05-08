@@ -23,6 +23,9 @@
 import React, { useCallback } from 'react'
 import { Printer, FileText } from 'lucide-react'
 import { SimulationProvider, useSimulation } from '@/lib/context/SimulationContext'
+import { KRIThresholdsProvider } from '@/lib/context/KRIThresholdsContext'
+import { KRIEntriesProvider } from '@/lib/context/KRIEntriesContext'
+import { MitigationActionsProvider } from '@/lib/context/MitigationActionsContext'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { NumericValue } from '@/components/provenance/NumericValue'
 import {
@@ -32,6 +35,7 @@ import {
   ALDAR_Q1_26_BACKLOG,
 } from '@/lib/data/aldar-financials'
 import { RiskContentSection } from '@/components/arc-pack/RiskContentSection'
+import { ARCFinalSections } from '@/components/arc-pack/ARCFinalSections'
 
 function CoverPage() {
   const today = new Date().toLocaleDateString('en-AE', {
@@ -167,10 +171,10 @@ function TableOfContents() {
   const items: { num: string; title: string; status: string }[] = [
     { num: '1', title: 'Cover & Anchor Figures', status: 'live' },
     { num: '2', title: 'Group Risk Posture (top-10, heatmap, narrative)', status: 'live' },
-    { num: '3', title: 'KRI Summary & Breach Posture', status: 'ships in E8' },
-    { num: '4', title: 'Scenario Results (Mild / Moderate / Severe)', status: 'ships in E8' },
-    { num: '5', title: 'Outstanding Mitigation Actions', status: 'ships in E8' },
-    { num: '6', title: 'Sign-off Block', status: 'ships in E8' },
+    { num: '3', title: 'KRI Summary & Breach Posture', status: 'live' },
+    { num: '4', title: 'Scenario Results (Mild / Moderate / Severe)', status: 'live' },
+    { num: '5', title: 'Outstanding Mitigation Actions', status: 'live' },
+    { num: '6', title: 'Sign-off Block', status: 'live' },
   ]
   return (
     <section
@@ -266,10 +270,11 @@ function TableOfContents() {
           lineHeight: 1.5,
         }}
       >
-        <strong style={{ color: 'var(--text-primary)' }}>E6 scaffold.</strong>{' '}
+        <strong style={{ color: 'var(--text-primary)' }}>All 6 sections live.</strong>{' '}
         Click <em>Print / Save as PDF</em> to produce a board-ready document
-        using the browser&rsquo;s native engine. Sections 2-6 ship in
-        patches E7 and E8 — they will appear in the same printable layout.
+        using the browser&rsquo;s native engine. The on-screen toolbar,
+        sidebar, and demo banners are hidden in print so the output reads
+        as a polished pack.
       </div>
     </section>
   )
@@ -332,11 +337,11 @@ function ARCPackContent() {
             Print-friendly Audit &amp; Risk Committee deliverable.
             Review on screen, then click Print / Save as PDF for a
             board-ready document. {risks.length} engine risks in current scope.
-            Sections 2–6 ship in E7 and E8.
+            All 6 sections live.
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-          <StatusBadge tier="MVP" note="Sections 1+2 live; sections 3-6 in E8" />
+          <StatusBadge tier="LIVE" note="All 6 sections live" />
           <button
             onClick={handlePrint}
             style={{
@@ -365,6 +370,7 @@ function ARCPackContent() {
         <CoverPage />
         <TableOfContents />
         <RiskContentSection />
+        <ARCFinalSections />
       </div>
 
       {/* Print styles — applied only when printing */}
@@ -410,7 +416,13 @@ function ARCPackContent() {
 export default function ARCPackPage() {
   return (
     <SimulationProvider>
-      <ARCPackContent />
+      <KRIThresholdsProvider>
+        <KRIEntriesProvider>
+          <MitigationActionsProvider>
+            <ARCPackContent />
+          </MitigationActionsProvider>
+        </KRIEntriesProvider>
+      </KRIThresholdsProvider>
     </SimulationProvider>
   )
 }
