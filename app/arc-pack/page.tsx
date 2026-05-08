@@ -31,6 +31,7 @@ import {
   ALDAR_FY25_NET_PROFIT_AFTER_TAX,
   ALDAR_Q1_26_BACKLOG,
 } from '@/lib/data/aldar-financials'
+import { RiskContentSection } from '@/components/arc-pack/RiskContentSection'
 
 function CoverPage() {
   const today = new Date().toLocaleDateString('en-AE', {
@@ -164,8 +165,8 @@ function AnchorTile({
 
 function TableOfContents() {
   const items: { num: string; title: string; status: string }[] = [
-    { num: '1', title: 'Cover & Anchor Figures', status: 'this section' },
-    { num: '2', title: 'Group Risk Posture (top-10, heatmap, narrative)', status: 'ships in E7' },
+    { num: '1', title: 'Cover & Anchor Figures', status: 'live' },
+    { num: '2', title: 'Group Risk Posture (top-10, heatmap, narrative)', status: 'live' },
     { num: '3', title: 'KRI Summary & Breach Posture', status: 'ships in E8' },
     { num: '4', title: 'Scenario Results (Mild / Moderate / Severe)', status: 'ships in E8' },
     { num: '5', title: 'Outstanding Mitigation Actions', status: 'ships in E8' },
@@ -235,12 +236,12 @@ function TableOfContents() {
               style={{
                 fontSize: 9,
                 fontWeight: 700,
-                color: it.status === 'this section' ? 'var(--risk-low)' : 'var(--text-tertiary)',
+                color: it.status === 'live' ? 'var(--risk-low)' : 'var(--text-tertiary)',
                 background:
-                  it.status === 'this section'
+                  it.status === 'live'
                     ? 'rgba(34,197,94,0.18)'
                     : 'var(--bg-secondary)',
-                border: `1px solid ${it.status === 'this section' ? 'rgba(34,197,94,0.55)' : 'var(--border-color)'}`,
+                border: `1px solid ${it.status === 'live' ? 'rgba(34,197,94,0.55)' : 'var(--border-color)'}`,
                 padding: '2px 8px',
                 borderRadius: 3,
                 letterSpacing: 0.4,
@@ -335,7 +336,7 @@ function ARCPackContent() {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-          <StatusBadge tier="MVP" note="E6 scaffold; E7+E8 pending" />
+          <StatusBadge tier="MVP" note="Sections 1+2 live; sections 3-6 in E8" />
           <button
             onClick={handlePrint}
             style={{
@@ -363,6 +364,7 @@ function ARCPackContent() {
       <div className="arc-document">
         <CoverPage />
         <TableOfContents />
+        <RiskContentSection />
       </div>
 
       {/* Print styles — applied only when printing */}
