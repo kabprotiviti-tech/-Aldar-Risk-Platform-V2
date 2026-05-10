@@ -91,7 +91,7 @@ function MyDashboardContent() {
   const { events } = useAuditTrail()
 
   const myDrafts = useMemo(
-    () => drafts.filter((d) => persona.match.includes(d.createdBy as string) || personaId === 'erm'),
+    () => drafts.filter((d) => persona.match.some((m) => m === d.createdBy) || personaId === 'erm'),
     [drafts, persona, personaId],
   )
 
