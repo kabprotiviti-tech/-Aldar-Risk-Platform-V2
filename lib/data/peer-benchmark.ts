@@ -21,7 +21,7 @@ export interface PeerProfile {
   id: string
   name: string
   ticker: string
-  exchange: 'ADX' | 'DFM'
+  exchange: string
   /** One-line positioning. */
   positioning: string
 }
