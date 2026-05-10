@@ -11,7 +11,8 @@
  * or is clearly labeled (e.g. "Status workflow ships in C5").
  */
 
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { SimulationProvider, useSimulation } from '@/lib/context/SimulationContext'
 import { RiskDraftProvider, useRiskDrafts, type RiskDraft, type RiskStatus } from '@/lib/context/RiskDraftContext'
@@ -83,6 +84,16 @@ function RiskRegisterContent() {
   const [selected, setSelected] = useState<RiskState | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<RiskDraft | null>(null)
+
+  // Drill-down: ?focus=R-NNN auto-opens the matching risk drawer.
+  // Powered by Top10RisksTable / heatmap pills / Personal Dashboard cards.
+  const searchParams = useSearchParams()
+  const focusId = searchParams?.get('focus') || null
+  useEffect(() => {
+    if (!focusId) return
+    const match = risks.find((r) => r.id === focusId)
+    if (match) setSelected(match)
+  }, [focusId, risks])
 
   // Per-risk action summary helper.
   function summarizeActions(riskId: string) {

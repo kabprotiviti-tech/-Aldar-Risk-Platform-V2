@@ -22,10 +22,17 @@ import {
   ShieldHalf,
   Landmark,
   BookOpen,
+  UserCircle2,
 } from 'lucide-react'
 import { clsx } from 'clsx'
 
 const navItems = [
+  {
+    href: '/my-dashboard',
+    label: 'My Dashboard',
+    icon: UserCircle2,
+    description: 'Personal "My Day" view',
+  },
   {
     href: '/dashboard',
     label: 'Dashboard',

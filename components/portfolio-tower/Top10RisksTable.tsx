@@ -13,6 +13,7 @@
  */
 
 import React, { useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { useSimulation } from '@/lib/context/SimulationContext'
 import { entityForRisk } from '@/lib/data/risk-entity-mapping'
@@ -33,6 +34,7 @@ function ratingColor(r: Rating): string {
 
 export function Top10RisksTable() {
   const { risks } = useSimulation()
+  const router = useRouter()
   const [sortKey, setSortKey] = useState<SortKey>('residual')
 
   const sorted = useMemo(() => {
@@ -135,7 +137,22 @@ export function Top10RisksTable() {
             const entity = getEntity(entityId)
             const trend = r.deltaExposureAedMn
             return (
-              <tr key={r.id} style={{ borderTop: '1px solid var(--border-color)' }}>
+              <tr
+                key={r.id}
+                onClick={() => router.push(`/risk-register?focus=${r.id}`)}
+                title={`Open ${r.id} drill-down`}
+                style={{
+                  borderTop: '1px solid var(--border-color)',
+                  cursor: 'pointer',
+                  transition: 'background 0.12s ease',
+                }}
+                onMouseEnter={(e) => {
+                  ;(e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'
+                }}
+                onMouseLeave={(e) => {
+                  ;(e.currentTarget as HTMLElement).style.background = 'transparent'
+                }}
+              >
                 <Td muted>{idx + 1}</Td>
                 <Td mono>{r.id}</Td>
                 <Td>{r.name}</Td>
@@ -213,8 +230,9 @@ export function Top10RisksTable() {
           borderTop: '1px solid var(--border-color)',
         }}
       >
-        Δ shows change in AED exposure vs baseline scenario. Entity ownership
-        is illustrative for MVP; pilot lifts from Aldar register.
+        Δ shows change in AED exposure vs baseline scenario. Click any row
+        to open the risk drawer on /risk-register. Entity ownership is
+        illustrative for MVP; pilot lifts from Aldar register.
       </div>
     </div>
   )

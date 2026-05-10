@@ -13,6 +13,7 @@
  */
 
 import React, { useState } from 'react'
+import Link from 'next/link'
 import { Pencil, PlusCircle } from 'lucide-react'
 import { SimulationProvider, useSimulation } from '@/lib/context/SimulationContext'
 import {
@@ -548,21 +549,24 @@ function KRIRow({
         ) : (
           <div style={{ display: 'inline-flex', flexWrap: 'wrap', gap: 4 }}>
             {kri.linkedRiskIds.map((rid) => (
-              <span
+              <Link
                 key={rid}
+                href={`/risk-register?focus=${rid}`}
+                title={`Open ${rid} drill-down`}
                 style={{
                   fontSize: 9,
                   fontWeight: 700,
                   background: 'var(--bg-primary)',
-                  color: 'var(--text-secondary)',
-                  border: '1px solid var(--border-color)',
+                  color: 'var(--accent-primary)',
+                  border: '1px solid rgba(255,102,0,0.4)',
                   padding: '1px 5px',
                   borderRadius: 3,
                   fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                  textDecoration: 'none',
                 }}
               >
                 {rid}
-              </span>
+              </Link>
             ))}
           </div>
         )}

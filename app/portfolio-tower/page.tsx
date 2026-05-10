@@ -17,6 +17,7 @@
  */
 
 import React from 'react'
+import Link from 'next/link'
 import { SimulationProvider, useSimulation } from '@/lib/context/SimulationContext'
 import { MitigationActionsProvider } from '@/lib/context/MitigationActionsContext'
 import { KRIThresholdsProvider } from '@/lib/context/KRIThresholdsContext'
@@ -331,9 +332,10 @@ function EntityHeatmap({
                     }}
                   >
                     {matched.map((r) => (
-                      <span
+                      <Link
                         key={r.id}
-                        title={`${r.id} — ${r.name} (${r.ratingTo})`}
+                        href={`/risk-register?focus=${r.id}`}
+                        title={`${r.id} — ${r.name} (${r.ratingTo}) · click to drill down`}
                         style={{
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -346,6 +348,8 @@ function EntityHeatmap({
                           padding: '1px 4px',
                           borderRadius: 8,
                           fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                          textDecoration: 'none',
+                          cursor: 'pointer',
                         }}
                       >
                         <span
@@ -357,7 +361,7 @@ function EntityHeatmap({
                           }}
                         />
                         {r.id}
-                      </span>
+                      </Link>
                     ))}
                   </div>
                 )
