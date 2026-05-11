@@ -16,6 +16,10 @@ import React, { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { usePersona } from '@/lib/context/PersonaContext'
 import { CRODashboard } from '@/components/home/CRODashboard'
+import { ChampionDashboard } from '@/components/home/ChampionDashboard'
+import { SubsidiaryCEODashboard } from '@/components/home/SubsidiaryCEODashboard'
+import { InternalAuditDashboard } from '@/components/home/InternalAuditDashboard'
+import { ARCChairDashboard } from '@/components/home/ARCChairDashboard'
 
 export default function HomePage() {
   const router = useRouter()
@@ -47,10 +51,15 @@ export default function HomePage() {
   switch (persona.id) {
     case 'group-cro':
       return <CRODashboard />
-    // P4b-e: champion / subsidiary-ceo / internal-audit / arc-chair dashboards.
-    // Until they ship, fall through to the CRO dashboard as a placeholder so
-    // every persona has a coherent /home — better than redirecting to a half-built page.
+    case 'risk-champion':
+      return <ChampionDashboard />
+    case 'subsidiary-ceo':
+      return <SubsidiaryCEODashboard />
+    case 'internal-audit':
+      return <InternalAuditDashboard />
+    case 'arc-chair':
+      return <ARCChairDashboard />
     default:
-      return <CRODashboard variant="fallback" persona={persona.title} />
+      return <CRODashboard />
   }
 }
