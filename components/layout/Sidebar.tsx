@@ -242,7 +242,7 @@ export function Sidebar() {
       style={{
         backgroundColor: 'var(--bg-secondary)',
         borderRight: '1px solid var(--border-color)',
-        width: collapsed ? '72px' : '240px',
+        width: collapsed ? '56px' : '200px',
         transition: 'width 0.25s ease',
         flexShrink: 0,
         position: 'fixed',
@@ -265,19 +265,19 @@ export function Sidebar() {
               {!collapsed ? (
                 <div
                   style={{
-                    padding: '8px 20px 4px',
+                    padding: '6px 14px 2px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 6,
+                    gap: 5,
                   }}
                 >
-                  <GroupIcon size={11} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                  <GroupIcon size={10} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
                   <span
                     style={{
-                      fontSize: 9,
+                      fontSize: 8,
                       fontWeight: 700,
                       color: 'var(--text-muted)',
-                      letterSpacing: 1.2,
+                      letterSpacing: 1,
                       textTransform: 'uppercase',
                     }}
                   >
@@ -306,10 +306,10 @@ export function Sidebar() {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '12px',
-                      padding: collapsed ? '9px 18px' : '8px 20px',
-                      margin: '1px 8px',
-                      borderRadius: '7px',
+                      gap: '10px',
+                      padding: collapsed ? '8px 14px' : '6px 14px',
+                      margin: '1px 6px',
+                      borderRadius: '6px',
                       textDecoration: 'none',
                       backgroundColor: isActive ? 'var(--accent-glow)' : 'transparent',
                       borderLeft: isActive
@@ -331,34 +331,26 @@ export function Sidebar() {
                     }}
                   >
                     <Icon
-                      size={16}
+                      size={15}
                       style={{
                         color: isActive ? 'var(--accent-primary)' : 'var(--text-muted)',
                         flexShrink: 0,
                       }}
                     />
                     {!collapsed && (
-                      <div style={{ minWidth: 0 }}>
-                        <div
-                          style={{
-                            color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-                            fontSize: '0.8rem',
-                            fontWeight: isActive ? 600 : 500,
-                          }}
-                        >
-                          {item.label}
-                        </div>
-                        <div
-                          style={{
-                            color: 'var(--text-muted)',
-                            fontSize: '0.62rem',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                          }}
-                        >
-                          {item.description}
-                        </div>
+                      <div
+                        style={{
+                          color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                          fontSize: '0.76rem',
+                          fontWeight: isActive ? 600 : 500,
+                          lineHeight: 1.2,
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          minWidth: 0,
+                        }}
+                      >
+                        {item.label}
                       </div>
                     )}
                   </Link>
@@ -369,27 +361,33 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Persona indicator (collapsed footer) — only when authenticated */}
+      {/* Persona indicator (footer) — only when authenticated */}
       {isAuthenticated && persona && (
         <div
           style={{
-            padding: collapsed ? '10px 14px' : '10px 16px',
+            padding: collapsed ? '6px 12px' : '6px 14px',
             borderTop: '1px solid var(--border-color)',
             fontSize: collapsed ? 0 : 10,
             color: 'var(--text-muted)',
             display: 'flex',
             alignItems: 'center',
-            gap: 8,
+            gap: 6,
             whiteSpace: 'nowrap',
+            overflow: 'hidden',
           }}
           title={`Persona: ${persona.title}`}
         >
-          <UserCircle2 size={13} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
+          <UserCircle2 size={12} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
           {!collapsed && (
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>
-                {persona.title}
-              </span>
+            <span
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                color: 'var(--text-secondary)',
+                fontWeight: 600,
+              }}
+            >
+              {persona.title}
             </span>
           )}
         </div>
@@ -398,7 +396,7 @@ export function Sidebar() {
       {/* AI Status footer */}
       <div
         style={{
-          padding: collapsed ? '12px 16px' : '12px 20px',
+          padding: collapsed ? '8px 12px' : '8px 14px',
           borderTop: '1px solid var(--border-color)',
         }}
       >
@@ -407,44 +405,41 @@ export function Sidebar() {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '10px',
-              padding: '8px 12px',
-              borderRadius: '8px',
+              gap: '8px',
+              padding: '5px 8px',
+              borderRadius: '6px',
               backgroundColor: 'rgba(34, 197, 94, 0.08)',
               border: '1px solid rgba(34, 197, 94, 0.2)',
             }}
           >
             <div
               style={{
-                width: '8px',
-                height: '8px',
+                width: '7px',
+                height: '7px',
                 borderRadius: '50%',
                 backgroundColor: '#22C55E',
                 flexShrink: 0,
               }}
               className="animate-pulse"
             />
-            <div style={{ minWidth: 0 }}>
-              <div
-                style={{
-                  color: '#22C55E',
-                  fontSize: '0.66rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.05em',
-                }}
-              >
-                AI ENGINE ACTIVE
-              </div>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.55rem' }}>AI · Live</div>
-            </div>
-            <Cpu size={13} style={{ color: '#22C55E', marginLeft: 'auto', flexShrink: 0 }} />
+            <span
+              style={{
+                color: '#22C55E',
+                fontSize: '0.6rem',
+                fontWeight: 700,
+                letterSpacing: '0.05em',
+              }}
+            >
+              AI ENGINE
+            </span>
+            <Cpu size={11} style={{ color: '#22C55E', marginLeft: 'auto', flexShrink: 0 }} />
           </div>
         ) : (
           <div
             title="AI Engine Active"
             style={{
-              width: '8px',
-              height: '8px',
+              width: '7px',
+              height: '7px',
               borderRadius: '50%',
               backgroundColor: '#22C55E',
               margin: '0 auto',

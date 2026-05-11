@@ -12,11 +12,15 @@
  *   - illustrative (sample, clearly labeled)
  *   - placeholder (calibration pending)
  *   - ai_hypothesis (pending human approval)
- * If you have a number with none of these tags — DO NOT render it raw.
- * Either tag it or remove it.
+ *
+ * UX-1 fix: the provenance card now renders via createPortal at body
+ * level with fixed positioning, so it never gets clipped by a drawer
+ * or modal that has `overflow: hidden`. Position is clamped to the
+ * viewport so the card is fully readable even near screen edges.
  */
 
-import React from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import type { DataPoint, ReliabilityTier } from '@/lib/provenance/types'
 
 interface NumericValueProps {
@@ -36,25 +40,66 @@ const TIER_DOT: Record<ReliabilityTier, { color: string; label: string }> = {
   ai_hypothesis: { color: '#A855F7', label: 'AI Hypothesis — pending approval' },
 }
 
+const CARD_WIDTH = 340
+const VIEWPORT_MARGIN = 12
+
 export function NumericValue({
   data,
   format,
   unitOverride,
   compact = false,
 }: NumericValueProps) {
-  const [open, setOpen] = React.useState(false)
-  const wrapperRef = React.useRef<HTMLSpanElement>(null)
+  const [open, setOpen] = useState(false)
+  const wrapperRef = useRef<HTMLSpanElement>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null)
 
-  // Close on outside click
-  React.useEffect(() => {
+  // Position the card next to the trigger, clamped to viewport.
+  useLayoutEffect(() => {
+    if (!open || typeof window === 'undefined') return
+    const rect = wrapperRef.current?.getBoundingClientRect()
+    if (!rect) return
+    const vw = window.innerWidth
+    const vh = window.innerHeight
+    // Default: below the trigger, right-aligned to the trigger
+    let left = rect.right - CARD_WIDTH
+    let top = rect.bottom + 6
+    // Clamp horizontally
+    if (left < VIEWPORT_MARGIN) left = VIEWPORT_MARGIN
+    if (left + CARD_WIDTH > vw - VIEWPORT_MARGIN)
+      left = vw - CARD_WIDTH - VIEWPORT_MARGIN
+    // If it would go below the viewport, flip above the trigger
+    // (rough card height estimate 320; refined below once mounted).
+    const estHeight = cardRef.current?.offsetHeight ?? 320
+    if (top + estHeight > vh - VIEWPORT_MARGIN) {
+      top = Math.max(VIEWPORT_MARGIN, rect.top - estHeight - 6)
+    }
+    setPos({ top, left })
+  }, [open])
+
+  // Close on outside click + Escape
+  useEffect(() => {
     if (!open) return
     function handleClick(e: MouseEvent) {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+      const target = e.target as Node
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(target) &&
+        cardRef.current &&
+        !cardRef.current.contains(target)
+      ) {
         setOpen(false)
       }
     }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
     document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('mousedown', handleClick)
+      document.removeEventListener('keydown', handleKey)
+    }
   }, [open])
 
   const formatted = format ? format(data.value) : data.value.toLocaleString()
@@ -97,40 +142,52 @@ export function NumericValue({
         </button>
       )}
 
-      {open && (
-        <ProvenanceCard data={data} tierColor={dot.color} tierLabel={dot.label} />
-      )}
+      {open && typeof document !== 'undefined' && pos &&
+        createPortal(
+          <ProvenanceCard
+            ref={cardRef}
+            data={data}
+            tierColor={dot.color}
+            tierLabel={dot.label}
+            position={pos}
+          />,
+          document.body,
+        )}
     </span>
   )
 }
 
-function ProvenanceCard({
-  data,
-  tierColor,
-  tierLabel,
-}: {
-  data: DataPoint
-  tierColor: string
-  tierLabel: string
-}) {
+const ProvenanceCard = React.forwardRef<
+  HTMLDivElement,
+  {
+    data: DataPoint
+    tierColor: string
+    tierLabel: string
+    position: { top: number; left: number }
+  }
+>(function ProvenanceCard({ data, tierColor, tierLabel, position }, ref) {
   return (
     <div
+      ref={ref}
       role="dialog"
       style={{
-        position: 'absolute',
-        top: 'calc(100% + 6px)',
-        right: 0,
-        zIndex: 9999,
-        width: 320,
+        position: 'fixed',
+        top: position.top,
+        left: position.left,
+        zIndex: 10001,
+        width: CARD_WIDTH,
+        maxHeight: 'min(70vh, 520px)',
+        overflowY: 'auto',
         background: 'var(--bg-card)',
         border: `1px solid ${tierColor}66`,
         borderRadius: 8,
         padding: 12,
-        boxShadow: '0 12px 30px -8px rgba(0,0,0,0.45)',
+        boxShadow: '0 16px 40px -8px rgba(0,0,0,0.55)',
         fontSize: 11,
         color: 'var(--text-primary)',
         textAlign: 'left',
         whiteSpace: 'normal',
+        lineHeight: 1.55,
       }}
     >
       <div
@@ -152,7 +209,7 @@ function ProvenanceCard({
             display: 'inline-block',
           }}
         />
-        <span style={{ fontWeight: 700, color: tierColor, letterSpacing: 0.4 }}>
+        <span style={{ fontWeight: 700, color: tierColor, letterSpacing: 0.4, fontSize: 10 }}>
           {tierLabel.toUpperCase()}
         </span>
       </div>
@@ -182,7 +239,9 @@ function ProvenanceCard({
           }`}
         />
       )}
-      {data.formula && <Row label="Formula" value={<code style={{ fontSize: 10 }}>{data.formula}</code>} />}
+      {data.formula && (
+        <Row label="Formula" value={<code style={{ fontSize: 10 }}>{data.formula}</code>} />
+      )}
       {data.upstream && data.upstream.length > 0 && (
         <Row
           label="Inputs"
@@ -201,24 +260,31 @@ function ProvenanceCard({
         <div
           style={{
             marginTop: 8,
-            padding: 6,
+            padding: 8,
             background: 'var(--bg-hover)',
             borderRadius: 4,
             color: 'var(--text-secondary)',
             fontStyle: 'italic',
+            fontSize: 10.5,
           }}
         >
           {data.confidenceNote}
         </div>
       )}
       {data.source.note && (
-        <div style={{ marginTop: 6, color: 'var(--text-tertiary)', fontSize: 10 }}>
+        <div
+          style={{
+            marginTop: 6,
+            color: 'var(--text-tertiary)',
+            fontSize: 10,
+          }}
+        >
           {data.source.note}
         </div>
       )}
     </div>
   )
-}
+})
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -236,7 +302,9 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
       >
         {label}
       </span>
-      <span style={{ flex: 1, color: 'var(--text-primary)' }}>{value}</span>
+      <span style={{ flex: 1, color: 'var(--text-primary)', wordBreak: 'break-word' }}>
+        {value}
+      </span>
     </div>
   )
 }
