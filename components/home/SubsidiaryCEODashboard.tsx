@@ -32,6 +32,7 @@ import {
   MitigationActionsProvider,
   useMitigationActions,
 } from '@/lib/context/MitigationActionsContext'
+import { RISKS } from '@/lib/engine/seedData'
 import { KRI_DEFINITIONS } from '@/lib/data/kri-definitions'
 import { computeKRIStatus, STATUS_META } from '@/lib/data/kri-status'
 import { entityForRisk } from '@/lib/data/risk-entity-mapping'
@@ -65,8 +66,13 @@ function Inner() {
   const entity = scope ? getEntity(scope) : null
 
   const myRisks = risks.filter((r) => (scope ? entityForRisk(r.id) === scope : true))
+  // Pull driverImpacts from RISKS (RiskDef) — RiskState surfaces
+  // `contributingDrivers` only post-simulation.
+  const myRiskIdSet = new Set(myRisks.map((r) => r.id))
   const myDriverIds = new Set(
-    myRisks.flatMap((r) => r.driverImpacts.map((di) => di.driverId)),
+    RISKS
+      .filter((r) => myRiskIdSet.has(r.id))
+      .flatMap((r) => r.driverImpacts.map((di) => di.driverId)),
   )
   const myKRIs = KRI_DEFINITIONS.filter((k) => myDriverIds.has(k.driverId))
   const myRiskIds = new Set(myRisks.map((r) => r.id))

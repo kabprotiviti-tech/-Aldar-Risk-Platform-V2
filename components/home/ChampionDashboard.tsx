@@ -48,6 +48,7 @@ import {
   RiskDraftProvider,
   useRiskDrafts,
 } from '@/lib/context/RiskDraftContext'
+import { RISKS } from '@/lib/engine/seedData'
 import { KRI_DEFINITIONS } from '@/lib/data/kri-definitions'
 import { computeKRIStatus, STATUS_META } from '@/lib/data/kri-status'
 import { entityForRisk } from '@/lib/data/risk-entity-mapping'
@@ -103,9 +104,14 @@ function ChampionInner() {
 
   // My KRIs — owner = persona owner mapping
   // Subsidiary champions don't have 1:1 KRI ownership in the seed; show all
-  // KRIs but call out the ones connected to subsidiary risks.
+  // KRIs but call out the ones connected to subsidiary risks. Pull
+  // driverImpacts from RISKS (RiskDef) since RiskState surfaces only the
+  // post-simulation `contributingDrivers` field.
+  const myRiskIdsForDrivers = new Set(myRisks.map((r) => r.id))
   const myRiskDriverIds = new Set(
-    myRisks.flatMap((r) => r.driverImpacts.map((di) => di.driverId)),
+    RISKS
+      .filter((r) => myRiskIdsForDrivers.has(r.id))
+      .flatMap((r) => r.driverImpacts.map((di) => di.driverId)),
   )
   const myKRIs = KRI_DEFINITIONS.filter((k) => myRiskDriverIds.has(k.driverId))
 
