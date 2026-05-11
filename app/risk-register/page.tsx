@@ -1,5 +1,9 @@
 'use client'
 
+// useSearchParams() (used for ?focus=R-NNN drill-down) bails out of static
+// prerender on this route. Force dynamic rendering.
+export const dynamic = 'force-dynamic'
+
 /**
  * Risk Register — Module 2 (deep)
  * --------------------------------
