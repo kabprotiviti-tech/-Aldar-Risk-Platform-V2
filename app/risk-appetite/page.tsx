@@ -17,10 +17,11 @@
  */
 
 import React, { useMemo, useState } from 'react'
-import { ShieldQuestion, Pencil, RotateCcw } from 'lucide-react'
+import { ShieldQuestion, Pencil, RotateCcw, Check, X, Clock } from 'lucide-react'
 import {
   RiskAppetiteProvider,
   useRiskAppetite,
+  type AppetiteOverride,
 } from '@/lib/context/RiskAppetiteContext'
 import {
   APPETITE_CATEGORY_META,
@@ -43,9 +44,19 @@ const CATEGORY_ORDER: AppetiteCategory[] = [
 ]
 
 function RiskAppetiteContent() {
-  const { allEffective, isOverridden, setOverride, resetOverride } = useRiskAppetite()
+  const {
+    allEffective,
+    isOverridden,
+    hasPending,
+    pendingProposals,
+    proposeChange,
+    approveProposal,
+    rejectProposal,
+    resetOverride,
+  } = useRiskAppetite()
   const statements = allEffective()
   const [editing, setEditing] = useState<GroupAppetiteStatement | null>(null)
+  const pending = pendingProposals()
 
   const grouped = useMemo(() => {
     const m = new Map<AppetiteCategory, GroupAppetiteStatement[]>()
@@ -105,10 +116,70 @@ function RiskAppetiteContent() {
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           <StatusBadge
             tier="MVP"
-            note={`${statements.length} statements${overriddenCount > 0 ? ` · ${overriddenCount} edited` : ''}`}
+            note={`${statements.length} statements${overriddenCount > 0 ? ` · ${overriddenCount} approved overrides` : ''}${pending.length > 0 ? ` · ${pending.length} pending approval` : ''}`}
           />
         </div>
       </div>
+
+      {/* Pending approval queue */}
+      {pending.length > 0 && (
+        <section
+          style={{
+            background: 'rgba(245,197,24,0.08)',
+            border: '1px solid rgba(245,197,24,0.40)',
+            borderLeft: '4px solid #F5C518',
+            borderRadius: 8,
+            padding: 14,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              marginBottom: 10,
+            }}
+          >
+            <Clock size={14} style={{ color: '#F5C518' }} />
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: '#F5C518',
+                letterSpacing: 0.6,
+                textTransform: 'uppercase',
+              }}
+            >
+              Pending Approval ({pending.length})
+            </div>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
+              ARC Chair / Group ERM Head reviews each proposal before it becomes effective.
+            </div>
+          </div>
+          <div style={{ display: 'grid', gap: 10 }}>
+            {pending.map((p) => {
+              const base = statements.find((s) => s.id === p.id)
+              if (!base) return null
+              return (
+                <PendingProposalCard
+                  key={p.id}
+                  baseStatement={base}
+                  override={p.override}
+                  onApprove={() => approveProposal(p.id)}
+                  onReject={() => {
+                    const reason = window.prompt(
+                      `Reject proposal for ${p.id}? Optional reason:`,
+                      '',
+                    )
+                    if (reason === null) return
+                    rejectProposal(p.id, undefined, reason || undefined)
+                  }}
+                />
+              )
+            })}
+          </div>
+        </section>
+      )}
 
       {CATEGORY_ORDER.map((cat) => {
         const list = grouped.get(cat) || []
@@ -164,6 +235,7 @@ function RiskAppetiteContent() {
                   key={s.id}
                   s={s}
                   overridden={isOverridden(s.id)}
+                  pending={hasPending(s.id)}
                   onEdit={() => setEditing(s)}
                   onReset={() => resetOverride(s.id)}
                 />
@@ -178,7 +250,7 @@ function RiskAppetiteContent() {
           statement={editing}
           onClose={() => setEditing(null)}
           onSave={(patch) => {
-            setOverride(editing.id, patch)
+            proposeChange(editing.id, patch)
             setEditing(null)
           }}
         />
@@ -190,11 +262,13 @@ function RiskAppetiteContent() {
 function AppetiteCard({
   s,
   overridden,
+  pending,
   onEdit,
   onReset,
 }: {
   s: GroupAppetiteStatement
   overridden: boolean
+  pending: boolean
   onEdit: () => void
   onReset: () => void
 }) {
@@ -266,7 +340,7 @@ function AppetiteCard({
             </span>
             {overridden && (
               <span
-                title="This statement has been edited from its default"
+                title="An approved override is currently effective"
                 style={{
                   background: 'rgba(255,102,0,0.16)',
                   color: 'var(--accent-primary)',
@@ -279,7 +353,25 @@ function AppetiteCard({
                   textTransform: 'uppercase',
                 }}
               >
-                Edited
+                Approved Override
+              </span>
+            )}
+            {pending && (
+              <span
+                title="A change has been proposed and is awaiting approval"
+                style={{
+                  background: 'rgba(245,197,24,0.16)',
+                  color: '#F5C518',
+                  border: '1px solid rgba(245,197,24,0.55)',
+                  padding: '1px 6px',
+                  borderRadius: 3,
+                  fontSize: 9,
+                  fontWeight: 700,
+                  letterSpacing: 0.5,
+                  textTransform: 'uppercase',
+                }}
+              >
+                Pending Approval
               </span>
             )}
           </div>
@@ -287,11 +379,11 @@ function AppetiteCard({
         <div style={{ display: 'flex', gap: 6 }}>
           <button
             onClick={onEdit}
-            title="Edit appetite statement"
+            title={pending ? 'Replace pending proposal' : 'Propose change to appetite statement'}
             style={iconBtnStyle}
           >
             <Pencil size={12} />
-            Edit
+            {pending ? 'Re-propose' : 'Propose Change'}
           </button>
           {overridden && (
             <button
@@ -451,6 +543,208 @@ function EditAppetiteModal({
         </div>
       </div>
     </Modal>
+  )
+}
+
+function PendingProposalCard({
+  baseStatement,
+  override,
+  onApprove,
+  onReject,
+}: {
+  baseStatement: GroupAppetiteStatement
+  override: AppetiteOverride
+  onApprove: () => void
+  onReject: () => void
+}) {
+  const proposedLevel = override.level ?? baseStatement.level
+  const lvl = APPETITE_LEVEL_META[proposedLevel]
+  const baseLvl = APPETITE_LEVEL_META[baseStatement.level]
+  const levelChanged = override.level && override.level !== baseStatement.level
+  const statementChanged =
+    override.statement !== undefined && override.statement !== baseStatement.statement
+  const approvedByChanged =
+    override.approvedBy !== undefined && override.approvedBy !== baseStatement.approvedBy
+  const reviewedChanged =
+    override.lastReviewed !== undefined && override.lastReviewed !== baseStatement.lastReviewed
+
+  return (
+    <div
+      style={{
+        background: 'var(--bg-primary)',
+        border: '1px solid var(--border-color)',
+        borderLeft: `3px solid ${lvl.color}`,
+        borderRadius: 6,
+        padding: 14,
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: 12,
+          marginBottom: 8,
+          flexWrap: 'wrap',
+        }}
+      >
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: 8,
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              marginBottom: 4,
+            }}
+          >
+            <span
+              style={{
+                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                fontSize: 10,
+                color: 'var(--text-tertiary)',
+                fontWeight: 600,
+              }}
+            >
+              {baseStatement.id}
+            </span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
+              {baseStatement.title}
+            </span>
+            <span
+              style={{
+                background: `${lvl.color}1f`,
+                color: lvl.color,
+                border: `1px solid ${lvl.color}66`,
+                padding: '2px 8px',
+                borderRadius: 3,
+                fontSize: 9,
+                fontWeight: 700,
+                letterSpacing: 0.5,
+                textTransform: 'uppercase',
+              }}
+            >
+              Proposed: {lvl.label}
+              {levelChanged && (
+                <span style={{ color: 'var(--text-tertiary)', marginLeft: 4 }}>
+                  (was {baseLvl.label})
+                </span>
+              )}
+            </span>
+          </div>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
+            Proposed by {override.proposedBy ?? 'unknown'}{' '}
+            {override.proposedAt
+              ? `· ${new Date(override.proposedAt).toLocaleString('en-AE', { timeZone: 'Asia/Dubai' })}`
+              : null}
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button
+            onClick={onApprove}
+            style={{
+              ...iconBtnStyle,
+              background: '#22C55E',
+              color: '#fff',
+              border: '1px solid #22C55E',
+            }}
+            title="Approve — proposal becomes the effective statement"
+          >
+            <Check size={12} />
+            Approve
+          </button>
+          <button
+            onClick={onReject}
+            style={{
+              ...iconBtnStyle,
+              background: 'transparent',
+              color: 'var(--risk-critical)',
+              border: '1px solid var(--risk-critical)',
+            }}
+            title="Reject — proposal is discarded; default remains effective"
+          >
+            <X size={12} />
+            Reject
+          </button>
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 10,
+          fontSize: 11,
+          lineHeight: 1.55,
+        }}
+      >
+        <div>
+          <div
+            style={{
+              fontSize: 9,
+              fontWeight: 700,
+              color: 'var(--text-tertiary)',
+              textTransform: 'uppercase',
+              letterSpacing: 0.5,
+              marginBottom: 4,
+            }}
+          >
+            Current (effective)
+          </div>
+          <div style={{ color: 'var(--text-secondary)' }}>{baseStatement.statement}</div>
+        </div>
+        <div>
+          <div
+            style={{
+              fontSize: 9,
+              fontWeight: 700,
+              color: '#F5C518',
+              textTransform: 'uppercase',
+              letterSpacing: 0.5,
+              marginBottom: 4,
+            }}
+          >
+            Proposed{statementChanged ? '' : ' (no change)'}
+          </div>
+          <div
+            style={{
+              color: statementChanged ? 'var(--text-primary)' : 'var(--text-tertiary)',
+              fontStyle: statementChanged ? 'normal' : 'italic',
+            }}
+          >
+            {override.statement ?? baseStatement.statement}
+          </div>
+        </div>
+      </div>
+
+      {(approvedByChanged || reviewedChanged) && (
+        <div
+          style={{
+            display: 'flex',
+            gap: 16,
+            flexWrap: 'wrap',
+            paddingTop: 8,
+            marginTop: 8,
+            borderTop: '1px dashed var(--border-color)',
+            fontSize: 10,
+            color: 'var(--text-tertiary)',
+          }}
+        >
+          {approvedByChanged && (
+            <span>
+              <strong style={{ color: 'var(--text-secondary)' }}>Approved-by →</strong>{' '}
+              {override.approvedBy}
+            </span>
+          )}
+          {reviewedChanged && (
+            <span>
+              <strong style={{ color: 'var(--text-secondary)' }}>Last-reviewed →</strong>{' '}
+              {override.lastReviewed}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
   )
 }
 
