@@ -1,9 +1,5 @@
 'use client'
 
-// useSearchParams() (used for ?focus=R-NNN drill-down) bails out of static
-// prerender on this route. Force dynamic rendering.
-export const dynamic = 'force-dynamic'
-
 /**
  * Risk Register — Module 2 (deep)
  * --------------------------------
@@ -16,7 +12,6 @@ export const dynamic = 'force-dynamic'
  */
 
 import React, { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { SimulationProvider, useSimulation } from '@/lib/context/SimulationContext'
 import { RiskDraftProvider, useRiskDrafts, type RiskDraft, type RiskStatus } from '@/lib/context/RiskDraftContext'
@@ -90,14 +85,17 @@ function RiskRegisterContent() {
   const [editing, setEditing] = useState<RiskDraft | null>(null)
 
   // Drill-down: ?focus=R-NNN auto-opens the matching risk drawer.
-  // Powered by Top10RisksTable / heatmap pills / Personal Dashboard cards.
-  const searchParams = useSearchParams()
-  const focusId = searchParams?.get('focus') || null
+  // We read the URL directly (window.location.search) instead of
+  // next/navigation's useSearchParams so the route does not need to opt
+  // out of static prerender (useSearchParams forces a Suspense boundary).
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const focusId = params.get('focus')
     if (!focusId) return
     const match = risks.find((r) => r.id === focusId)
     if (match) setSelected(match)
-  }, [focusId, risks])
+  }, [risks])
 
   // Per-risk action summary helper.
   function summarizeActions(riskId: string) {
