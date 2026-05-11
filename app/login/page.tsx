@@ -23,13 +23,14 @@ import {
   ClipboardCheck,
   Gavel,
   CheckCircle2,
+  type LucideIcon,
 } from 'lucide-react'
 import { usePersona } from '@/lib/context/PersonaContext'
 import { PERSONAS, type PersonaId, type Persona } from '@/lib/personas'
 import { ENTITIES } from '@/lib/entities/hierarchy'
 import type { EntityId } from '@/lib/data/risk-entity-mapping'
 
-const PERSONA_ICONS: Record<PersonaId, React.ComponentType<{ size?: number }>> = {
+const PERSONA_ICONS: Record<PersonaId, LucideIcon> = {
   'group-cro': Crown,
   'risk-champion': Briefcase,
   'subsidiary-ceo': Building2,
