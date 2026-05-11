@@ -29,8 +29,13 @@ import { KRI_DEFINITIONS } from '@/lib/data/kri-definitions'
 import { GROUP_APPETITE_STATEMENTS } from '@/lib/data/group-appetite-statements'
 import { useAuditTrail } from '@/lib/context/AuditTrailContext'
 import { entityForRisk } from '@/lib/data/risk-entity-mapping'
-import { getEntity } from '@/lib/entities/hierarchy'
-import { getRiskBaselineProvenance, type RiskId } from '@/lib/data/risk-baseline-provenance'
+import { getEntity, ENTITIES, SUBSIDIARIES } from '@/lib/entities/hierarchy'
+import {
+  getRiskBaselineProvenance,
+  type RiskId,
+  ALL_RISK_IDS,
+} from '@/lib/data/risk-baseline-provenance'
+import { FINANCIAL_ANCHORS } from '@/lib/engine/seedData'
 
 interface Msg {
   id: string
@@ -41,25 +46,56 @@ interface Msg {
 
 const SUGGESTIONS = [
   'Show me R-008',
+  'Risks for Aldar Investment',
+  'Where does R-008 exposure come from',
   'KRI-12 latest status',
   'GA-FIN-01 appetite',
   'Top 5 risks',
-  'Recent audit trail',
 ]
+
+const HISTORY_KEY = 'aldar-risk-memory-history-v1'
+const HISTORY_LIMIT = 60
+
+const WELCOME_MSG: Msg = {
+  id: 'welcome',
+  who: 'memory',
+  text:
+    "Hi — I'm Risk Memory. Ask me about any R-NNN / DRAFT-NNN / KRI-NN / GA-* appetite, or filter risks by subsidiary (\"Aldar Investment\"). I look it up — I don't generate.",
+}
 
 export function RiskMemoryChat() {
   const [open, setOpen] = useState(false)
   const [input, setInput] = useState('')
-  const [msgs, setMsgs] = useState<Msg[]>([
-    {
-      id: 'welcome',
-      who: 'memory',
-      text:
-        "Hi — I'm Risk Memory. Ask me about any R-NNN, DRAFT-NNN, KRI-NN, or GA-* appetite. I look it up — I don't generate.",
-    },
-  ])
+  const [msgs, setMsgs] = useState<Msg[]>([WELCOME_MSG])
+  const [hydrated, setHydrated] = useState(false)
   const { events } = useAuditTrail()
   const endRef = useRef<HTMLDivElement | null>(null)
+
+  // Hydrate session history once on mount (browser only)
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(HISTORY_KEY)
+      if (raw) {
+        const parsed = JSON.parse(raw) as Msg[]
+        if (Array.isArray(parsed) && parsed.length > 0) setMsgs(parsed)
+      }
+    } catch {
+      // private mode / quota — non-fatal
+    }
+    setHydrated(true)
+  }, [])
+
+  // Persist on change after hydration
+  useEffect(() => {
+    if (!hydrated) return
+    try {
+      // Cap stored history to prevent quota issues
+      const slice = msgs.slice(-HISTORY_LIMIT)
+      window.localStorage.setItem(HISTORY_KEY, JSON.stringify(slice))
+    } catch {
+      // quota / private mode — non-fatal
+    }
+  }, [msgs, hydrated])
 
   useEffect(() => {
     if (open) endRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -289,12 +325,104 @@ export function RiskMemoryChat() {
       }
     }
 
+    // 8. Provenance traceback — "where does R-008 exposure come from"
+    if (
+      /(where|how|source|provenance|anchor|baseline|come from|derived|traceback)/.test(lower) &&
+      /(r-?\d|exposure|aed|anchor|figure|number)/.test(lower)
+    ) {
+      // If a specific R-NNN was mentioned the rMatch branch above caught it.
+      // This branch handles generic provenance asks — return the anchor chain
+      // for the most recently-referenced risk or, lacking that, R-008 (highest
+      // signal exposure risk in the demo).
+      const lastUserRef =
+        msgs
+          .slice()
+          .reverse()
+          .map((m) => m.text.toUpperCase().match(/R-0?(\d{1,3})/))
+          .find((m) => m) || null
+      const id = lastUserRef
+        ? (`R-${lastUserRef[1].padStart(3, '0')}` as RiskId)
+        : ('R-008' as RiskId)
+      if (!ALL_RISK_IDS.includes(id)) {
+        return {
+          id: uid(),
+          who: 'memory',
+          text: `${id} not in the provenance map. Active risks: ${ALL_RISK_IDS.join(', ')}.`,
+        }
+      }
+      const r = RISKS.find((x) => x.id === id)!
+      const prov = getRiskBaselineProvenance(id)
+      const anchorVal = FINANCIAL_ANCHORS[prov.anchorKey]
+      const computed = Math.round(
+        r.financialBaseAedMn *
+          r.sensitivityCoefficient *
+          r.financialWeight *
+          10,
+      )
+      const refLine = prov.anchorReference
+        ? `  Audited reference: ${prov.anchorReference.aldarReference.value.toLocaleString()} AED mn (${prov.anchorReference.aldarReference.reliability})`
+        : '  Audited reference: not mapped — pilot calibration pending.'
+      return {
+        id: uid(),
+        who: 'memory',
+        text: `${id} exposure — provenance chain`,
+        detail: [
+          `Engine anchor key: ${prov.anchorKey}`,
+          `Anchor value: ${anchorVal.toLocaleString()} AED mn (illustrative MVP baseline)`,
+          `Risk sensitivity coefficient: ${r.sensitivityCoefficient}`,
+          `Risk financial weight: ${r.financialWeight}`,
+          `Computed baseline (anchor × coefficient × weight × 10):`,
+          `  ${anchorVal.toLocaleString()} × ${r.sensitivityCoefficient} × ${r.financialWeight} × 10 = ${computed.toLocaleString()} AED mn`,
+          refLine,
+          `Tier: ${prov.engineDataPoint.reliability}`,
+          `Calibration plan: ${prov.calibrationPlan}`,
+        ].join('\n'),
+      }
+    }
+
+    // 9. Cross-entity reference — "show me risks for Aldar Investment"
+    const entityMatch = SUBSIDIARIES.find((e) => {
+      const tokens = [
+        e.shortName.toLowerCase(),
+        e.shortName.toLowerCase().replace(/\s+/g, ''),
+        e.id.toLowerCase(),
+      ]
+      return tokens.some((t) => lower.includes(t))
+    })
+    if (entityMatch || lower.includes('aldar group') || lower.includes('group risks')) {
+      const target = entityMatch ?? ENTITIES.find((e) => e.kind === 'holding')!
+      const scoped = RISKS.filter((r) => entityForRisk(r.id) === target.id)
+      if (scoped.length === 0) {
+        return {
+          id: uid(),
+          who: 'memory',
+          text: `${target.shortName} — no engine risks mapped`,
+          detail: `Risk → entity mapping is illustrative for MVP (see /portfolio-tower). No R-001..R-010 records are tagged to ${target.shortName} in the current seed.`,
+        }
+      }
+      const sorted = scoped.sort(
+        (a, b) =>
+          b.baseLikelihood * b.baseImpact - a.baseLikelihood * a.baseImpact,
+      )
+      return {
+        id: uid(),
+        who: 'memory',
+        text: `${target.shortName} — ${scoped.length} risk${scoped.length === 1 ? '' : 's'} (engine register)`,
+        detail: sorted
+          .map(
+            (r) =>
+              `${r.id} ${r.name} — inherent ${r.baseLikelihood * r.baseImpact}/25, owner ${r.owner}`,
+          )
+          .join('\n'),
+      }
+    }
+
     // Fallback
     return {
       id: uid(),
       who: 'memory',
       text:
-        "I don't have a template for that. Try mentioning a specific entity: R-001..R-010, KRI-09..KRI-16, GA-FIN-01 (etc.), or ask for 'top risks' / 'recent audit' / 'escalations'.",
+        "I don't have a template for that. Try: R-001..R-010, KRI-09..KRI-16, GA-FIN-01 (etc.), \"risks for Aldar Investment\", \"where does R-008 exposure come from\", or \"top risks\" / \"recent audit\" / \"escalations\".",
     }
   }
 
@@ -381,9 +509,34 @@ export function RiskMemoryChat() {
               </div>
             </div>
             <button
-              onClick={() => setOpen(false)}
+              onClick={() => {
+                if (
+                  msgs.length > 1 &&
+                  confirm('Clear chat history for this session?')
+                ) {
+                  setMsgs([WELCOME_MSG])
+                }
+              }}
+              title="Clear chat history"
               style={{
                 marginLeft: 'auto',
+                background: 'transparent',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-tertiary)',
+                cursor: 'pointer',
+                padding: '2px 8px',
+                borderRadius: 3,
+                fontSize: 9,
+                fontWeight: 700,
+                letterSpacing: 0.4,
+                textTransform: 'uppercase',
+              }}
+            >
+              Clear
+            </button>
+            <button
+              onClick={() => setOpen(false)}
+              style={{
                 background: 'transparent',
                 border: 'none',
                 color: 'var(--text-secondary)',
