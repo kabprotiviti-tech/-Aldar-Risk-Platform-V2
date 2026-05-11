@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { Palette } from 'lucide-react'
 import { ThemeSelector } from './ThemeSelector'
 import { MarketWidget } from '@/components/MarketWidget'
+import { PersonaBadge } from './PersonaBadge'
 
 function LiveBadge() {
   return (
@@ -250,6 +251,9 @@ export function Header() {
                 flexShrink: 0,
               }}
             />
+
+            {/* Persona badge — login chip with dropdown */}
+            <PersonaBadge />
 
             {/* Theme button */}
             <button
