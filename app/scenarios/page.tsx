@@ -20,6 +20,7 @@ import { FinancialCalculationPanel, ViewCalcButton, type FinancialCalcContext } 
 import { scenarioTemplates, portfolioNames, type Portfolio } from '@/lib/simulated-data'
 import { ScenarioEngine } from '@/components/ScenarioEngine'
 import { SimulationWorkbench } from '@/components/simulation/SimulationWorkbench'
+import { BaselineComparisonPanel } from '@/components/scenarios/BaselineComparisonPanel'
 
 type Intensity = 'mild' | 'moderate' | 'severe'
 
@@ -328,6 +329,8 @@ export default function ScenariosPage() {
         >
           NEW · Real-time Intelligence Workbench
         </div>
+        <BaselineComparisonPanel />
+        <div style={{ height: 12 }} />
         <SimulationWorkbench />
       </div>
 
