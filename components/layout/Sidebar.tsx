@@ -38,6 +38,8 @@ import {
   Search,
   Telescope,
   Activity,
+  ClipboardList,
+  Settings,
   type LucideIcon,
 } from 'lucide-react'
 import { usePersona } from '@/lib/context/PersonaContext'
@@ -150,6 +152,20 @@ const NAV_GROUPS: NavGroup[] = [
         icon: FileText,
         description: 'Document Intelligence',
         personas: ['group-cro', 'risk-champion', 'internal-audit'],
+      },
+    ],
+  },
+  {
+    id: 'respond',
+    label: 'Respond',
+    icon: Settings,
+    items: [
+      {
+        href: '/respond/approvals',
+        label: 'Approvals',
+        icon: ClipboardList,
+        description: 'Approvals queue · all routings',
+        personas: ALL,
       },
     ],
   },

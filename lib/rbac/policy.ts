@@ -152,6 +152,7 @@ const ROUTE_ALLOWLIST: Record<PersonaId, string[]> = {
   'group-cro': [
     '/', '/login', '/welcome', '/home',
     '/my-dashboard',
+    '/respond/approvals',
     '/risk-register', '/risk-library',
     '/kri', '/portfolio-tower', '/scenarios',
     '/audit-trail', '/documents',
@@ -162,6 +163,7 @@ const ROUTE_ALLOWLIST: Record<PersonaId, string[]> = {
   'risk-champion': [
     '/', '/login', '/welcome', '/home',
     '/my-dashboard',
+    '/respond/approvals',
     '/risk-register', '/risk-library',
     '/kri', '/scenarios',
     '/audit-trail', '/documents',
@@ -170,6 +172,7 @@ const ROUTE_ALLOWLIST: Record<PersonaId, string[]> = {
   'subsidiary-ceo': [
     '/', '/login', '/welcome', '/home',
     '/my-dashboard',
+    '/respond/approvals',
     '/risk-register',
     '/kri', '/portfolio-tower', '/scenarios',
     '/audit-trail',
@@ -179,6 +182,7 @@ const ROUTE_ALLOWLIST: Record<PersonaId, string[]> = {
   'internal-audit': [
     '/', '/login', '/welcome', '/home',
     '/my-dashboard',
+    '/respond/approvals',
     '/risk-register', '/risk-library',
     '/kri', '/portfolio-tower',
     '/audit-trail', '/documents',
@@ -189,6 +193,7 @@ const ROUTE_ALLOWLIST: Record<PersonaId, string[]> = {
   'arc-chair': [
     '/', '/login', '/welcome', '/home',
     '/my-dashboard',
+    '/respond/approvals',
     '/risk-register',
     '/kri', '/portfolio-tower',
     '/audit-trail',
