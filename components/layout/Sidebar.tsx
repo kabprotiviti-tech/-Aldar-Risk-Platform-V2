@@ -23,6 +23,7 @@ import {
   Landmark,
   BookOpen,
   UserCircle2,
+  BookMarked,
 } from 'lucide-react'
 import { clsx } from 'clsx'
 
@@ -92,6 +93,12 @@ const navItems = [
     label: 'Risk Library',
     icon: BookOpen,
     description: 'UAE risks + peer benchmark',
+  },
+  {
+    href: '/standards-reference',
+    label: 'Standards Ref',
+    icon: BookMarked,
+    description: 'ISO 31000 + COSO ERM',
   },
   {
     href: '/audit-trail',
