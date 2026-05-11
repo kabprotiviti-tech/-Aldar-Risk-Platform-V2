@@ -20,12 +20,13 @@
  * deliverable while the on-screen review version stays honest.
  */
 
-import React, { useCallback } from 'react'
-import { Printer, FileText } from 'lucide-react'
+import React, { useCallback, useState } from 'react'
+import { Printer, FileText, FileDown, Loader2 } from 'lucide-react'
 import { SimulationProvider, useSimulation } from '@/lib/context/SimulationContext'
 import { KRIThresholdsProvider } from '@/lib/context/KRIThresholdsContext'
 import { KRIEntriesProvider } from '@/lib/context/KRIEntriesContext'
 import { MitigationActionsProvider } from '@/lib/context/MitigationActionsContext'
+import { ACTIONS } from '@/lib/engine/seedData'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { NumericValue } from '@/components/provenance/NumericValue'
 import {
@@ -287,6 +288,29 @@ function ARCPackContent() {
     }
   }, [])
 
+  const [exporting, setExporting] = useState(false)
+  const handleExportPDF = useCallback(async () => {
+    if (exporting) return
+    setExporting(true)
+    try {
+      // Dynamic import keeps @react-pdf/renderer out of the initial bundle.
+      const { downloadARCPackPDF } = await import(
+        '@/components/arc-pack/ARCPackPDFDocument'
+      )
+      // Rank ACTIONS by expectedReductionPct desc — surfaces the highest-impact
+      // levers in the printed pack.
+      const top = [...ACTIONS].sort(
+        (a, b) => b.expectedReductionPct - a.expectedReductionPct,
+      )
+      await downloadARCPackPDF(top)
+    } catch (err) {
+      console.error('PDF export failed', err)
+      alert('PDF export failed — see console for details.')
+    } finally {
+      setExporting(false)
+    }
+  }, [exporting])
+
   // Pull risks just to show the count in the header (real content lands in E7)
   const { risks } = useSimulation()
 
@@ -341,9 +365,10 @@ function ARCPackContent() {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-          <StatusBadge tier="LIVE" note="All 6 sections live" />
+          <StatusBadge tier="LIVE" note="All 6 sections live · PDF engine ready" />
           <button
-            onClick={handlePrint}
+            onClick={handleExportPDF}
+            disabled={exporting}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -355,13 +380,36 @@ function ARCPackContent() {
               borderRadius: 6,
               fontSize: 12,
               fontWeight: 700,
+              cursor: exporting ? 'wait' : 'pointer',
+              letterSpacing: 0.4,
+              textTransform: 'uppercase',
+              opacity: exporting ? 0.7 : 1,
+            }}
+          >
+            {exporting ? <Loader2 size={13} className="animate-spin" /> : <FileDown size={13} />}
+            {exporting ? 'Generating PDF…' : 'Export PDF'}
+          </button>
+          <button
+            onClick={handlePrint}
+            title="Browser print engine fallback"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              background: 'transparent',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border-color)',
+              padding: '8px 14px',
+              borderRadius: 6,
+              fontSize: 11,
+              fontWeight: 700,
               cursor: 'pointer',
               letterSpacing: 0.4,
               textTransform: 'uppercase',
             }}
           >
-            <Printer size={13} />
-            Print / Save as PDF
+            <Printer size={12} />
+            Print
           </button>
         </div>
       </div>
