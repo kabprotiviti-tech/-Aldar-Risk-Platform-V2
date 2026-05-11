@@ -49,6 +49,14 @@ export type Permission =
   // ARC Pack
   | 'arc:view'
   | 'arc:export-pdf'
+  /**
+   * P5b — confidential executive-session content. Whistleblower count,
+   * draft IA findings, litigation register, external auditor's open
+   * management-letter points. ARC Chair sees this; ERM Head does NOT
+   * (SCA Code Art. 31 independence — board oversight separate from
+   * executive management).
+   */
+  | 'arc:confidential'
   // Audit Trail
   | 'audit:view'
   | 'audit:export'
@@ -99,20 +107,22 @@ const PERSONA_PERMISSIONS: Record<PersonaId, Permission[]> = {
     'audit:view',
   ],
   // ─── Chief Internal Auditor ── 3rd line, read-mostly assurance.
+  // CIA also sees confidential ARC content (they author the IA drafts).
   'internal-audit': [
     'risk:view',
     'mitigation:edit', // can write findings → actions
     'kri:view',
     'appetite:view',
-    'arc:view',
+    'arc:view', 'arc:confidential',
     'audit:view', 'audit:export',
   ],
-  // ─── ARC Chair ── Governing body, approves appetite + sees ARC pack.
+  // ─── ARC Chair ── Governing body, approves appetite + sees ARC pack
+  // PLUS confidential executive-session content (P5b).
   'arc-chair': [
     'risk:view',
     'kri:view',
     'appetite:view', 'appetite:approve',
-    'arc:view', 'arc:export-pdf',
+    'arc:view', 'arc:export-pdf', 'arc:confidential',
     'audit:view',
   ],
 }

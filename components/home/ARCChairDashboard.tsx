@@ -51,6 +51,15 @@ import {
 import { useAuditTrail } from '@/lib/context/AuditTrailContext'
 import { KRI_DEFINITIONS } from '@/lib/data/kri-definitions'
 import { computeKRIStatus } from '@/lib/data/kri-status'
+import {
+  CONFIDENTIAL_ITEMS,
+  CATEGORY_META as CONFIDENTIAL_CAT_META,
+  countsBySeverity,
+  countsByCategory,
+} from '@/lib/data/arc-confidential'
+import { can } from '@/lib/rbac/policy'
+import { usePersona } from '@/lib/context/PersonaContext'
+import { EyeOff } from 'lucide-react'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 
@@ -73,6 +82,8 @@ export function ARCChairDashboard() {
 }
 
 function Inner() {
+  const { persona } = usePersona()
+  const canSeeConfidential = can(persona?.id ?? null, 'arc:confidential')
   const { risks } = useSimulation()
   const { latestFor } = useKRIEntries()
   const { thresholdsFor } = useKRIThresholds()
@@ -180,23 +191,189 @@ function Inner() {
         </Section>
       </div>
 
+      {canSeeConfidential ? <ConfidentialPanel /> : <ConfidentialBlind />}
+    </div>
+  )
+}
+
+function ConfidentialPanel() {
+  const sev = countsBySeverity()
+  const byCat = countsByCategory()
+  return (
+    <section
+      style={{
+        background: 'rgba(168,85,247,0.06)',
+        border: '1px solid rgba(168,85,247,0.40)',
+        borderLeft: '4px solid #A855F7',
+        borderRadius: 8,
+        padding: 14,
+        position: 'relative',
+      }}
+    >
       <div
         style={{
-          padding: 12,
-          background: 'var(--bg-secondary)',
-          border: '1px dashed var(--border-color)',
-          borderLeft: '3px solid #F5C518',
-          borderRadius: 6,
-          fontSize: 11,
-          color: 'var(--text-secondary)',
-          lineHeight: 1.55,
+          position: 'absolute',
+          top: 10,
+          right: 12,
+          fontSize: 8,
+          fontWeight: 700,
+          color: '#A855F7',
+          background: 'rgba(168,85,247,0.18)',
+          border: '1px solid rgba(168,85,247,0.55)',
+          padding: '2px 6px',
+          borderRadius: 3,
+          letterSpacing: 0.6,
+          textTransform: 'uppercase',
         }}
       >
-        <strong style={{ color: 'var(--text-primary)' }}>Executive-session content</strong>{' '}
-        (whistleblower count, draft IA findings, confidential litigation
-        items) ships in <strong>P5b</strong> with field-level RBAC. ARC
-        Chair persona will see these; ERM Head will not.
+        Executive Session · ARC + IA Only
       </div>
+      <div
+        style={{
+          fontSize: 11,
+          fontWeight: 700,
+          color: '#A855F7',
+          letterSpacing: 0.5,
+          textTransform: 'uppercase',
+          marginBottom: 4,
+        }}
+      >
+        Confidential Items
+      </div>
+      <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 10, maxWidth: 720, lineHeight: 1.5 }}>
+        Field-level RBAC. Whistleblower / IA drafts / litigation / external
+        auditor open points. SCA Code Art. 31 independence — ARC Chair sees
+        this; Group ERM Head does not.
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8, marginBottom: 12 }}>
+        <SevTile label="High severity" value={sev.high} color="#FF3B3B" />
+        <SevTile label="Medium severity" value={sev.medium} color="#FF8C00" />
+        <SevTile label="Low severity" value={sev.low} color="#22C55E" />
+        <SevTile label="Total open" value={sev.total} color="#A855F7" />
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 8 }}>
+        {CONFIDENTIAL_ITEMS.map((item) => {
+          const cat = CONFIDENTIAL_CAT_META[item.category]
+          const sevColor =
+            item.severity === 'high' ? '#FF3B3B' : item.severity === 'medium' ? '#FF8C00' : '#22C55E'
+          return (
+            <div
+              key={item.id}
+              style={{
+                background: 'var(--bg-primary)',
+                border: '1px solid var(--border-color)',
+                borderLeft: `3px solid ${cat.color}`,
+                borderRadius: 6,
+                padding: 10,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 4,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={monoStyle}>{item.id}</span>
+                <span
+                  style={{
+                    fontSize: 8,
+                    fontWeight: 700,
+                    color: cat.color,
+                    background: `${cat.color}1f`,
+                    border: `1px solid ${cat.color}55`,
+                    padding: '1px 5px',
+                    borderRadius: 3,
+                    letterSpacing: 0.4,
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {cat.label}
+                </span>
+                <span
+                  style={{
+                    fontSize: 8,
+                    fontWeight: 700,
+                    color: sevColor,
+                    marginLeft: 'auto',
+                    letterSpacing: 0.4,
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {item.severity}
+                </span>
+              </div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>
+                {item.title}
+              </div>
+              <div style={{ fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                {item.summary}
+              </div>
+              <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>
+                opened {item.openedAt} · owner {item.owner}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      <div
+        style={{
+          marginTop: 8,
+          paddingTop: 8,
+          borderTop: '1px dashed rgba(168,85,247,0.40)',
+          fontSize: 9,
+          color: 'var(--text-tertiary)',
+          fontStyle: 'italic',
+        }}
+      >
+        Illustrative pre-pilot. Pilot wires whistleblower system + IA workpapers +
+        Legal matters register + external auditor management-letter feed.
+      </div>
+    </section>
+  )
+}
+
+function ConfidentialBlind() {
+  return (
+    <section
+      style={{
+        background: 'var(--bg-secondary)',
+        border: '1px dashed var(--border-color)',
+        borderLeft: '3px solid var(--text-tertiary)',
+        borderRadius: 8,
+        padding: 14,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        fontSize: 11,
+        color: 'var(--text-tertiary)',
+        fontStyle: 'italic',
+      }}
+    >
+      <EyeOff size={14} />
+      <span>
+        <strong style={{ color: 'var(--text-secondary)' }}>Executive Session content hidden.</strong>{' '}
+        Whistleblower, draft IA findings, litigation register and external auditor letters
+        are visible only to ARC Chair / Chief Internal Auditor (SCA Code Art. 31 independence).
+      </span>
+    </section>
+  )
+}
+
+function SevTile({ label, value, color }: { label: string; value: number; color: string }) {
+  return (
+    <div
+      style={{
+        background: 'var(--bg-primary)',
+        border: `1px solid ${color}55`,
+        borderRadius: 6,
+        padding: '8px 10px',
+      }}
+    >
+      <div style={{ fontSize: 9, fontWeight: 700, color, textTransform: 'uppercase', letterSpacing: 0.4 }}>
+        {label}
+      </div>
+      <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.1 }}>{value}</div>
     </div>
   )
 }
