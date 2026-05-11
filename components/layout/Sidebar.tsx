@@ -24,6 +24,7 @@ import {
   BookOpen,
   UserCircle2,
   BookMarked,
+  LifeBuoy,
 } from 'lucide-react'
 import { clsx } from 'clsx'
 
@@ -99,6 +100,12 @@ const navItems = [
     label: 'Standards Ref',
     icon: BookMarked,
     description: 'ISO 31000 + COSO ERM',
+  },
+  {
+    href: '/bcm',
+    label: 'BCM',
+    icon: LifeBuoy,
+    description: 'Phase 4 roadmap',
   },
   {
     href: '/audit-trail',
