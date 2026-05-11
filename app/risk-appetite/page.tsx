@@ -30,6 +30,8 @@ import {
   type AppetiteLevel,
   type GroupAppetiteStatement,
 } from '@/lib/data/group-appetite-statements'
+import { usePersona } from '@/lib/context/PersonaContext'
+import { can } from '@/lib/rbac/policy'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { Modal } from '@/components/ui/Modal'
@@ -54,6 +56,10 @@ function RiskAppetiteContent() {
     rejectProposal,
     resetOverride,
   } = useRiskAppetite()
+  const { persona } = usePersona()
+  const canPropose = can(persona?.id ?? null, 'appetite:propose')
+  const canApprove = can(persona?.id ?? null, 'appetite:approve')
+  const canReset = can(persona?.id ?? null, 'appetite:reset')
   const statements = allEffective()
   const [editing, setEditing] = useState<GroupAppetiteStatement | null>(null)
   const pending = pendingProposals()
@@ -165,6 +171,7 @@ function RiskAppetiteContent() {
                   key={p.id}
                   baseStatement={base}
                   override={p.override}
+                  canApprove={canApprove}
                   onApprove={() => approveProposal(p.id)}
                   onReject={() => {
                     const reason = window.prompt(
@@ -236,6 +243,8 @@ function RiskAppetiteContent() {
                   s={s}
                   overridden={isOverridden(s.id)}
                   pending={hasPending(s.id)}
+                  canPropose={canPropose}
+                  canReset={canReset}
                   onEdit={() => setEditing(s)}
                   onReset={() => resetOverride(s.id)}
                 />
@@ -263,12 +272,16 @@ function AppetiteCard({
   s,
   overridden,
   pending,
+  canPropose,
+  canReset,
   onEdit,
   onReset,
 }: {
   s: GroupAppetiteStatement
   overridden: boolean
   pending: boolean
+  canPropose: boolean
+  canReset: boolean
   onEdit: () => void
   onReset: () => void
 }) {
@@ -377,15 +390,17 @@ function AppetiteCard({
           </div>
         </div>
         <div style={{ display: 'flex', gap: 6 }}>
-          <button
-            onClick={onEdit}
-            title={pending ? 'Replace pending proposal' : 'Propose change to appetite statement'}
-            style={iconBtnStyle}
-          >
-            <Pencil size={12} />
-            {pending ? 'Re-propose' : 'Propose Change'}
-          </button>
-          {overridden && (
+          {canPropose && (
+            <button
+              onClick={onEdit}
+              title={pending ? 'Replace pending proposal' : 'Propose change to appetite statement'}
+              style={iconBtnStyle}
+            >
+              <Pencil size={12} />
+              {pending ? 'Re-propose' : 'Propose Change'}
+            </button>
+          )}
+          {overridden && canReset && (
             <button
               onClick={onReset}
               title="Revert to default"
@@ -549,11 +564,13 @@ function EditAppetiteModal({
 function PendingProposalCard({
   baseStatement,
   override,
+  canApprove,
   onApprove,
   onReject,
 }: {
   baseStatement: GroupAppetiteStatement
   override: AppetiteOverride
+  canApprove: boolean
   onApprove: () => void
   onReject: () => void
 }) {
@@ -640,32 +657,52 @@ function PendingProposalCard({
           </div>
         </div>
         <div style={{ display: 'flex', gap: 6 }}>
-          <button
-            onClick={onApprove}
-            style={{
-              ...iconBtnStyle,
-              background: '#22C55E',
-              color: '#fff',
-              border: '1px solid #22C55E',
-            }}
-            title="Approve — proposal becomes the effective statement"
-          >
-            <Check size={12} />
-            Approve
-          </button>
-          <button
-            onClick={onReject}
-            style={{
-              ...iconBtnStyle,
-              background: 'transparent',
-              color: 'var(--risk-critical)',
-              border: '1px solid var(--risk-critical)',
-            }}
-            title="Reject — proposal is discarded; default remains effective"
-          >
-            <X size={12} />
-            Reject
-          </button>
+          {canApprove ? (
+            <>
+              <button
+                onClick={onApprove}
+                style={{
+                  ...iconBtnStyle,
+                  background: '#22C55E',
+                  color: '#fff',
+                  border: '1px solid #22C55E',
+                }}
+                title="Approve — proposal becomes the effective statement"
+              >
+                <Check size={12} />
+                Approve
+              </button>
+              <button
+                onClick={onReject}
+                style={{
+                  ...iconBtnStyle,
+                  background: 'transparent',
+                  color: 'var(--risk-critical)',
+                  border: '1px solid var(--risk-critical)',
+                }}
+                title="Reject — proposal is discarded; default remains effective"
+              >
+                <X size={12} />
+                Reject
+              </button>
+            </>
+          ) : (
+            <span
+              title="Only Group CRO / ARC Chair can approve appetite proposals"
+              style={{
+                fontSize: 9,
+                fontWeight: 700,
+                color: 'var(--text-tertiary)',
+                letterSpacing: 0.4,
+                textTransform: 'uppercase',
+                padding: '4px 8px',
+                border: '1px solid var(--border-color)',
+                borderRadius: 3,
+              }}
+            >
+              Awaiting CRO / ARC Chair
+            </span>
+          )}
         </div>
       </div>
 

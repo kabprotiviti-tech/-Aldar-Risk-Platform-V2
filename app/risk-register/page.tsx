@@ -19,6 +19,8 @@ import { MitigationActionsProvider, useMitigationActions } from '@/lib/context/M
 import { KRIThresholdsProvider } from '@/lib/context/KRIThresholdsContext'
 import { KRIEntriesProvider } from '@/lib/context/KRIEntriesContext'
 import { EscalationsProvider } from '@/lib/context/EscalationsContext'
+import { usePersona } from '@/lib/context/PersonaContext'
+import { can } from '@/lib/rbac/policy'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { RiskDetailDrawer } from '@/components/risk-register/RiskDetailDrawer'
@@ -83,6 +85,8 @@ function RiskRegisterContent() {
   const [selected, setSelected] = useState<RiskState | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<RiskDraft | null>(null)
+  const { persona } = usePersona()
+  const canCreate = can(persona?.id ?? null, 'risk:create')
 
   // Drill-down: ?focus=R-NNN auto-opens the matching risk drawer.
   // We read the URL directly (window.location.search) instead of
@@ -206,30 +210,53 @@ function RiskRegisterContent() {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <button
-            onClick={() => {
-              setEditing(null)
-              setFormOpen(true)
-            }}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              background: 'var(--accent-primary)',
-              color: 'var(--on-accent)',
-              border: 'none',
-              padding: '8px 14px',
-              borderRadius: 6,
-              fontSize: 12,
-              fontWeight: 700,
-              cursor: 'pointer',
-              letterSpacing: 0.4,
-              textTransform: 'uppercase',
-            }}
-          >
-            <Plus size={14} />
-            Add Risk
-          </button>
+          {canCreate && (
+            <button
+              onClick={() => {
+                setEditing(null)
+                setFormOpen(true)
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                background: 'var(--accent-primary)',
+                color: 'var(--on-accent)',
+                border: 'none',
+                padding: '8px 14px',
+                borderRadius: 6,
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: 'pointer',
+                letterSpacing: 0.4,
+                textTransform: 'uppercase',
+              }}
+            >
+              <Plus size={14} />
+              Add Risk
+            </button>
+          )}
+          {!canCreate && persona && (
+            <span
+              title={`${persona.title} has read access only on this surface`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+                padding: '5px 10px',
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 4,
+                fontSize: 10,
+                fontWeight: 700,
+                color: 'var(--text-tertiary)',
+                letterSpacing: 0.4,
+                textTransform: 'uppercase',
+              }}
+            >
+              View only · {persona.title}
+            </span>
+          )}
           <StatusBadge
             tier="LIVE"
             note={`${risks.length} engine + ${drafts.length} draft`}
