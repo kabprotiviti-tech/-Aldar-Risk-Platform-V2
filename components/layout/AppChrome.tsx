@@ -6,6 +6,7 @@ import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { MobileNav } from './MobileNav'
 import { AIRiskAdvisor } from '@/components/AIRiskAdvisor'
+import { RiskMemoryChat } from '@/components/RiskMemoryChat'
 import { StealthToggle } from './StealthToggle'
 
 export function AppChrome({ children }: { children: React.ReactNode }) {
@@ -38,6 +39,7 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
       </div>
       <MobileNav />
       <AIRiskAdvisor />
+      <RiskMemoryChat />
       <StealthToggle />
     </>
   )
