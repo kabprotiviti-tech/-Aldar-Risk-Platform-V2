@@ -34,19 +34,31 @@ import { EscalatedToGroupPanel } from '@/components/portfolio-tower/EscalatedToG
 import { ENTITIES, HOLDING, SUBSIDIARIES, HIERARCHY_DISCLAIMER } from '@/lib/entities/hierarchy'
 import { entityForRisk, type EntityId } from '@/lib/data/risk-entity-mapping'
 import type { RiskState, Rating } from '@/lib/engine/types'
+import { usePersona } from '@/lib/context/PersonaContext'
 
 function PortfolioTowerContent() {
-  const { risks } = useSimulation()
+  const { risks: allRisks } = useSimulation()
+  const { session } = usePersona()
+
+  // P6 entity-scope filter: when a subsidiary scope is active, the
+  // Group-level heatmap + Concentration + Top-10 narrow to that
+  // subsidiary's risks. Per-subsidiary cards stay scoped to themselves
+  // regardless (so the viewer still sees the cross-entity context).
+  const scope = session.entityScope
+  const risks =
+    scope && scope !== 'aldar-group'
+      ? allRisks.filter((r) => entityForRisk(r.id) === scope)
+      : allRisks
 
   // Group risks by entity (Group bucket = "aldar-group" PLUS all subsidiaries — i.e. everything)
   const risksByEntity: Record<EntityId, RiskState[]> = {
-    'aldar-group': risks,
+    'aldar-group': allRisks,
     'aldar-development': [],
     'aldar-investment': [],
     'aldar-education': [],
     'aldar-hospitality': [],
   }
-  for (const r of risks) {
+  for (const r of allRisks) {
     const eid = entityForRisk(r.id)
     if (eid !== 'aldar-group') {
       risksByEntity[eid].push(r)
@@ -90,11 +102,31 @@ function PortfolioTowerContent() {
           >
             Group ERM Head / CEO view. Cross-entity heatmaps for{' '}
             {HOLDING.shortName} and the {SUBSIDIARIES.length} subsidiaries
-            below. Top-10 risks, ERM annual plan calendar, and roll-up
-            math ship in M4.2 and M4.3.
+            below.
           </p>
+          {scope && scope !== 'aldar-group' && (
+            <div
+              style={{
+                marginTop: 6,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '4px 10px',
+                background: 'rgba(255,102,0,0.10)',
+                border: '1px solid rgba(255,102,0,0.40)',
+                borderRadius: 4,
+                fontSize: 10,
+                fontWeight: 700,
+                color: 'var(--accent-primary)',
+                letterSpacing: 0.4,
+                textTransform: 'uppercase',
+              }}
+            >
+              Filtered to {scope.replace('aldar-', '')}
+            </div>
+          )}
         </div>
-        <StatusBadge tier="MVP" note={`${risks.length} risks across ${ENTITIES.length} entities`} />
+        <StatusBadge tier="MVP" note={`${risks.length} risks${scope && scope !== 'aldar-group' ? ` · scope ${scope.replace('aldar-', '')}` : ` across ${ENTITIES.length} entities`}`} />
       </div>
 
       {/* E4 — ERM Scorecard at top so the CRO sees KPI roll-up first */}

@@ -5,6 +5,7 @@ import { Palette } from 'lucide-react'
 import { ThemeSelector } from './ThemeSelector'
 import { MarketWidget } from '@/components/MarketWidget'
 import { PersonaBadge } from './PersonaBadge'
+import { EntityScopePicker } from './EntityScopePicker'
 
 function LiveBadge() {
   return (
@@ -251,6 +252,9 @@ export function Header() {
                 flexShrink: 0,
               }}
             />
+
+            {/* Entity scope picker — switch active subsidiary */}
+            <EntityScopePicker />
 
             {/* Persona badge — login chip with dropdown */}
             <PersonaBadge />

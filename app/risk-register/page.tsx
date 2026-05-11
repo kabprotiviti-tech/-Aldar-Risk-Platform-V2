@@ -21,6 +21,7 @@ import { KRIEntriesProvider } from '@/lib/context/KRIEntriesContext'
 import { EscalationsProvider } from '@/lib/context/EscalationsContext'
 import { usePersona } from '@/lib/context/PersonaContext'
 import { can } from '@/lib/rbac/policy'
+import { entityForRisk } from '@/lib/data/risk-entity-mapping'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { RiskDetailDrawer } from '@/components/risk-register/RiskDetailDrawer'
@@ -85,8 +86,9 @@ function RiskRegisterContent() {
   const [selected, setSelected] = useState<RiskState | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<RiskDraft | null>(null)
-  const { persona } = usePersona()
+  const { persona, session } = usePersona()
   const canCreate = can(persona?.id ?? null, 'risk:create')
+  const entityScope = session.entityScope
 
   // Drill-down: ?focus=R-NNN auto-opens the matching risk drawer.
   // We read the URL directly (window.location.search) instead of
@@ -109,13 +111,20 @@ function RiskRegisterContent() {
     return { total, overdue }
   }
 
-  // Combined rows: engine first, then drafts
+  // Combined rows: engine first, then drafts.
+  // P6: when an entity scope is active (non-Group), filter engine risks
+  // to that subsidiary via the entity-mapping sidecar. Drafts pass
+  // through unchanged (they aren't entity-tagged yet — pilot fix).
   const allRows: RegisterRow[] = useMemo(() => {
+    const scopedRisks =
+      entityScope && entityScope !== 'aldar-group'
+        ? risks.filter((r) => entityForRisk(r.id) === entityScope)
+        : risks
     return [
-      ...risks.map<RegisterRow>((r) => ({ kind: 'engine', risk: r })),
+      ...scopedRisks.map<RegisterRow>((r) => ({ kind: 'engine', risk: r })),
       ...drafts.map<RegisterRow>((d) => ({ kind: 'draft', draft: d })),
     ]
-  }, [risks, drafts])
+  }, [risks, drafts, entityScope])
 
   const categories = useMemo(() => {
     const set = new Set<string>()
