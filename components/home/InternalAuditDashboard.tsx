@@ -31,6 +31,7 @@ import {
   useMitigationActions,
 } from '@/lib/context/MitigationActionsContext'
 import { useAuditTrail } from '@/lib/context/AuditTrailContext'
+import { RISKS } from '@/lib/engine/seedData'
 import { THREE_LINES } from '@/lib/data/three-lines-of-defense'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
@@ -50,15 +51,20 @@ function Inner() {
   const { actions } = useMitigationActions()
   const { events } = useAuditTrail()
 
-  // Assurance proxy: per risk, count of controls × testing freshness
+  // Assurance proxy: per risk, count of controls × testing freshness.
+  // Control list lives on RiskDef (RISKS), not RiskState — join by id.
   const ranked = [...risks]
-    .map((r) => ({
-      id: r.id,
-      name: r.name,
-      controlCount: r.controls.length,
-      controlGap: r.baseInherent - r.controls.length * 2.5, // crude proxy
-      residual: r.newResidual,
-    }))
+    .map((r) => {
+      const def = RISKS.find((x) => x.id === r.id)
+      const controlCount = def?.controls.length ?? 0
+      return {
+        id: r.id,
+        name: r.name,
+        controlCount,
+        controlGap: r.baseInherent - controlCount * 2.5, // crude proxy
+        residual: r.newResidual,
+      }
+    })
     .sort((a, b) => b.controlGap - a.controlGap)
 
   const openFindings = actions.filter((a) => a.status !== 'closed')
