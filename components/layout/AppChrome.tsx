@@ -12,6 +12,12 @@ import { StealthToggle } from './StealthToggle'
 export function AppChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isLanding = pathname === '/'
+  const isLogin = pathname === '/login'
+
+  if (isLogin) {
+    // Login screen runs without chrome (no sidebar, no header, no FABs).
+    return <>{children}</>
+  }
 
   if (isLanding) {
     return (

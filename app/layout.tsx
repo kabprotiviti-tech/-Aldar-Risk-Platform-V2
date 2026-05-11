@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/lib/context/ThemeContext'
 import { DerivedRisksProvider } from '@/lib/context/DerivedRisksContext'
 import { UploadedDocumentProvider } from '@/lib/context/UploadedDocumentContext'
 import { AuditTrailProvider } from '@/lib/context/AuditTrailContext'
+import { PersonaProvider } from '@/lib/context/PersonaContext'
 import { AppChrome } from '@/components/layout/AppChrome'
 import { EnvironmentBanner } from '@/components/provenance/EnvironmentBanner'
 
@@ -43,12 +44,14 @@ export default function RootLayout({
       <body className={inter.variable} suppressHydrationWarning>
         <ThemeProvider>
           <AuditTrailProvider>
-            <UploadedDocumentProvider>
-              <DerivedRisksProvider>
-                <EnvironmentBanner env="demo" />
-                <AppChrome>{children}</AppChrome>
-              </DerivedRisksProvider>
-            </UploadedDocumentProvider>
+            <PersonaProvider>
+              <UploadedDocumentProvider>
+                <DerivedRisksProvider>
+                  <EnvironmentBanner env="demo" />
+                  <AppChrome>{children}</AppChrome>
+                </DerivedRisksProvider>
+              </UploadedDocumentProvider>
+            </PersonaProvider>
           </AuditTrailProvider>
         </ThemeProvider>
       </body>
