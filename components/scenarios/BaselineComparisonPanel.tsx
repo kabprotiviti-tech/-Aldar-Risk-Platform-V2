@@ -114,10 +114,10 @@ export function BaselineComparisonPanel() {
                 <tr key={r.label} style={{ borderTop: '1px solid var(--border-color)' }}>
                   <Td>{r.label}</Td>
                   <Td right mono>
-                    <NumericValue value={r.fy24} />
+                    <NumericValue data={r.fy24} />
                   </Td>
                   <Td right mono>
-                    <NumericValue value={r.fy25} />
+                    <NumericValue data={r.fy25} />
                   </Td>
                   <Td right mono>
                     <span style={{ color: yoyColor, fontWeight: 700 }}>
