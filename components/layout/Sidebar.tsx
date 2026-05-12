@@ -229,19 +229,21 @@ const NAV_GROUPS: NavGroup[] = [
 
 export function Sidebar() {
   const pathname = usePathname()
-  const [collapsed, setCollapsed] = useState(false)
+  // Default collapsed (icon-only L1). User explicitly expands to see L2.
+  const [collapsed, setCollapsed] = useState(true)
+  const [userToggled, setUserToggled] = useState(false)
   const { persona, isAuthenticated } = usePersona()
 
-  // Auto-collapse on tablet/mobile
+  // Auto-collapse on tablet/mobile, but respect explicit user toggle.
   React.useEffect(() => {
     const check = () => {
+      if (userToggled) return
       if (window.innerWidth < 1024) setCollapsed(true)
-      else setCollapsed(false)
     }
     check()
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)
-  }, [])
+  }, [userToggled])
 
   // Filter items by persona. Unauthenticated = show everything (so demo
   // users browsing without login see the full surface area).
@@ -466,26 +468,38 @@ export function Sidebar() {
       </div>
 
       <button
-        onClick={() => setCollapsed(!collapsed)}
+        onClick={() => {
+          setUserToggled(true)
+          setCollapsed(!collapsed)
+        }}
+        title={collapsed ? 'Expand sidebar (show labels)' : 'Collapse sidebar (icons only)'}
+        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         style={{
           position: 'absolute',
-          top: '50%',
-          right: '-12px',
-          transform: 'translateY(-50%)',
-          width: '24px',
-          height: '24px',
+          top: 18,
+          right: '-13px',
+          width: '26px',
+          height: '26px',
           borderRadius: '50%',
-          backgroundColor: 'var(--bg-card)',
-          border: '1px solid var(--border-color)',
+          backgroundColor: 'var(--accent-primary)',
+          border: '2px solid var(--bg-primary)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
           zIndex: 50,
-          color: 'var(--text-muted)',
+          color: 'var(--on-accent)',
+          boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
+          transition: 'transform 0.18s ease',
+        }}
+        onMouseEnter={(e) => {
+          ;(e.currentTarget as HTMLElement).style.transform = 'scale(1.1)'
+        }}
+        onMouseLeave={(e) => {
+          ;(e.currentTarget as HTMLElement).style.transform = 'scale(1)'
         }}
       >
-        {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
+        {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
       </button>
     </aside>
   )

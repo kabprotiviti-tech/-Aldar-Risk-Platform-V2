@@ -5,7 +5,10 @@ import { usePathname } from 'next/navigation'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { MobileNav } from './MobileNav'
-import { AIRiskAdvisor } from '@/components/AIRiskAdvisor'
+// AIRiskAdvisor temporarily disabled — RiskMemoryChat (deterministic,
+// no-hallucination) is the single conversational surface until the
+// 10-agent UX synthesis lands a merged design.
+// import { AIRiskAdvisor } from '@/components/AIRiskAdvisor'
 import { RiskMemoryChat } from '@/components/RiskMemoryChat'
 import { StealthToggle } from './StealthToggle'
 
@@ -46,7 +49,6 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
         </div>
       </div>
       <MobileNav />
-      <AIRiskAdvisor />
       <RiskMemoryChat />
       <StealthToggle />
     </>
