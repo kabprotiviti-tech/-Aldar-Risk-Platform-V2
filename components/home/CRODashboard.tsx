@@ -141,9 +141,12 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
   }
 
   const totalExposure = risks.reduce((s, r) => s + r.exposureAedMn, 0)
+  const totalExposureBn = (totalExposure / 1000).toFixed(2)
+  const criticalCount = risks.filter((r) => r.ratingTo === 'Critical').length
+  const highCount = risks.filter((r) => r.ratingTo === 'High').length
 
   return (
-    <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 14 }}>
       <IllustrativeDataBanner pilotFeeds="Aldar live ERM feeds (PMS / Yardi / SAP / escrow)" />
 
       {/* Header */}
@@ -159,17 +162,19 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
         <div>
           <h1
             style={{
-              fontSize: 22,
-              fontWeight: 700,
+              fontSize: 28,
+              fontWeight: 600,
               color: 'var(--text-primary)',
               margin: 0,
+              letterSpacing: '-0.015em',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 8,
+              gap: 10,
+              lineHeight: 1.15,
             }}
           >
-            <Crown size={20} style={{ color: '#FF6600' }} />
-            Group CRO Cockpit
+            <Crown size={22} style={{ color: 'var(--accent-primary)' }} />
+            Group CRO cockpit
           </h1>
           <p
             style={{
@@ -211,10 +216,94 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
         </div>
       </div>
 
-      {/* Exception strip — top 5 by residual */}
+      {/* HERO — single most important CRO number */}
+      <section
+        style={{
+          background:
+            'linear-gradient(135deg, rgba(255,102,0,0.06) 0%, rgba(45,158,255,0.04) 100%), var(--bg-secondary)',
+          border: '1px solid var(--border-color)',
+          borderRadius: 12,
+          padding: '22px 24px',
+          display: 'grid',
+          gridTemplateColumns: 'minmax(280px, 2fr) repeat(3, minmax(140px, 1fr))',
+          gap: 24,
+          alignItems: 'end',
+          boxShadow: 'var(--shadow-md)',
+        }}
+      >
+        <div>
+          <div
+            style={{
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: 1,
+              textTransform: 'uppercase',
+              color: 'var(--text-tertiary)',
+              marginBottom: 6,
+            }}
+          >
+            Group Residual Exposure
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'baseline',
+              gap: 10,
+              flexWrap: 'wrap',
+            }}
+          >
+            <span
+              style={{
+                fontSize: 'clamp(40px, 5vw, 56px)',
+                fontWeight: 700,
+                color: 'var(--text-primary)',
+                letterSpacing: '-0.02em',
+                lineHeight: 1,
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              AED {totalExposureBn}
+            </span>
+            <span style={{ fontSize: 16, color: 'var(--text-tertiary)', fontWeight: 500 }}>
+              bn
+            </span>
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                color: 'var(--text-tertiary)',
+                marginLeft: 8,
+              }}
+            >
+              across {risks.length} engine risks · {appetiteStatements.length} appetite statements
+            </span>
+          </div>
+        </div>
+
+        <HeroStat
+          label="Critical / High"
+          value={`${criticalCount} / ${highCount}`}
+          tone={criticalCount > 0 ? 'danger' : highCount > 3 ? 'warning' : 'neutral'}
+          sub="of total risk count"
+        />
+        <HeroStat
+          label="KRI Breaches"
+          value={`${kriPosture.red + kriPosture.amber}`}
+          tone={kriPosture.red > 0 ? 'danger' : kriPosture.amber > 0 ? 'warning' : 'success'}
+          sub={`${kriPosture.red} red · ${kriPosture.amber} amber`}
+        />
+        <HeroStat
+          label="Items Awaiting You"
+          value={`${pendingEsc.length + pendingApp.length + overdueCount}`}
+          tone={pendingEsc.length + pendingApp.length + overdueCount > 0 ? 'warning' : 'success'}
+          sub={`${pendingEsc.length} esc · ${pendingApp.length} appetite · ${overdueCount} overdue`}
+        />
+      </section>
+
+      {/* Exception strip — top 5 by residual (the "outside appetite" proxy) */}
       <Section
-        title="Top 5 — Highest Residual Risk"
-        subtitle="Sorted by residual score, with delta vs inherent baseline"
+        title="Top 5 outside appetite"
+        subtitle="Highest residual scores — these need CRO attention this week"
         accent="#FF3B3B"
         icon={<AlertTriangle size={14} />}
       >
@@ -476,9 +565,8 @@ function Section({
       style={{
         background: 'var(--bg-secondary)',
         border: '1px solid var(--border-color)',
-        borderLeft: `4px solid ${accent}`,
-        borderRadius: 8,
-        padding: 14,
+        borderRadius: 10,
+        padding: 16,
       }}
     >
       <div
@@ -496,18 +584,17 @@ function Section({
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 6,
-              fontSize: 11,
-              fontWeight: 700,
-              color: accent,
-              letterSpacing: 0.5,
-              textTransform: 'uppercase',
+              gap: 8,
+              fontSize: 14,
+              fontWeight: 600,
+              color: 'var(--text-primary)',
+              letterSpacing: '-0.005em',
             }}
           >
-            {icon}
+            <span style={{ color: accent, display: 'inline-flex' }}>{icon}</span>
             {title}
           </div>
-          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>
+          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>
             {subtitle}
           </div>
         </div>
@@ -599,6 +686,56 @@ function TrendTile({
         <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{unit}</span>
       </div>
       <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 4 }}>{sub}</div>
+    </div>
+  )
+}
+
+type HeroTone = 'neutral' | 'success' | 'warning' | 'danger'
+
+function HeroStat({
+  label,
+  value,
+  tone = 'neutral',
+  sub,
+}: {
+  label: string
+  value: string
+  tone?: HeroTone
+  sub?: string
+}) {
+  const toneColor: Record<HeroTone, string> = {
+    neutral: 'var(--text-primary)',
+    success: 'var(--state-success, #22C55E)',
+    warning: 'var(--state-warning, #F5C518)',
+    danger: 'var(--state-danger, #FF3B3B)',
+  }
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div
+        style={{
+          fontSize: 10,
+          fontWeight: 700,
+          color: 'var(--text-tertiary)',
+          textTransform: 'uppercase',
+          letterSpacing: 0.6,
+        }}
+      >
+        {label}
+      </div>
+      <div
+        style={{
+          fontSize: 24,
+          fontWeight: 700,
+          color: toneColor[tone],
+          fontVariantNumeric: 'tabular-nums',
+          lineHeight: 1.1,
+        }}
+      >
+        {value}
+      </div>
+      {sub && (
+        <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{sub}</div>
+      )}
     </div>
   )
 }

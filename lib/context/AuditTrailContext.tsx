@@ -26,6 +26,7 @@ import {
   createPersistedContext,
   uid,
 } from '@/lib/context/createPersistedContext'
+import { buildAuditTrailSeed } from '@/lib/data/audit-trail-seed'
 
 export type AuditCategory =
   | 'risk'
@@ -65,6 +66,11 @@ const { Provider: StoreProvider, useStore } = createPersistedContext<AuditEvent[
   storageKey: STORAGE_KEY,
   defaultValue: [],
   migrate: (raw) => (Array.isArray(raw) ? (raw as AuditEvent[]) : []),
+  // First-visit seed — 12 illustrative events spanning the last 7 days
+  // so /audit-trail + CRO/IA dashboards don't render "0 events". Never
+  // overwrites real user data, never re-seeds after the sentinel fires.
+  seed: () => buildAuditTrailSeed() as AuditEvent[],
+  seedSentinelKey: 'aldar-audit-trail-seeded-v1',
 })
 
 /**

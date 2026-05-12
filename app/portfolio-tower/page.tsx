@@ -34,6 +34,7 @@ import { EscalatedToGroupPanel } from '@/components/portfolio-tower/EscalatedToG
 import { ENTITIES, HOLDING, SUBSIDIARIES, HIERARCHY_DISCLAIMER } from '@/lib/entities/hierarchy'
 import { entityForRisk, type EntityId } from '@/lib/data/risk-entity-mapping'
 import type { RiskState, Rating } from '@/lib/engine/types'
+import { RISKS } from '@/lib/engine/seedData'
 import { usePersona } from '@/lib/context/PersonaContext'
 
 function PortfolioTowerContent() {
@@ -238,16 +239,22 @@ function EntityHeatmap({
   isGroup,
 }: EntityHeatmapProps) {
   // Bucket risks by their inherent (likelihood, impact) integer pair.
-  // We use baseLikelihood and baseImpact (inherent) for the heatmap —
-  // matches the convention on /risk-register.
+  // BCG-1 audit fix: previously both L and I were rounded from the SAME
+  // newInherent value, so every risk plotted on the diagonal (L = I).
+  // RiskState carries the product `newInherent`; the original L and I
+  // live on the RiskDef (RISKS) as `baseLikelihood` + `baseImpact`. Join
+  // by riskId so the heatmap actually shows the L/I distribution.
   const cells = new Map<string, RiskState[]>()
   for (const r of risks) {
-    // Round to integer cells (1..5)
-    const l = Math.max(1, Math.min(5, Math.round(r.newInherent / 5)))
-    const i = Math.max(1, Math.min(5, Math.round(r.newInherent / 5)))
-    // The above is a fallback if we don't have direct L/I; refine using engine fields if present
-    // (the simulation engine stores newInherent as L*I product, so we can't perfectly invert).
-    // Use a balanced split for visualization.
+    const def = RISKS.find((x) => x.id === r.id)
+    const l = Math.max(
+      1,
+      Math.min(5, def?.baseLikelihood ?? Math.round(Math.sqrt(r.newInherent))),
+    )
+    const i = Math.max(
+      1,
+      Math.min(5, def?.baseImpact ?? Math.round(Math.sqrt(r.newInherent))),
+    )
     const key = `${l}-${i}`
     const arr = cells.get(key) || []
     arr.push(r)

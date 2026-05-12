@@ -365,7 +365,10 @@ function ARCPackContent() {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-          <StatusBadge tier="LIVE" note="All 6 sections live · PDF engine ready" />
+          <StatusBadge
+            tier="MVP"
+            note="6 sections wired · figures illustrative until pilot"
+          />
           <button
             onClick={handleExportPDF}
             disabled={exporting}

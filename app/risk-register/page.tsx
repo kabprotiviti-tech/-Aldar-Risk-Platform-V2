@@ -214,8 +214,9 @@ function RiskRegisterContent() {
           >
             Cause-Event-Impact register for Aldar Group. Inherent and residual scores
             for engine risks come from the simulation. User-added risks are stored
-            locally as DRAFT and persist between sessions in this browser.
-            Mitigation actions / Status workflow / Heatmap ship in C4-C7.
+            locally as DRAFT and persist between sessions in this browser. Click any
+            row for the detail drawer — mitigation actions, status workflow,
+            heatmap, KRI linkage and escalate-to-Group are all wired.
           </p>
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>

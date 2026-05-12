@@ -87,11 +87,11 @@ function KRIContent() {
             and sales pipelines. Current values flow from the simulation
             engine drivers; thresholds are user-editable per KRI and
             persist locally. Manual entry, traffic-light status, breach
-            events and trend charts ship in patches D3–D7. Risk-appetite
-            linkage ships in D8.
+            events, 6-month trend charts and risk-appetite linkage are
+            all wired — click any KRI row to drill in.
           </p>
         </div>
-        <StatusBadge tier="MVP" note={`${KRI_DEFINITIONS.length} KRIs · thresholds in D2`} />
+        <StatusBadge tier="MVP" note={`${KRI_DEFINITIONS.length} KRIs tracked`} />
       </div>
 
       <div
