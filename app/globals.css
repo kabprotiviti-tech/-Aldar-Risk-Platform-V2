@@ -14,6 +14,7 @@
   --bg-hover: #1A2240;
   --text-primary: #F0F4FF;
   --text-secondary: #A8B4CC;
+  --text-tertiary: #7F8CA3;
   --text-muted: #5A6A84;
   --accent-primary: #C9A84C;
   --accent-secondary: #E8C96A;
@@ -34,6 +35,19 @@
   --chart-3: #A855F7;
   --chart-4: #22C55E;
   --chart-5: #FF6B6B;
+  /* UX-1 design-system token additions (UI-5 audit) */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.45);
+  --shadow-lg: 0 32px 64px rgba(0,0,0,0.55);
+  --focus-ring: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-primary);
+  --link-color: #5BB8FF;
+  --link-hover: #9DD3FF;
+  --state-success: #22C55E;
+  --state-warning: #F5C518;
+  --state-danger: #FF3B3B;
+  --state-info: #2D9EFF;
+  --surface-1: var(--bg-card);
+  --surface-2: var(--bg-hover);
 }
 
 /* ---- EXECUTIVE LIGHT ---- */
