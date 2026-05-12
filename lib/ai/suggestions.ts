@@ -13,7 +13,8 @@
  */
 
 import type { KRIDefinition, KRIThresholds } from '@/lib/data/kri-definitions'
-import { RISKS, type RiskDef } from '@/lib/engine/seedData'
+import { RISKS } from '@/lib/engine/seedData'
+import type { RiskDef } from '@/lib/engine/types'
 
 // ============================================================
 // MITIGATION suggestions per risk
