@@ -17,16 +17,9 @@ const nextConfig = {
         destination: '/portfolio-tower',
         permanent: false,
       },
-      {
-        source: '/executive-brief',
-        destination: '/arc-pack',
-        permanent: false,
-      },
-      {
-        source: '/control-command-center',
-        destination: '/home',
-        permanent: false,
-      },
+      // /executive-brief + /control-command-center RESTORED — they were
+      // wrongly deprecated. /executive-brief is the Board summary view;
+      // /control-command-center is the ICOFR control catalog. Both stay.
     ]
   },
 }

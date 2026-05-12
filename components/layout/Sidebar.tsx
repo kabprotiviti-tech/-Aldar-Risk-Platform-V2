@@ -140,6 +140,13 @@ const NAV_GROUPS: NavGroup[] = [
         personas: ALL,
       },
       {
+        href: '/control-command-center',
+        label: 'Control Center',
+        icon: Gauge,
+        description: 'ICOFR control catalog',
+        personas: ['group-cro', 'internal-audit', 'arc-chair', 'risk-champion'],
+      },
+      {
         href: '/kri',
         label: 'KRIs',
         icon: Gauge,
@@ -187,6 +194,13 @@ const NAV_GROUPS: NavGroup[] = [
         icon: FileBarChart,
         description: 'Board-ready PDF report',
         personas: ['group-cro', 'arc-chair', 'subsidiary-ceo', 'internal-audit'],
+      },
+      {
+        href: '/executive-brief',
+        label: 'Executive Brief',
+        icon: FileBarChart,
+        description: 'CEO + Board summary',
+        personas: ['group-cro', 'arc-chair', 'subsidiary-ceo'],
       },
     ],
   },
