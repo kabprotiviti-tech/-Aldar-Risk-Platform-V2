@@ -440,48 +440,62 @@ export function RiskMemoryChat() {
 
   return (
     <>
-      {/* FAB button (bottom-LEFT to avoid AIRiskAdvisor) */}
+      {/* FAB — bottom-right, restrained outlined ring (Linear/Vercel pattern,
+         no consumer-y pulsing). */}
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          title="Open Risk Memory — ask about R-NNN, KRI-NN, GA-*, audit trail"
+          title="Ask Aldar Risk Assistant (Cmd+K) — R-NNN, KRI-NN, GA-*, audit trail"
+          aria-label="Risk Assistant"
           style={{
             position: 'fixed',
-            bottom: 28,
-            left: 28,
+            bottom: 24,
+            right: 24,
             zIndex: fabZ,
-            background: 'var(--accent-primary)',
+            background:
+              'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary, var(--accent-primary)) 100%)',
             color: 'var(--on-accent)',
-            border: 'none',
+            border: '1px solid var(--accent-primary)',
             borderRadius: '50%',
             width: 52,
             height: 52,
             cursor: 'pointer',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.40)',
+            boxShadow: 'var(--shadow-md, 0 8px 24px rgba(0,0,0,0.4))',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            transition: 'transform 0.18s ease, box-shadow 0.18s ease',
+          }}
+          onMouseEnter={(e) => {
+            const el = e.currentTarget as HTMLElement
+            el.style.transform = 'scale(1.05)'
+            el.style.boxShadow = 'var(--shadow-lg, 0 16px 36px rgba(0,0,0,0.5))'
+          }}
+          onMouseLeave={(e) => {
+            const el = e.currentTarget as HTMLElement
+            el.style.transform = 'scale(1)'
+            el.style.boxShadow = 'var(--shadow-md, 0 8px 24px rgba(0,0,0,0.4))'
           }}
         >
-          <MessageSquareText size={22} />
+          <Sparkles size={20} />
         </button>
       )}
 
-      {/* Panel */}
+      {/* Panel — bottom-right anchored, taller, cleaner header */}
       {open && (
         <div
           role="dialog"
-          aria-label="Risk Memory chat"
+          aria-label="Risk Assistant"
           style={{
             position: 'fixed',
-            bottom: 28,
-            left: 28,
-            width: 'min(420px, 92vw)',
-            maxHeight: 'min(640px, 80vh)',
+            bottom: 24,
+            right: 24,
+            width: 'min(440px, 94vw)',
+            maxHeight: 'min(680px, 84vh)',
             background: 'var(--bg-primary)',
             border: '1px solid var(--border-color)',
             borderRadius: 12,
-            boxShadow: '0 24px 60px rgba(0,0,0,0.55)',
+            boxShadow: 'var(--shadow-lg, 0 24px 60px rgba(0,0,0,0.55))',
             zIndex: panelZ,
             display: 'flex',
             flexDirection: 'column',
@@ -493,19 +507,35 @@ export function RiskMemoryChat() {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 8,
-              padding: '12px 14px',
+              gap: 10,
+              padding: '14px 16px',
               borderBottom: '1px solid var(--border-color)',
-              background: 'var(--bg-secondary)',
+              background:
+                'linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%)',
             }}
           >
-            <Sparkles size={14} style={{ color: 'var(--accent-primary)' }} />
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>
-                Risk Memory
+            <div
+              style={{
+                width: 30,
+                height: 30,
+                borderRadius: 8,
+                background:
+                  'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary, var(--accent-primary)) 100%)',
+                color: 'var(--on-accent)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <Sparkles size={15} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+                Aldar Risk Assistant
               </div>
-              <div style={{ fontSize: 9, color: 'var(--text-tertiary)', letterSpacing: 0.3 }}>
-                Deterministic lookup — no LLM hallucination
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', letterSpacing: 0.3 }}>
+                Deterministic lookup · every answer traces to its source
               </div>
             </div>
             <button

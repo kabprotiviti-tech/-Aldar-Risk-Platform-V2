@@ -40,6 +40,7 @@ import { getEntity } from '@/lib/entities/hierarchy'
 import { usePersona } from '@/lib/context/PersonaContext'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
+import { ExternalIntelligenceFeed } from '@/components/home/ExternalIntelligenceFeed'
 
 export function SubsidiaryCEODashboard() {
   return (
@@ -186,6 +187,8 @@ function Inner() {
         <strong style={{ color: 'var(--text-primary)' }}>Group escalations to {entity?.shortName ?? 'this subsidiary'}:</strong>{' '}
         ship in P8 (Approvals queue). Pilot wires real Group → Subsidiary escalation feed.
       </div>
+
+      <ExternalIntelligenceFeed limit={4} />
     </div>
   )
 }

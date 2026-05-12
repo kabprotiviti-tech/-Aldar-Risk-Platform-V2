@@ -53,6 +53,7 @@ import { entityForRisk } from '@/lib/data/risk-entity-mapping'
 import { getEntity } from '@/lib/entities/hierarchy'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
+import { ExternalIntelligenceFeed } from '@/components/home/ExternalIntelligenceFeed'
 import { usePersona } from '@/lib/context/PersonaContext'
 
 interface Props {
@@ -473,6 +474,9 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
           />
         </div>
       </Section>
+
+      {/* External intelligence feed — restored from old /dashboard */}
+      <ExternalIntelligenceFeed limit={5} />
 
       {/* Emerging signals — recent audit-trail movement */}
       <Section

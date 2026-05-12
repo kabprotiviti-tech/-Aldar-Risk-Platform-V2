@@ -33,10 +33,15 @@ import { KRISparkline } from '@/components/kri/KRISparkline'
 import { KRIBreachHistoryModal } from '@/components/kri/KRIBreachHistoryModal'
 import { KRI_DEFINITIONS, type KRIDefinition } from '@/lib/data/kri-definitions'
 import { computeKRIStatus, STATUS_META, type KRIStatus } from '@/lib/data/kri-status'
+import { usePersona } from '@/lib/context/PersonaContext'
+import { can } from '@/lib/rbac/policy'
 import { computeBreachHistory } from '@/lib/data/kri-breach-history'
 import type { Driver } from '@/lib/engine/types'
 
 function KRIContent() {
+  const { persona } = usePersona()
+  const canEditThresholds = can(persona?.id ?? null, 'kri:edit-threshold')
+  const canEnterValue = can(persona?.id ?? null, 'kri:enter-value')
   const { drivers } = useSimulation()
   const [editingKriId, setEditingKriId] = useState<string | null>(null)
   const [entryKriId, setEntryKriId] = useState<string | null>(null)
@@ -125,8 +130,8 @@ function KRIContent() {
                 key={kri.id}
                 kri={kri}
                 drivers={drivers}
-                onEditThresholds={() => setEditingKriId(kri.id)}
-                onAddEntry={() => setEntryKriId(kri.id)}
+                onEditThresholds={canEditThresholds ? () => setEditingKriId(kri.id) : undefined}
+                onAddEntry={canEnterValue ? () => setEntryKriId(kri.id) : undefined}
                 onOpenBreaches={() => setBreachKriId(kri.id)}
               />
             ))}
@@ -351,8 +356,8 @@ function KRIRow({
 }: {
   kri: KRIDefinition
   drivers: Driver[]
-  onEditThresholds: () => void
-  onAddEntry: () => void
+  onEditThresholds?: () => void
+  onAddEntry?: () => void
   onOpenBreaches: () => void
 }) {
   const driver = drivers.find((d) => d.id === kri.driverId)
@@ -411,7 +416,7 @@ function KRIRow({
               {latest.period} · {latest.enteredBy}
             </span>
           </div>
-        ) : (
+        ) : onAddEntry ? (
           <button
             onClick={onAddEntry}
             title="Add first manual entry"
@@ -434,8 +439,12 @@ function KRIRow({
             <PlusCircle size={11} />
             Add value
           </button>
+        ) : (
+          <span style={{ fontSize: 9, color: 'var(--text-tertiary)', fontStyle: 'italic' }}>
+            no entry yet
+          </span>
         )}
-        {latest && (
+        {latest && onAddEntry && (
           <button
             onClick={onAddEntry}
             title="Add or update an entry"
@@ -523,22 +532,24 @@ function KRIRow({
             </span>
           )}
           <AppetiteChip kri={kri} />
-          <button
-            onClick={onEditThresholds}
-            title="Edit thresholds"
-            style={{
-              background: 'transparent',
-              border: '1px solid var(--border-color)',
-              color: 'var(--text-secondary)',
-              borderRadius: 3,
-              padding: 3,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-            }}
-          >
-            <Pencil size={10} />
-          </button>
+          {onEditThresholds && (
+            <button
+              onClick={onEditThresholds}
+              title="Edit thresholds"
+              style={{
+                background: 'transparent',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-secondary)',
+                borderRadius: 3,
+                padding: 3,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+              }}
+            >
+              <Pencil size={10} />
+            </button>
+          )}
         </div>
       </Td>
       <Td>
