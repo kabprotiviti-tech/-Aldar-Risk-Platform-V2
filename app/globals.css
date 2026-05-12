@@ -1484,3 +1484,24 @@ body {
   .landing-cta-ghost { width: 100%; justify-content: center; }
 }
 
+/* Block 3 #8 — Mobile-responsive polish.
+   - Every hand-rolled table on Risk Register / Risk Library / Audit Trail /
+     Standards Reference / Risk Appetite gets a horizontal scroll wrapper
+     so wide tables don't push out the viewport on tablet / Board iPad.
+   - Reduce page padding on narrow viewports so the main content area
+     uses every available pixel. */
+.layout-main-content table {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+.layout-main-content table thead,
+.layout-main-content table tbody { display: table; width: 100%; table-layout: auto; }
+@media (max-width: 767px) {
+  .layout-main-content { padding-left: 12px !important; padding-right: 12px !important; }
+  .arc-toolbar > div:last-child { gap: 6px !important; flex-wrap: wrap; }
+  .header-title { font-size: 0.82rem !important; }
+}
+
+

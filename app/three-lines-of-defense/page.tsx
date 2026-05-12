@@ -61,8 +61,9 @@ export default function ThreeLinesPage() {
             The IIA 2020 Three Lines Model adapted to Aldar's structure.
             Operational management owns the risk; Group ERM, Compliance, and
             Treasury frame and monitor it; Internal Audit provides
-            independent assurance to the ARC. Each role lists illustrative
-            responsibilities and the platform surfaces it uses day-to-day.
+            independent assurance to the Audit &amp; Risk Committee (ARC).
+            Each role lists illustrative responsibilities and the platform
+            surfaces it uses day-to-day.
           </p>
         </div>
         <StatusBadge tier="MVP" note={`${THREE_LINES.length} lines · ${totalRoles} roles`} />

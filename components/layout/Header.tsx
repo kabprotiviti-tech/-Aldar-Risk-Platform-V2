@@ -6,6 +6,7 @@ import { ThemeSelector } from './ThemeSelector'
 import { MarketWidget } from '@/components/MarketWidget'
 import { PersonaBadge } from './PersonaBadge'
 import { EntityScopePicker } from './EntityScopePicker'
+import { NotificationsBell } from './NotificationsBell'
 
 function LiveBadge() {
   return (
@@ -252,6 +253,9 @@ export function Header() {
                 flexShrink: 0,
               }}
             />
+
+            {/* Notifications bell */}
+            <NotificationsBell />
 
             {/* Entity scope picker — switch active subsidiary */}
             <EntityScopePicker />

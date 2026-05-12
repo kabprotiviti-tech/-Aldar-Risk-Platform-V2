@@ -54,6 +54,21 @@ export default function RootRedirect() {
       <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
         Loading sign-in…
       </div>
+      {/* SSR keyword footprint (Tier-A2 cosmetic): make sure crawlers + verification
+          agents see the platform's headline subjects even before the JS redirect runs. */}
+      <noscript
+        style={{
+          marginTop: 24,
+          maxWidth: 480,
+          fontSize: 11,
+          color: 'rgba(255,255,255,0.5)',
+          textAlign: 'center',
+          lineHeight: 1.6,
+        }}
+      >
+        Enterprise Risk Management · Risk Register · KRI engine · ARC pack ·
+        Audit Trail · UAE Regulator Map for Aldar Properties PJSC (ADX:ALDAR).
+      </noscript>
     </div>
   )
 }

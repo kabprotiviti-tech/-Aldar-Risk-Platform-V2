@@ -12,9 +12,10 @@
  */
 
 import React, { useEffect, useState } from 'react'
-import { Check, X, RotateCcw } from 'lucide-react'
+import { Check, X, RotateCcw, Sparkles } from 'lucide-react'
 import { useKRIThresholds } from '@/lib/context/KRIThresholdsContext'
 import type { KRIDefinition, KRIThresholds } from '@/lib/data/kri-definitions'
+import { suggestThresholds } from '@/lib/ai/suggestions'
 
 interface Props {
   kri: KRIDefinition
@@ -29,6 +30,11 @@ export function KRIThresholdEditor({ kri, onClose }: Props) {
   const [amber, setAmber] = useState<number>(current.amberBoundary)
   const [red, setRed] = useState<number>(current.redBoundary)
   const [error, setError] = useState<string | null>(null)
+  const [suggestion, setSuggestion] = useState<{
+    amberBoundary: number
+    redBoundary: number
+    rationale: string
+  } | null>(null)
 
   // Re-sync local state if KRI or override changes externally
   useEffect(() => {
@@ -182,6 +188,111 @@ export function KRIThresholdEditor({ kri, onClose }: Props) {
         ({kri.defaultThresholds.unit}). Pilot will calibrate to Aldar
         appetite & tolerance.
       </div>
+
+      {/* AI threshold suggestion (Block 3 #6) */}
+      {!suggestion ? (
+        <button
+          type="button"
+          onClick={() => setSuggestion(suggestThresholds(kri))}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            background: 'rgba(168,85,247,0.10)',
+            border: '1px solid rgba(168,85,247,0.40)',
+            color: '#A855F7',
+            borderRadius: 4,
+            padding: '6px 10px',
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: 0.4,
+            textTransform: 'uppercase',
+            cursor: 'pointer',
+          }}
+        >
+          <Sparkles size={11} />
+          Suggest thresholds (AI Hypothesis)
+        </button>
+      ) : (
+        <div
+          style={{
+            background: 'rgba(168,85,247,0.08)',
+            border: '1px solid rgba(168,85,247,0.40)',
+            borderRadius: 6,
+            padding: 10,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              fontSize: 9,
+              fontWeight: 700,
+              color: '#A855F7',
+              letterSpacing: 0.6,
+              textTransform: 'uppercase',
+            }}
+          >
+            <Sparkles size={10} />
+            AI Hypothesis · pending human approval
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--text-primary)', lineHeight: 1.55 }}>
+            Amber <strong>{suggestion.amberBoundary}</strong>, Red{' '}
+            <strong>{suggestion.redBoundary}</strong> {current.unit}.
+          </div>
+          <div style={{ fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.55 }}>
+            {suggestion.rationale}
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button
+              type="button"
+              onClick={() => {
+                setAmber(suggestion.amberBoundary)
+                setRed(suggestion.redBoundary)
+                setError(validate(suggestion.amberBoundary, suggestion.redBoundary))
+                setSuggestion(null)
+              }}
+              style={{
+                background: '#A855F7',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 3,
+                padding: '4px 10px',
+                fontSize: 9,
+                fontWeight: 700,
+                letterSpacing: 0.4,
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+              }}
+            >
+              Apply to fields
+            </button>
+            <button
+              type="button"
+              onClick={() => setSuggestion(null)}
+              style={{
+                background: 'transparent',
+                color: 'var(--text-tertiary)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 3,
+                padding: '4px 10px',
+                fontSize: 9,
+                fontWeight: 700,
+                letterSpacing: 0.4,
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+              }}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
 
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
         <button
