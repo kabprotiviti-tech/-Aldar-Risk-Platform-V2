@@ -9,11 +9,9 @@ const nextConfig = {
     //   /executive-brief   → /arc-pack
     // /control-command-center is deleted entirely (no replacement).
     return [
-      {
-        source: '/dashboard',
-        destination: '/home',
-        permanent: false,
-      },
+      // /dashboard is RESTORED — it's the External Risk Intelligence
+      // surface (live news feed + decision intelligence + AI stress test).
+      // Do NOT redirect it away.
       {
         source: '/portfolio',
         destination: '/portfolio-tower',

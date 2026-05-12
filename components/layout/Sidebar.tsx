@@ -133,6 +133,13 @@ const NAV_GROUPS: NavGroup[] = [
     icon: Activity,
     items: [
       {
+        href: '/dashboard',
+        label: 'External Intel',
+        icon: LayoutDashboard,
+        description: 'News + decision intelligence',
+        personas: ALL,
+      },
+      {
         href: '/kri',
         label: 'KRIs',
         icon: Gauge,
