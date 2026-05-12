@@ -22,6 +22,7 @@ import {
   FileText,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Cpu,
   ListChecks,
   Gauge,
@@ -248,12 +249,59 @@ const NAV_GROUPS: NavGroup[] = [
   },
 ]
 
+const GROUP_OPEN_STORAGE = 'aldar-sidebar-group-open-v1'
+
+function loadGroupState(): Record<string, boolean> {
+  if (typeof window === 'undefined') return {}
+  try {
+    const raw = window.localStorage.getItem(GROUP_OPEN_STORAGE)
+    if (!raw) return {}
+    const parsed = JSON.parse(raw)
+    return parsed && typeof parsed === 'object' ? parsed : {}
+  } catch {
+    return {}
+  }
+}
+
 export function Sidebar() {
   const pathname = usePathname()
-  // Default collapsed (icon-only L1). User explicitly expands to see L2.
-  const [collapsed, setCollapsed] = useState(true)
+  // Default expanded (200px) so users see the L2 labels by default.
+  const [collapsed, setCollapsed] = useState(false)
   const [userToggled, setUserToggled] = useState(false)
   const { persona, isAuthenticated } = usePersona()
+
+  // Per-group expand state. Default: all OPEN. Persists to localStorage.
+  // Note: the active route's group always force-opens regardless of saved state.
+  const [groupOpen, setGroupOpen] = useState<Record<string, boolean>>({})
+  const [groupHydrated, setGroupHydrated] = useState(false)
+
+  React.useEffect(() => {
+    setGroupOpen(loadGroupState())
+    setGroupHydrated(true)
+  }, [])
+
+  React.useEffect(() => {
+    if (!groupHydrated) return
+    try {
+      window.localStorage.setItem(GROUP_OPEN_STORAGE, JSON.stringify(groupOpen))
+    } catch {
+      // private mode / quota — non-fatal
+    }
+  }, [groupOpen, groupHydrated])
+
+  function toggleGroup(groupId: string) {
+    setGroupOpen((prev) => ({
+      ...prev,
+      [groupId]: prev[groupId] === undefined ? false : !prev[groupId],
+    }))
+  }
+
+  function isGroupOpen(groupId: string, hasActiveItem: boolean): boolean {
+    // Active route's group always opens, even if user collapsed it earlier.
+    if (hasActiveItem) return true
+    const saved = groupOpen[groupId]
+    return saved === undefined ? true : saved
+  }
 
   // Auto-collapse on tablet/mobile, but respect explicit user toggle.
   React.useEffect(() => {
@@ -294,45 +342,96 @@ export function Sidebar() {
         overflowX: 'hidden',
       }}
     >
-      <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto', overflowX: 'hidden' }}>
+      <nav style={{ flex: 1, padding: '10px 0', overflowY: 'auto', overflowX: 'hidden' }}>
         {NAV_GROUPS.map((group) => {
           const items = visibleItems(group.items)
           if (items.length === 0) return null
           const GroupIcon = group.icon
+          const hasActiveItem = items.some(
+            (i) => pathname === i.href || pathname.startsWith(i.href + '/'),
+          )
+          const open = isGroupOpen(group.id, hasActiveItem)
+
           return (
-            <div key={group.id} style={{ marginBottom: 8 }}>
+            <div key={group.id} style={{ marginBottom: 4 }}>
               {!collapsed ? (
-                <div
+                // ── L2 expanded: clickable group header with accordion chevron
+                <button
+                  onClick={() => toggleGroup(group.id)}
+                  aria-expanded={open}
+                  aria-controls={`sidebar-group-${group.id}`}
                   style={{
-                    padding: '6px 14px 2px',
+                    width: 'calc(100% - 12px)',
+                    margin: '4px 6px 2px',
+                    padding: '6px 10px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 5,
+                    gap: 8,
+                    background: 'transparent',
+                    border: 'none',
+                    borderRadius: 6,
+                    cursor: 'pointer',
+                    color: 'var(--text-secondary)',
+                    transition: 'background 0.15s ease, color 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    ;(e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'
+                  }}
+                  onMouseLeave={(e) => {
+                    ;(e.currentTarget as HTMLElement).style.background = 'transparent'
                   }}
                 >
-                  <GroupIcon size={10} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                  <GroupIcon
+                    size={13}
+                    style={{
+                      color: hasActiveItem ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                      flexShrink: 0,
+                    }}
+                  />
                   <span
                     style={{
-                      fontSize: 8,
+                      flex: 1,
+                      textAlign: 'left',
+                      fontSize: 10,
                       fontWeight: 700,
-                      color: 'var(--text-muted)',
-                      letterSpacing: 1,
+                      color: hasActiveItem ? 'var(--text-primary)' : 'var(--text-secondary)',
+                      letterSpacing: 1.2,
                       textTransform: 'uppercase',
                     }}
                   >
                     {group.label}
                   </span>
-                </div>
+                  <ChevronDown
+                    size={12}
+                    style={{
+                      color: 'var(--text-tertiary)',
+                      transform: open ? 'rotate(0deg)' : 'rotate(-90deg)',
+                      transition: 'transform 0.2s ease',
+                      flexShrink: 0,
+                    }}
+                  />
+                </button>
               ) : (
+                // ── L1 collapsed: divider between groups, no header
                 <div
                   style={{
                     height: 1,
-                    margin: '6px 16px',
+                    margin: '6px 12px',
                     background: 'var(--border-color)',
                     opacity: 0.4,
                   }}
                 />
               )}
+
+              {/* Children — hidden when group is collapsed AND sidebar is expanded.
+                  When sidebar is icon-rail collapsed, always show icons regardless. */}
+              <div
+                id={`sidebar-group-${group.id}`}
+                style={{
+                  display: collapsed || open ? 'block' : 'none',
+                  overflow: 'hidden',
+                }}
+              >
               {items.map((item) => {
                 const Icon = item.icon
                 const isActive =
@@ -395,6 +494,7 @@ export function Sidebar() {
                   </Link>
                 )
               })}
+              </div>
             </div>
           )
         })}
