@@ -1504,4 +1504,34 @@ body {
   .header-title { font-size: 0.82rem !important; }
 }
 
+/* ─── Batch D — Mobile responsive sweep ────────────────────────────
+   Tightens layout for senior reviewing on tablet / phone. Most
+   dashboards used CSS grid auto-fit minmax(180px, 1fr) which stacks
+   naturally, but Header overflow + KPI tile gaps need help on narrow
+   viewports.
+   ─────────────────────────────────────────────────────────────────── */
+@media (max-width: 1023px) {
+  /* KPI grids should breathe a bit on tablet */
+  .layout-main-content [style*="repeat(auto-fit"] { gap: 8px !important; }
+}
+@media (max-width: 639px) {
+  /* Header controls hide ClockWidget / MarketWidget already; tighten further */
+  header[style*="sticky"] > div { padding: 8px 12px !important; gap: 8px !important; }
+  /* Stack hero-stat strips to single column to avoid tiny cramped tiles */
+  .layout-main-content [style*="grid-template-columns: repeat(auto-fit, minmax(180px"],
+  .layout-main-content [style*="grid-template-columns: repeat(auto-fit, minmax(200px"] {
+    grid-template-columns: 1fr !important;
+  }
+  /* Section titles wrap rather than overflow */
+  .layout-main-content h1 { font-size: 22px !important; letter-spacing: -0.01em !important; }
+  /* Trust footer rows wrap cleanly */
+  .layout-main-content [style*="border: 1px dashed"] { font-size: 9px !important; }
+}
+@media (max-width: 399px) {
+  .layout-main-content [style*="padding: '24px 32px'"],
+  .layout-main-content [style*="padding: 24px 32px"] {
+    padding: 16px 12px !important;
+  }
+}
+
 
