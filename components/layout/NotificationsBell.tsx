@@ -11,11 +11,23 @@
  * Pilot wires email / Slack / Teams push; pre-pilot this is in-app only.
  */
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { Bell, BellRing, X, AlertTriangle, Mail } from 'lucide-react'
+import { Bell, BellRing, X, AlertTriangle, Mail, Crown } from 'lucide-react'
 import { useAuditTrail } from '@/lib/context/AuditTrailContext'
 import { usePersona } from '@/lib/context/PersonaContext'
+import type { PersonaId } from '@/lib/personas'
+
+// Persona-relevant audit categories. CRO sees everything, ARC focuses on
+// governance, IA on findings, Champion on their own activity, Sub-CEO on
+// in-scope escalations. Empty array means "see all".
+const CATEGORY_BY_PERSONA: Record<PersonaId, string[]> = {
+  'group-cro': [],
+  'arc-chair': ['escalation', 'risk_appetite', 'risk_status'],
+  'internal-audit': ['risk', 'mitigation', 'kri', 'audit'],
+  'subsidiary-ceo': ['escalation', 'risk_status', 'mitigation', 'kri'],
+  'risk-champion': ['risk', 'mitigation', 'kri'],
+}
 
 interface NotificationItem {
   id: string
@@ -49,29 +61,40 @@ export function NotificationsBell() {
 
   if (!isAuthenticated) return null
 
+  // Persona-aware filter: limit to categories that matter to this seat.
+  const allowedCategories = persona ? CATEGORY_BY_PERSONA[persona.id] : []
+  const personaFilter = (cat: string) =>
+    allowedCategories.length === 0 || allowedCategories.includes(cat)
+
   // Build the notification list — last 60 minutes of audit activity,
   // any escalation events surface as warning, anything tagged 'red' as danger.
   const cutoff = Date.now() - RECENT_WINDOW_MIN * 60_000
-  const recent = events
-    .filter((e) => new Date(e.at).getTime() >= cutoff)
-    .sort((a, b) => (a.at < b.at ? 1 : -1))
-    .slice(0, 8)
-    .map<NotificationItem>((e) => ({
-      id: e.id,
-      kind: 'audit',
-      title: `${e.category.toUpperCase().replace('_', ' ')} · ${e.action}`,
-      detail: e.summary,
-      at: e.at,
-      href:
-        e.targetId && /^R-/.test(e.targetId)
-          ? `/risk-register?focus=${e.targetId}`
-          : e.targetId && /^KRI-/.test(e.targetId)
-            ? '/kri'
-            : e.targetId && /^GA-/.test(e.targetId)
-              ? '/risk-appetite'
-              : '/audit-trail',
-      severity: e.category === 'escalation' ? 'danger' : 'info',
-    }))
+  const recent = useMemo(
+    () =>
+      events
+        .filter((e) => new Date(e.at).getTime() >= cutoff)
+        .filter((e) => personaFilter(e.category))
+        .sort((a, b) => (a.at < b.at ? 1 : -1))
+        .slice(0, 8)
+        .map<NotificationItem>((e) => ({
+          id: e.id,
+          kind: 'audit',
+          title: `${e.category.toUpperCase().replace('_', ' ')} · ${e.action}`,
+          detail: e.summary,
+          at: e.at,
+          href:
+            e.targetId && /^R-/.test(e.targetId)
+              ? `/risk-register?focus=${e.targetId}`
+              : e.targetId && /^KRI-/.test(e.targetId)
+                ? '/kri'
+                : e.targetId && /^GA-/.test(e.targetId)
+                  ? '/risk-appetite'
+                  : '/audit-trail',
+          severity: e.category === 'escalation' ? 'danger' : 'info',
+        })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [events, persona?.id, cutoff],
+  )
 
   const count = recent.length
   const hasUrgent = recent.some((r) => r.severity === 'danger')
@@ -154,8 +177,12 @@ export function NotificationsBell() {
               <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>
                 Notifications
               </div>
-              <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
-                Last {RECENT_WINDOW_MIN} min · {persona?.title ?? 'you'}
+              <div style={{ fontSize: 10, color: 'var(--text-tertiary)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <Crown size={9} style={{ color: 'var(--accent-primary)' }} />
+                Last {RECENT_WINDOW_MIN} min · scoped to {persona?.title ?? 'you'}
+                {allowedCategories.length > 0 && (
+                  <span style={{ opacity: 0.7 }}>· {allowedCategories.length} cat</span>
+                )}
               </div>
             </div>
             <button
