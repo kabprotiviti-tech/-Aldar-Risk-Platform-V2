@@ -22,6 +22,7 @@ import {
   Activity,
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardBody } from '@/components/ui/Card'
+import { BASELINE_RISK_POSTURE } from '@/lib/data/baselineRiskPosture'
 import { LiveRiskSignals } from '@/components/dashboard/LiveRiskSignals'
 import { AIFusionPanel } from '@/components/dashboard/AIFusionPanel'
 import { KPIDrillDownPanel, AI_ALERT_COUNT, type KPIView } from '@/components/KPIDrillDownPanel'
@@ -433,8 +434,11 @@ function RiskTrendChart() {
 export default function DashboardPage() {
   const [lastUpdated, setLastUpdated] = useState(0)
   const [liveKPIs, setLiveKPIs] = useState({
-    riskScore: aggregateKPIs.totalRiskScore,
-    exposure: aggregateKPIs.totalFinancialExposure,
+    // Batch 1 credibility: never let the headline tiles fall to 0 if the
+    // engine briefly hands back empty aggregates. Baseline figures defend
+    // the executive view until live feeds replace them at pilot.
+    riskScore: aggregateKPIs.totalRiskScore || BASELINE_RISK_POSTURE.overallRiskScore,
+    exposure: aggregateKPIs.totalFinancialExposure || BASELINE_RISK_POSTURE.totalFinancialExposure,
   })
   const [alertsRefreshing, setAlertsRefreshing] = useState(false)
   const [activeView, setActiveView] = useState<KPIView | null>(null)

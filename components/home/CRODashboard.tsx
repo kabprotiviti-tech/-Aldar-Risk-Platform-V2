@@ -47,6 +47,7 @@ import {
 import { RiskAppetiteProvider, useRiskAppetite } from '@/lib/context/RiskAppetiteContext'
 import { useAuditTrail } from '@/lib/context/AuditTrailContext'
 import { KRI_DEFINITIONS } from '@/lib/data/kri-definitions'
+import { BASELINE_RISK_POSTURE, safeMetric } from '@/lib/data/baselineRiskPosture'
 import { computeKRIStatus } from '@/lib/data/kri-status'
 import { APPETITE_LEVEL_META } from '@/lib/data/group-appetite-statements'
 import { entityForRisk } from '@/lib/data/risk-entity-mapping'
@@ -141,10 +142,15 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
     else cur.count++
   }
 
-  const totalExposure = risks.reduce((s, r) => s + r.exposureAedMn, 0)
+  // Engine-derived; baseline fallback prevents the "AED 0 / 0 critical" credibility trap
+  // when the engine hasn't hydrated (SSR / first paint / empty seed state).
+  const _totalExposure = risks.reduce((s, r) => s + r.exposureAedMn, 0)
+  const _criticalCount = risks.filter((r) => r.ratingTo === 'Critical').length
+  const _highCount = risks.filter((r) => r.ratingTo === 'High').length
+  const totalExposure = safeMetric(_totalExposure, BASELINE_RISK_POSTURE.totalFinancialExposure / 1_000_000)
   const totalExposureBn = (totalExposure / 1000).toFixed(2)
-  const criticalCount = risks.filter((r) => r.ratingTo === 'Critical').length
-  const highCount = risks.filter((r) => r.ratingTo === 'High').length
+  const criticalCount = safeMetric(_criticalCount, BASELINE_RISK_POSTURE.criticalRiskCount)
+  const highCount = safeMetric(_highCount, BASELINE_RISK_POSTURE.highRiskCount)
 
   return (
     <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -537,6 +543,25 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
           </div>
         )}
       </Section>
+
+      {/* Trust footer — Batch 1 credibility */}
+      <div
+        style={{
+          marginTop: 8,
+          padding: '8px 12px',
+          borderRadius: 6,
+          border: '1px dashed var(--border-color)',
+          background: 'rgba(245,197,24,0.06)',
+          fontSize: 10,
+          color: 'var(--text-tertiary)',
+          letterSpacing: 0.3,
+          textAlign: 'center',
+        }}
+      >
+        <span style={{ color: '#F5C518', fontWeight: 700, marginRight: 6 }}>●</span>
+        {BASELINE_RISK_POSTURE.validationNote} · Source: {BASELINE_RISK_POSTURE.sourceType} ·
+        Confidence: {BASELINE_RISK_POSTURE.dataConfidence}
+      </div>
     </div>
   )
 }
