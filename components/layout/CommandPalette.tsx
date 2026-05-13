@@ -152,6 +152,39 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       .filter((it): it is PaletteItem => Boolean(it))
   }, [recent, personaItems, query])
 
+  // Direct-jump detection: user types a risk ID (R-001) or KRI ID
+  // (KRI-09) and we add a "Jump to <ID>" item at the top that routes
+  // straight to the drawer. Lets a CRO surface R-001 in two keystrokes
+  // (⌘K then r-001).
+  const directJump = useMemo<PaletteItem | null>(() => {
+    const q = query.trim().toUpperCase()
+    const riskMatch = /^R-\d{1,4}$/.test(q)
+    const kriMatch = /^KRI-\d{1,4}$/.test(q)
+    const gaMatch = /^GA-[A-Z0-9-]+$/.test(q)
+    if (!riskMatch && !kriMatch && !gaMatch) return null
+    const href = riskMatch
+      ? `/risk-register?focus=${q}`
+      : kriMatch
+        ? '/kri'
+        : `/risk-appetite?focus=${q}`
+    const label = riskMatch
+      ? `Jump to risk ${q}`
+      : kriMatch
+        ? `Jump to ${q}`
+        : `Jump to appetite ${q}`
+    return {
+      href,
+      label,
+      group: 'Direct jump',
+      description: riskMatch
+        ? 'Open the risk register focused on this risk'
+        : kriMatch
+          ? 'Open the KRI engine'
+          : 'Open the risk-appetite page',
+      icon: ITEMS[0].icon, // generic — overridden visually by accent
+    }
+  }, [query])
+
   // Free-text filter on top of the persona scope. When no query and
   // recents exist, drop those recents from the main list to avoid
   // duplication.
@@ -170,10 +203,15 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
     return base
   }, [query, personaItems, recentItems])
 
-  // Combined navigation list — recents come first when present.
+  // Combined navigation list — direct-jump first (when matched),
+  // then recents, then filtered taxonomic items.
   const combined = useMemo<PaletteItem[]>(
-    () => [...recentItems, ...filtered],
-    [recentItems, filtered],
+    () => [
+      ...(directJump ? [directJump] : []),
+      ...recentItems,
+      ...filtered,
+    ],
+    [directJump, recentItems, filtered],
   )
 
   // Reset on open
@@ -353,17 +391,24 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
           {combined.map((it, idx) => {
             const Icon = it.icon
             const active = idx === activeIdx
-            // Recent items always come first when present; flag them so we
-            // can render the "Recent" group header instead of the item's
-            // own group, and so we can hint at the recency badge.
-            const isRecent = idx < recentItems.length
+            // Direct-jump takes index 0; recents follow; taxonomic items last.
+            const directOffset = directJump ? 1 : 0
+            const isDirect = directJump && idx === 0
+            const isRecent = !isDirect && idx >= directOffset && idx < directOffset + recentItems.length
             const prev = combined[idx - 1]
-            const prevIsRecent = idx - 1 < recentItems.length && idx > 0
-            const itemGroup = isRecent ? 'Recent' : it.group
-            const prevGroup = prev ? (prevIsRecent ? 'Recent' : prev.group) : null
+            const prevIsDirect = directJump && idx === 1
+            const prevIsRecent = !prevIsDirect && idx - 1 >= directOffset && idx - 1 < directOffset + recentItems.length && idx > 0
+            const itemGroup = isDirect ? 'Direct jump' : isRecent ? 'Recent' : it.group
+            const prevGroup = prev
+              ? prevIsDirect
+                ? 'Direct jump'
+                : prevIsRecent
+                  ? 'Recent'
+                  : prev.group
+              : null
             const showGroupHeader = !prev || prevGroup !== itemGroup
             return (
-              <React.Fragment key={`${isRecent ? 'r-' : ''}${it.href}`}>
+              <React.Fragment key={`${isDirect ? 'd-' : isRecent ? 'r-' : ''}${it.href}-${idx}`}>
                 {showGroupHeader && (
                   <div
                     style={{
@@ -371,13 +416,18 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                       fontWeight: 700,
                       letterSpacing: 0.6,
                       textTransform: 'uppercase',
-                      color: isRecent ? 'var(--accent-primary)' : 'var(--text-tertiary)',
+                      color: isDirect
+                        ? 'var(--state-warning, #F5C518)'
+                        : isRecent
+                          ? 'var(--accent-primary)'
+                          : 'var(--text-tertiary)',
                       padding: '8px 12px 4px',
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: 5,
                     }}
                   >
+                    {isDirect && <ArrowRight size={9} />}
                     {isRecent && <Clock size={9} />}
                     {itemGroup}
                   </div>
