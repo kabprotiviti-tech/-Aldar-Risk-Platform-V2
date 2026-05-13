@@ -27,6 +27,7 @@ import { canAccessRoute } from '@/lib/rbac/policy'
 import {
   Search,
   ArrowRight,
+  Clock,
   Command as CommandIcon,
   Crown as PersonaIcon,
   type LucideIcon,
@@ -93,6 +94,32 @@ interface CommandPaletteProps {
   onClose: () => void
 }
 
+const RECENT_KEY = 'aldar-cmdk-recent-v1'
+const RECENT_LIMIT = 4
+
+function loadRecent(): string[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const raw = localStorage.getItem(RECENT_KEY)
+    if (!raw) return []
+    const arr = JSON.parse(raw)
+    return Array.isArray(arr) ? arr.filter((s) => typeof s === 'string').slice(0, RECENT_LIMIT) : []
+  } catch {
+    return []
+  }
+}
+
+function pushRecent(href: string) {
+  if (typeof window === 'undefined') return
+  try {
+    const cur = loadRecent()
+    const next = [href, ...cur.filter((h) => h !== href)].slice(0, RECENT_LIMIT)
+    localStorage.setItem(RECENT_KEY, JSON.stringify(next))
+  } catch {
+    // ignore quota / disabled localStorage
+  }
+}
+
 export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const router = useRouter()
   const { persona } = usePersona()
@@ -100,6 +127,12 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const listRef = useRef<HTMLDivElement>(null)
   const [query, setQuery] = useState('')
   const [activeIdx, setActiveIdx] = useState(0)
+  const [recent, setRecent] = useState<string[]>([])
+
+  // Hydrate recent list on each open so updates land between sessions.
+  useEffect(() => {
+    if (open) setRecent(loadRecent())
+  }, [open])
 
   // Persona-scoped item set — palette only surfaces routes the
   // logged-in persona is authorised to view. Mirrors the sidebar
@@ -110,15 +143,38 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
     return ITEMS.filter((it) => canAccessRoute(persona.id, it.href))
   }, [persona])
 
-  // Free-text filter on top of the persona scope.
+  // Resolve recent hrefs back to PaletteItem, drop any that the
+  // persona no longer has access to.
+  const recentItems = useMemo<PaletteItem[]>(() => {
+    if (query.trim()) return [] // hide recents while searching
+    return recent
+      .map((h) => personaItems.find((it) => it.href === h))
+      .filter((it): it is PaletteItem => Boolean(it))
+  }, [recent, personaItems, query])
+
+  // Free-text filter on top of the persona scope. When no query and
+  // recents exist, drop those recents from the main list to avoid
+  // duplication.
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return personaItems
-    return personaItems.filter((it) => {
-      const hay = `${it.label} ${it.description} ${it.group} ${(it.keywords ?? []).join(' ')}`.toLowerCase()
-      return hay.includes(q)
-    })
-  }, [query, personaItems])
+    const base = q
+      ? personaItems.filter((it) => {
+          const hay = `${it.label} ${it.description} ${it.group} ${(it.keywords ?? []).join(' ')}`.toLowerCase()
+          return hay.includes(q)
+        })
+      : personaItems
+    if (!q && recentItems.length > 0) {
+      const recentHrefs = new Set(recentItems.map((r) => r.href))
+      return base.filter((it) => !recentHrefs.has(it.href))
+    }
+    return base
+  }, [query, personaItems, recentItems])
+
+  // Combined navigation list — recents come first when present.
+  const combined = useMemo<PaletteItem[]>(
+    () => [...recentItems, ...filtered],
+    [recentItems, filtered],
+  )
 
   // Reset on open
   useEffect(() => {
@@ -133,8 +189,8 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
 
   // Keep active index in range when filter changes
   useEffect(() => {
-    if (activeIdx >= filtered.length) setActiveIdx(Math.max(0, filtered.length - 1))
-  }, [filtered.length, activeIdx])
+    if (activeIdx >= combined.length) setActiveIdx(Math.max(0, combined.length - 1))
+  }, [combined.length, activeIdx])
 
   // Scroll active into view
   useEffect(() => {
@@ -145,6 +201,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
 
   const go = useCallback(
     (href: string) => {
+      pushRecent(href)
       onClose()
       router.push(href)
     },
@@ -160,7 +217,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       }
       if (e.key === 'ArrowDown') {
         e.preventDefault()
-        setActiveIdx((i) => Math.min(filtered.length - 1, i + 1))
+        setActiveIdx((i) => Math.min(combined.length - 1, i + 1))
         return
       }
       if (e.key === 'ArrowUp') {
@@ -170,11 +227,11 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       }
       if (e.key === 'Enter') {
         e.preventDefault()
-        const it = filtered[activeIdx]
+        const it = combined[activeIdx]
         if (it) go(it.href)
       }
     },
-    [filtered, activeIdx, go, onClose],
+    [combined, activeIdx, go, onClose],
   )
 
   // Body scroll lock
@@ -281,7 +338,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
             minHeight: 0,
           }}
         >
-          {filtered.length === 0 && (
+          {combined.length === 0 && (
             <div
               style={{
                 padding: 24,
@@ -293,13 +350,20 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
               No matches for &ldquo;{query}&rdquo;.
             </div>
           )}
-          {filtered.map((it, idx) => {
+          {combined.map((it, idx) => {
             const Icon = it.icon
             const active = idx === activeIdx
-            const prev = filtered[idx - 1]
-            const showGroupHeader = !prev || prev.group !== it.group
+            // Recent items always come first when present; flag them so we
+            // can render the "Recent" group header instead of the item's
+            // own group, and so we can hint at the recency badge.
+            const isRecent = idx < recentItems.length
+            const prev = combined[idx - 1]
+            const prevIsRecent = idx - 1 < recentItems.length && idx > 0
+            const itemGroup = isRecent ? 'Recent' : it.group
+            const prevGroup = prev ? (prevIsRecent ? 'Recent' : prev.group) : null
+            const showGroupHeader = !prev || prevGroup !== itemGroup
             return (
-              <React.Fragment key={it.href}>
+              <React.Fragment key={`${isRecent ? 'r-' : ''}${it.href}`}>
                 {showGroupHeader && (
                   <div
                     style={{
@@ -307,11 +371,15 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                       fontWeight: 700,
                       letterSpacing: 0.6,
                       textTransform: 'uppercase',
-                      color: 'var(--text-tertiary)',
+                      color: isRecent ? 'var(--accent-primary)' : 'var(--text-tertiary)',
                       padding: '8px 12px 4px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 5,
                     }}
                   >
-                    {it.group}
+                    {isRecent && <Clock size={9} />}
+                    {itemGroup}
                   </div>
                 )}
                 <button
