@@ -56,6 +56,7 @@ import { getEntity } from '@/lib/entities/hierarchy'
 import { usePersona } from '@/lib/context/PersonaContext'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
+import { ExternalIntelligenceFeed } from '@/components/home/ExternalIntelligenceFeed'
 
 export function ChampionDashboard() {
   return (
@@ -365,6 +366,11 @@ function ChampionInner() {
           </div>
         )}
       </Section>
+
+      {/* External market / regulator / macro / sector signals —
+          1st-line needs the same external context the CRO sees so a
+          champion entering a draft risk knows the market backdrop. */}
+      <ExternalIntelligenceFeed limit={4} />
 
       {/* Escalate CTA strip */}
       <div
