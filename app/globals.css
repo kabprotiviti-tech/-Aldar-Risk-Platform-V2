@@ -1534,4 +1534,26 @@ body {
   }
 }
 
+/* ─── Batch C — Login + global focus polish ───────────────────────
+   Keyboard a11y: buttons, links and inputs across the platform get
+   a visible accent ring on :focus-visible. Avoids the default browser
+   blue ring on dark themes and matches the design token.
+   ──────────────────────────────────────────────────────────────── */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[role="menuitem"]:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring, 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-primary)) !important;
+  border-radius: inherit;
+}
+/* Login persona buttons specifically lift slightly on hover/focus */
+.persona-tile-button:hover,
+.persona-tile-button:focus-visible {
+  transform: translateY(-2px);
+  transition: transform 0.18s ease-out;
+}
+
 

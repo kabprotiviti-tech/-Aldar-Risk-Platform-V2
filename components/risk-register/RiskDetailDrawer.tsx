@@ -121,15 +121,30 @@ export function RiskDetailDrawer({ risk, onClose }: Props) {
 
   return (
     <>
+      <style>{`
+        @keyframes aldar-drawer-slide-in {
+          from { transform: translateX(100%); }
+          to   { transform: translateX(0); }
+        }
+        @keyframes aldar-drawer-fade-in {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .aldar-drawer-slide, .aldar-drawer-backdrop { animation: none !important; }
+        }
+      `}</style>
       {/* Backdrop */}
       <div
         onClick={onClose}
+        className="aldar-drawer-backdrop"
         style={{
           position: 'fixed',
           inset: 0,
           background: 'rgba(0,0,0,0.4)',
           zIndex: 9000,
           backdropFilter: 'blur(2px)',
+          animation: 'aldar-drawer-fade-in 220ms ease-out',
         }}
       />
 
@@ -137,6 +152,7 @@ export function RiskDetailDrawer({ risk, onClose }: Props) {
       <aside
         role="dialog"
         aria-label={`Risk detail: ${risk.name}`}
+        className="aldar-drawer-slide"
         style={{
           position: 'fixed',
           top: 0,
@@ -150,6 +166,7 @@ export function RiskDetailDrawer({ risk, onClose }: Props) {
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
+          animation: 'aldar-drawer-slide-in 260ms cubic-bezier(0.22, 1, 0.36, 1)',
         }}
       >
         {/* Header */}
