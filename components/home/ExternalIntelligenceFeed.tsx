@@ -24,6 +24,7 @@ import {
   Newspaper,
   Building2,
   Banknote,
+  type LucideIcon,
 } from 'lucide-react'
 
 interface IntelItem {
@@ -42,7 +43,7 @@ interface IntelItem {
 
 const CATEGORY_META: Record<
   IntelItem['category'],
-  { label: string; color: string; icon: React.ComponentType<{ size?: number }> }
+  { label: string; color: string; icon: LucideIcon }
 > = {
   market: { label: 'Market', color: '#2D9EFF', icon: Building2 },
   regulator: { label: 'Regulator', color: '#A855F7', icon: Newspaper },
@@ -52,7 +53,7 @@ const CATEGORY_META: Record<
 
 const SIGNAL_META: Record<
   IntelItem['signal'],
-  { color: string; icon: React.ComponentType<{ size?: number }> }
+  { color: string; icon: LucideIcon }
 > = {
   up: { color: '#22C55E', icon: TrendingUp },
   down: { color: '#FF3B3B', icon: TrendingDown },
