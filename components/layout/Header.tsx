@@ -1,12 +1,62 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Palette } from 'lucide-react'
+import { Palette, Search } from 'lucide-react'
 import { ThemeSelector } from './ThemeSelector'
 import { MarketWidget } from '@/components/MarketWidget'
 import { PersonaBadge } from './PersonaBadge'
 import { EntityScopePicker } from './EntityScopePicker'
 import { NotificationsBell } from './NotificationsBell'
+import { useCommandPalette } from './CommandPalette'
+
+function CommandPaletteButton() {
+  const { toggle } = useCommandPalette()
+  const [isMac, setIsMac] = useState(false)
+  useEffect(() => {
+    setIsMac(/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent))
+  }, [])
+  return (
+    <button
+      onClick={toggle}
+      aria-label="Open command palette"
+      title="Open command palette"
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 8,
+        padding: '5px 10px',
+        borderRadius: 7,
+        backgroundColor: 'var(--bg-card)',
+        border: '1px solid var(--border-color)',
+        color: 'var(--text-secondary)',
+        cursor: 'pointer',
+        fontSize: '0.72rem',
+        fontWeight: 600,
+        flexShrink: 0,
+        whiteSpace: 'nowrap',
+      }}
+    >
+      <Search size={12} style={{ color: 'var(--text-tertiary)' }} />
+      <span className="hidden md:inline" style={{ color: 'var(--text-tertiary)' }}>
+        Quick jump
+      </span>
+      <kbd
+        style={{
+          fontSize: 9,
+          fontWeight: 700,
+          color: 'var(--text-tertiary)',
+          border: '1px solid var(--border-color)',
+          background: 'var(--bg-primary)',
+          padding: '1px 5px',
+          borderRadius: 3,
+          letterSpacing: 0.3,
+        }}
+      >
+        {isMac ? '⌘K' : 'Ctrl K'}
+      </kbd>
+    </button>
+  )
+}
 
 function LiveBadge() {
   return (
@@ -253,6 +303,9 @@ export function Header() {
                 flexShrink: 0,
               }}
             />
+
+            {/* Cmd-K / Ctrl-K command palette trigger */}
+            <CommandPaletteButton />
 
             {/* Notifications bell */}
             <NotificationsBell />

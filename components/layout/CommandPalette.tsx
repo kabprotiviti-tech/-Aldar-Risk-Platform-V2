@@ -402,12 +402,21 @@ const kbdStyle: React.CSSProperties = {
 }
 
 /**
- * Global hotkey hook. Returns { open, setOpen } for the consumer to
- * pass into <CommandPalette />. Listens for ⌘K / Ctrl-K anywhere in
- * the document.
+ * Command-palette context — lifts open/close state so any descendant
+ * (Header button, sidebar, FAB) can trigger the palette without
+ * routing through props.
  */
-export function useCommandPalette() {
+interface CommandPaletteCtx {
+  open: boolean
+  setOpen: (v: boolean) => void
+  toggle: () => void
+}
+
+const PaletteCtx = React.createContext<CommandPaletteCtx | null>(null)
+
+export function CommandPaletteProvider({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false)
+  const toggle = useCallback(() => setOpen((v) => !v), [])
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -420,5 +429,20 @@ export function useCommandPalette() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  return { open, setOpen }
+  const value = useMemo(() => ({ open, setOpen, toggle }), [open, toggle])
+  return (
+    <PaletteCtx.Provider value={value}>
+      {children}
+      <CommandPalette open={open} onClose={() => setOpen(false)} />
+    </PaletteCtx.Provider>
+  )
+}
+
+export function useCommandPalette(): CommandPaletteCtx {
+  const ctx = React.useContext(PaletteCtx)
+  if (!ctx) {
+    // Graceful fallback for use outside the provider — return noops.
+    return { open: false, setOpen: () => {}, toggle: () => {} }
+  }
+  return ctx
 }
