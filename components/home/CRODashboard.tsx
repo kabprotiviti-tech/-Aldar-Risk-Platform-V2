@@ -48,6 +48,7 @@ import { RiskAppetiteProvider, useRiskAppetite } from '@/lib/context/RiskAppetit
 import { useAuditTrail } from '@/lib/context/AuditTrailContext'
 import { KRI_DEFINITIONS } from '@/lib/data/kri-definitions'
 import { BASELINE_RISK_POSTURE, safeMetric } from '@/lib/data/baselineRiskPosture'
+import { TrustFooter } from '@/components/provenance/TrustFooter'
 import { computeKRIStatus } from '@/lib/data/kri-status'
 import { APPETITE_LEVEL_META } from '@/lib/data/group-appetite-statements'
 import { entityForRisk } from '@/lib/data/risk-entity-mapping'
@@ -544,24 +545,8 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
         )}
       </Section>
 
-      {/* Trust footer — Batch 1 credibility */}
-      <div
-        style={{
-          marginTop: 8,
-          padding: '8px 12px',
-          borderRadius: 6,
-          border: '1px dashed var(--border-color)',
-          background: 'rgba(245,197,24,0.06)',
-          fontSize: 10,
-          color: 'var(--text-tertiary)',
-          letterSpacing: 0.3,
-          textAlign: 'center',
-        }}
-      >
-        <span style={{ color: '#F5C518', fontWeight: 700, marginRight: 6 }}>●</span>
-        {BASELINE_RISK_POSTURE.validationNote} · Source: {BASELINE_RISK_POSTURE.sourceType} ·
-        Confidence: {BASELINE_RISK_POSTURE.dataConfidence}
-      </div>
+      <TrustFooter />
+
     </div>
   )
 }

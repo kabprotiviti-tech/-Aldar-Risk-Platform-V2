@@ -57,6 +57,7 @@ import { usePersona } from '@/lib/context/PersonaContext'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { ExternalIntelligenceFeed } from '@/components/home/ExternalIntelligenceFeed'
+import { TrustFooter } from '@/components/provenance/TrustFooter'
 
 export function ChampionDashboard() {
   return (
@@ -399,6 +400,8 @@ function ChampionInner() {
           Open Risk Register →
         </Link>
       </div>
+
+      <TrustFooter />
     </div>
   )
 }

@@ -62,6 +62,7 @@ import { usePersona } from '@/lib/context/PersonaContext'
 import { EyeOff } from 'lucide-react'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
+import { TrustFooter } from '@/components/provenance/TrustFooter'
 import { ExternalIntelligenceFeed } from '@/components/home/ExternalIntelligenceFeed'
 
 export function ARCChairDashboard() {
@@ -196,6 +197,8 @@ function Inner() {
       <ExternalIntelligenceFeed limit={4} />
 
       {canSeeConfidential ? <ConfidentialPanel /> : <ConfidentialBlind />}
+
+      <TrustFooter />
     </div>
   )
 }

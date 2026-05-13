@@ -36,6 +36,7 @@ import { THREE_LINES } from '@/lib/data/three-lines-of-defense'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { ExternalIntelligenceFeed } from '@/components/home/ExternalIntelligenceFeed'
+import { TrustFooter } from '@/components/provenance/TrustFooter'
 
 export function InternalAuditDashboard() {
   return (
@@ -154,6 +155,8 @@ function Inner() {
       {/* External assurance-relevant signals — regulator / market / sector
           context the 3rd line needs alongside the internal audit feed. */}
       <ExternalIntelligenceFeed limit={4} />
+
+      <TrustFooter />
     </div>
   )
 }

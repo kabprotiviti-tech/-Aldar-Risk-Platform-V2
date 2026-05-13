@@ -40,6 +40,7 @@ import { getEntity } from '@/lib/entities/hierarchy'
 import { usePersona } from '@/lib/context/PersonaContext'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
+import { TrustFooter } from '@/components/provenance/TrustFooter'
 import { ExternalIntelligenceFeed } from '@/components/home/ExternalIntelligenceFeed'
 
 export function SubsidiaryCEODashboard() {
@@ -189,6 +190,8 @@ function Inner() {
       </div>
 
       <ExternalIntelligenceFeed limit={4} />
+
+      <TrustFooter />
     </div>
   )
 }

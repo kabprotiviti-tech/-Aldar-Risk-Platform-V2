@@ -58,6 +58,7 @@ import { computeKRIStatus, STATUS_META } from '@/lib/data/kri-status'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { ExternalIntelligenceFeed } from '@/components/home/ExternalIntelligenceFeed'
+import { TrustFooter } from '@/components/provenance/TrustFooter'
 import {
   BASELINE_RISK_POSTURE,
   safeMetric,
@@ -483,24 +484,7 @@ function MyDashboardContent() {
         )}
       </Section>
 
-      {/* Trust footer */}
-      <div
-        style={{
-          marginTop: 4,
-          padding: '8px 12px',
-          borderRadius: 6,
-          border: '1px dashed var(--border-color)',
-          background: 'rgba(245,197,24,0.06)',
-          fontSize: 10,
-          color: 'var(--text-tertiary)',
-          letterSpacing: 0.3,
-          textAlign: 'center',
-        }}
-      >
-        <span style={{ color: '#F5C518', fontWeight: 700, marginRight: 6 }}>●</span>
-        {BASELINE_RISK_POSTURE.validationNote} · Source: {BASELINE_RISK_POSTURE.sourceType} ·
-        Persona binding: <strong style={{ color: 'var(--accent-primary)' }}>locked to login</strong>
-      </div>
+      <TrustFooter />
     </div>
   )
 }
