@@ -1,39 +1,43 @@
 'use client'
 
 /**
- * Personal Dashboard — Module 13 (M13)
- * -------------------------------------
- * Role-aware "My Day" view. Aggregates the four things a Risk Champion /
- * KRI Owner / Group ERM Head needs to see first thing in the morning:
+ * My Dashboard — Unified Leadership View (Batch 2 redesign)
+ * ----------------------------------------------------------
+ * One-screen "My Day" for any logged-in persona. Combines INTERNAL
+ * context (drafts / actions / KRIs / audit) and EXTERNAL context
+ * (market / regulator / macro / sector signals) on a single canvas so
+ * a CRO, ERM Head, Subsidiary CEO, Internal Auditor or ARC Chair can
+ * answer their killer question in 8 seconds without toggling screens.
  *
- *   1. My drafts              — RiskDrafts I've authored (createdBy match)
- *   2. My open mitigations    — actions assigned to me (owner match)
- *      with overdue chip
- *   3. My KRIs                — KRIs I own + latest status traffic-light
- *   4. Recent audit activity  — last 10 audit events (cross-module)
+ * Persona binding: READS from <PersonaContext> (i.e. the login). There
+ * is NO local persona picker. Mismatch between login + dashboard view
+ * is no longer possible.
  *
- * Pre-pilot we have no real RBAC, so the user picks their persona via a
- * top-of-page selector. Pilot wires SSO + role-based filtering.
+ * Persona-to-owner filter mapping (illustrative until SSO):
+ *   group-cro       → consolidated (sees everything)
+ *   risk-champion   → owned-by-me (Risk Champion strings)
+ *   subsidiary-ceo  → consolidated within entity scope
+ *   internal-audit  → consolidated, read-mostly
+ *   arc-chair       → consolidated, governance lens
  *
- * Honors CLAUDE.md: every count derives from persisted contexts. No
- * fabricated numerics. AED figures inherit existing provenance.
+ * Honors CLAUDE.md: every figure derives from persisted context state
+ * or the baseline risk-posture (illustrative + tagged). No fabricated
+ * AED.
  */
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import Link from 'next/link'
 import {
-  UserCircle2,
   AlertCircle,
   Activity,
   Inbox,
   Pencil,
   Plus,
   ShieldCheck,
+  Crown,
+  ChevronRight,
 } from 'lucide-react'
-import {
-  SimulationProvider,
-  useSimulation,
-} from '@/lib/context/SimulationContext'
+import { SimulationProvider } from '@/lib/context/SimulationContext'
 import { RiskDraftProvider, useRiskDrafts } from '@/lib/context/RiskDraftContext'
 import {
   MitigationActionsProvider,
@@ -48,66 +52,58 @@ import {
   useKRIEntries,
 } from '@/lib/context/KRIEntriesContext'
 import { useAuditTrail } from '@/lib/context/AuditTrailContext'
+import { usePersona } from '@/lib/context/PersonaContext'
 import { KRI_DEFINITIONS } from '@/lib/data/kri-definitions'
 import { computeKRIStatus, STATUS_META } from '@/lib/data/kri-status'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
+import { ExternalIntelligenceFeed } from '@/components/home/ExternalIntelligenceFeed'
+import {
+  BASELINE_RISK_POSTURE,
+  safeMetric,
+} from '@/lib/data/baselineRiskPosture'
+import { formatCurrencyShort } from '@/lib/utils/formatters'
+import type { PersonaId } from '@/lib/personas'
 
-const PERSONAS = [
-  { id: 'champion', label: 'Risk Champion', match: ['Risk Champion (demo)', 'Risk Champion'] },
-  { id: 'erm', label: 'Group ERM Head', match: ['Group ERM Head (demo)', 'Group ERM Head'] },
-  { id: 'cdo', label: 'Chief Development Officer', match: ['Chief Development Officer'] },
-  { id: 'invest', label: 'Head of Aldar Investment', match: ['Head of Aldar Investment'] },
-  { id: 'sales', label: 'Head of Sales', match: ['Head of Sales'] },
-] as const
-
-type PersonaId = (typeof PERSONAS)[number]['id']
-
-const STORAGE_PERSONA = 'aldar-my-dashboard-persona-v1'
+// ── Persona → owner-string filter mapping ────────────────────────────────
+const PERSONA_OWNER_MATCH: Record<PersonaId, string[]> = {
+  'group-cro':       [], // [] = see all (consolidated)
+  'risk-champion':   ['Risk Champion (demo)', 'Risk Champion'],
+  'subsidiary-ceo':  [], // entity-scope filter; sees all in scope
+  'internal-audit':  [], // read-mostly consolidated
+  'arc-chair':       [], // governance lens consolidated
+}
 
 function MyDashboardContent() {
-  const [personaId, setPersonaId] = useState<PersonaId>('champion')
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_PERSONA)
-      if (saved && PERSONAS.find((p) => p.id === saved)) setPersonaId(saved as PersonaId)
-    } catch {}
-  }, [])
-
-  function pickPersona(id: PersonaId) {
-    setPersonaId(id)
-    try {
-      localStorage.setItem(STORAGE_PERSONA, id)
-    } catch {}
-  }
-
-  const persona = PERSONAS.find((p) => p.id === personaId)!
+  const { persona, session } = usePersona()
+  const personaId = persona?.id ?? 'group-cro'
 
   const { drafts } = useRiskDrafts()
   const { actions, isOverdue } = useMitigationActions()
-  const { entries, latestFor } = useKRIEntries()
+  const { entries: _entries, latestFor } = useKRIEntries()
   const { thresholdsFor } = useKRIThresholds()
   const { events } = useAuditTrail()
 
+  // ── Filter logic ────────────────────────────────────────────────────
+  const ownerMatch = PERSONA_OWNER_MATCH[personaId]
+  const seeAll = ownerMatch.length === 0
+
   const myDrafts = useMemo(
-    () => drafts.filter((d) => persona.match.some((m) => m === d.createdBy) || personaId === 'erm'),
-    [drafts, persona, personaId],
+    () => (seeAll ? drafts : drafts.filter((d) => ownerMatch.includes(d.createdBy))),
+    [drafts, seeAll, ownerMatch],
   )
 
   const myActions = useMemo(
-    () => actions.filter((a) => persona.match.some((m) => a.owner === m) || personaId === 'erm'),
-    [actions, persona, personaId],
+    () => (seeAll ? actions : actions.filter((a) => ownerMatch.includes(a.owner))),
+    [actions, seeAll, ownerMatch],
   )
 
-  const myActionsOverdue = myActions.filter(isOverdue).length
+  const openActions = myActions.filter((a) => a.status !== 'closed')
+  const myActionsOverdue = openActions.filter(isOverdue).length
 
   const myKRIs = useMemo(
-    () =>
-      KRI_DEFINITIONS.filter((k) =>
-        persona.match.some((m) => k.owner === m) || personaId === 'erm',
-      ),
-    [persona, personaId],
+    () => (seeAll ? KRI_DEFINITIONS : KRI_DEFINITIONS.filter((k) => ownerMatch.includes(k.owner))),
+    [seeAll, ownerMatch],
   )
 
   const recentEvents = useMemo(
@@ -115,104 +111,140 @@ function MyDashboardContent() {
       events
         .slice()
         .sort((a, b) => (a.at < b.at ? 1 : -1))
-        .slice(0, 10),
+        .slice(0, 8),
     [events],
   )
 
+  const auditToday = recentEvents.filter((e) => sameDay(new Date(e.at), new Date())).length
+
+  // ── KRI status roll-up (G/A/R) ──────────────────────────────────────
+  const kriStatus = useMemo(() => {
+    let g = 0, a = 0, r = 0
+    for (const k of myKRIs) {
+      const t = thresholdsFor(k)
+      const latest = latestFor(k.id)
+      if (!latest) continue
+      const s = computeKRIStatus(latest.value, t, k.direction)
+      if (s === 'green') g++
+      else if (s === 'amber') a++
+      else if (s === 'red') r++
+    }
+    return { g, a, r }
+  }, [myKRIs, thresholdsFor, latestFor])
+
+  // ── Headline metrics (with baseline-fallback to defend against zero) ─
+  const headlineRiskScore = safeMetric(undefined, BASELINE_RISK_POSTURE.overallRiskScore)
+  const headlineExposure = safeMetric(undefined, BASELINE_RISK_POSTURE.totalFinancialExposure)
+  const headlineCriticalHigh = safeMetric(undefined, BASELINE_RISK_POSTURE.totalCriticalAndHighRisks)
+
+  // ── Render ──────────────────────────────────────────────────────────
   return (
-    <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 18 }}>
-      <IllustrativeDataBanner pilotFeeds="Aldar SSO + role-based filtering wired to actual user identity" />
+    <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <IllustrativeDataBanner pilotFeeds="Aldar SSO + live ERM + Reuters/Bayut/ADREC/CBUAE/ADX feeds" />
 
-      <div
+      {/* ── Hero ─────────────────────────────────────────────────────── */}
+      <header
         style={{
           display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-          gap: 16,
-          flexWrap: 'wrap',
+          flexDirection: 'column',
+          gap: 14,
+          padding: '8px 0 4px',
         }}
       >
-        <div>
-          <h1
-            style={{
-              fontSize: 22,
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              margin: 0,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-            }}
-          >
-            <UserCircle2 size={20} style={{ color: 'var(--accent-primary)' }} />
-            My Dashboard
-          </h1>
-          <p
-            style={{
-              fontSize: 12,
-              color: 'var(--text-secondary)',
-              margin: '4px 0 0',
-              maxWidth: 760,
-              lineHeight: 1.55,
-            }}
-          >
-            Role-aware "My Day" view. Until pilot wires SSO + RBAC, pick a
-            persona below — the page filters drafts, actions and KRIs by
-            illustrative role mapping. The Group ERM Head persona sees
-            everything (consolidated view).
-          </p>
-        </div>
-        <StatusBadge tier="MVP" note={`Persona: ${persona.label}`} />
-      </div>
-
-      {/* Persona picker */}
-      <div
-        style={{
-          display: 'flex',
-          gap: 6,
-          flexWrap: 'wrap',
-          padding: 10,
-          background: 'var(--bg-secondary)',
-          border: '1px solid var(--border-color)',
-          borderRadius: 8,
-          alignItems: 'center',
-        }}
-      >
-        <span
+        <div
           style={{
-            fontSize: 10,
-            fontWeight: 700,
-            color: 'var(--text-tertiary)',
-            letterSpacing: 0.6,
-            textTransform: 'uppercase',
-            marginRight: 4,
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            gap: 16,
+            flexWrap: 'wrap',
           }}
         >
-          Persona
-        </span>
-        {PERSONAS.map((p) => (
-          <button
-            key={p.id}
-            onClick={() => pickPersona(p.id)}
-            style={{
-              background: p.id === personaId ? 'var(--accent-primary)' : 'transparent',
-              color: p.id === personaId ? 'var(--on-accent)' : 'var(--text-secondary)',
-              border: `1px solid ${p.id === personaId ? 'var(--accent-primary)' : 'var(--border-color)'}`,
-              padding: '5px 12px',
-              borderRadius: 4,
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: 0.4,
-              textTransform: 'uppercase',
-              cursor: 'pointer',
-            }}
-          >
-            {p.label}
-          </button>
-        ))}
-      </div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: 0.8,
+                color: 'var(--accent-primary)',
+                textTransform: 'uppercase',
+                marginBottom: 6,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+              }}
+            >
+              <Crown size={11} />
+              {persona ? `${persona.title} · ${persona.line}` : 'Unauthenticated'}
+            </div>
+            <h1
+              style={{
+                fontSize: 'clamp(24px, 3vw, 32px)',
+                fontWeight: 600,
+                letterSpacing: '-0.02em',
+                color: 'var(--text-primary)',
+                margin: 0,
+                lineHeight: 1.2,
+              }}
+            >
+              {persona
+                ? `Good morning, ${session.displayName?.split('@')[0] ?? persona.title}.`
+                : 'My Dashboard'}
+            </h1>
+            {persona && (
+              <p
+                style={{
+                  fontSize: 13,
+                  color: 'var(--text-secondary)',
+                  margin: '6px 0 0',
+                  maxWidth: 720,
+                  lineHeight: 1.5,
+                }}
+              >
+                <span style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>Killer question:</span>{' '}
+                {persona.killerQuestion}
+              </p>
+            )}
+          </div>
+          <StatusBadge tier="MVP" note={persona ? `Bound to login · ${persona.title}` : 'No persona'} />
+        </div>
 
-      {/* Tile row: counts */}
+        {/* Hero KPI strip — unified internal + market */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: 10,
+          }}
+        >
+          <HeroStat
+            label="Group risk score"
+            value={String(headlineRiskScore)}
+            tone={headlineRiskScore >= 75 ? 'danger' : headlineRiskScore >= 60 ? 'warning' : 'good'}
+            sub={`Trend ${BASELINE_RISK_POSTURE.riskScoreTrend > 0 ? '+' : ''}${BASELINE_RISK_POSTURE.riskScoreTrend} MoM`}
+          />
+          <HeroStat
+            label="Critical + High"
+            value={String(headlineCriticalHigh)}
+            tone={headlineCriticalHigh > 8 ? 'danger' : headlineCriticalHigh > 4 ? 'warning' : 'good'}
+            sub={`${BASELINE_RISK_POSTURE.criticalRiskCount} critical · ${BASELINE_RISK_POSTURE.highRiskCount} high`}
+          />
+          <HeroStat
+            label="Gross exposure"
+            value={formatCurrencyShort(headlineExposure, 'AED')}
+            tone="neutral"
+            sub={`Net unhedged ${formatCurrencyShort(BASELINE_RISK_POSTURE.netUnhedgedExposure, 'AED')}`}
+          />
+          <HeroStat
+            label="AI alerts today"
+            value={String(BASELINE_RISK_POSTURE.aiAlertsToday)}
+            tone={BASELINE_RISK_POSTURE.aiAlertsToday > 5 ? 'warning' : 'good'}
+            sub={`${BASELINE_RISK_POSTURE.activeExternalSignals} external · ${BASELINE_RISK_POSTURE.activeControlWeaknesses} controls`}
+          />
+        </div>
+      </header>
+
+      {/* ── My-Day KPI tiles ──────────────────────────────────────────── */}
       <div
         style={{
           display: 'grid',
@@ -221,46 +253,49 @@ function MyDashboardContent() {
         }}
       >
         <KPITile
-          icon={<Pencil size={16} />}
-          label="My Drafts"
+          icon={<Pencil size={14} />}
+          label={seeAll ? 'Drafts in flight' : 'My Drafts'}
           value={myDrafts.length}
           accent="#FF6600"
           href="/risk-register"
         />
         <KPITile
-          icon={<Activity size={16} />}
-          label="My Open Actions"
-          value={myActions.filter((a) => a.status !== 'closed').length}
+          icon={<Activity size={14} />}
+          label={seeAll ? 'Open mitigations' : 'My Open Actions'}
+          value={openActions.length}
           accent="#2D9EFF"
-          subline={
-            myActionsOverdue > 0
-              ? `${myActionsOverdue} overdue`
-              : 'on track'
-          }
+          subline={myActionsOverdue > 0 ? `${myActionsOverdue} overdue` : 'on track'}
           sublineColor={myActionsOverdue > 0 ? '#FF3B3B' : '#22C55E'}
         />
         <KPITile
-          icon={<AlertCircle size={16} />}
-          label="My KRIs"
+          icon={<AlertCircle size={14} />}
+          label={seeAll ? 'KRIs monitored' : 'My KRIs'}
           value={myKRIs.length}
           accent="#A855F7"
           href="/kri"
+          subline={
+            kriStatus.r > 0
+              ? `${kriStatus.r} red · ${kriStatus.a} amber`
+              : kriStatus.a > 0
+                ? `${kriStatus.a} amber · ${kriStatus.g} green`
+                : `${kriStatus.g} green`
+          }
+          sublineColor={kriStatus.r > 0 ? '#FF3B3B' : kriStatus.a > 0 ? '#F5C518' : '#22C55E'}
         />
         <KPITile
-          icon={<Inbox size={16} />}
-          label="Audit Events Today"
-          value={recentEvents.filter((e) => sameDay(new Date(e.at), new Date())).length}
+          icon={<Inbox size={14} />}
+          label="Audit events today"
+          value={auditToday}
           accent="#22C55E"
           href="/audit-trail"
         />
       </div>
 
-      {/* Drafts + Actions row */}
+      {/* ── 2-up: Drafts + Actions ────────────────────────────────────── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: 12 }}>
         <Section
-          title="My Drafts"
-          subtitle={`${myDrafts.length} draft risk${myDrafts.length === 1 ? '' : 's'} authored by this persona`}
-          accent="#FF6600"
+          title={seeAll ? 'Drafts In Flight' : 'My Drafts'}
+          subtitle={`${myDrafts.length} draft risk${myDrafts.length === 1 ? '' : 's'}${seeAll ? ' across the group' : ' authored by you'}`}
           cta={
             <Link href="/risk-register" style={ctaStyle}>
               <Plus size={11} /> Add Risk
@@ -268,20 +303,14 @@ function MyDashboardContent() {
           }
         >
           {myDrafts.length === 0 ? (
-            <Empty>No drafts yet. Use /risk-register to add a new draft risk.</Empty>
+            <Empty>{seeAll ? 'No drafts in flight.' : 'No drafts yet. Use /risk-register to add a new draft risk.'}</Empty>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {myDrafts.slice(0, 6).map((d) => (
-                <Link
-                  key={d.id}
-                  href={`/risk-register?focus=${d.id}`}
-                  style={rowLinkStyle}
-                >
+                <Link key={d.id} href={`/risk-register?focus=${d.id}`} style={rowLinkStyle}>
                   <span style={monoStyle}>{d.id}</span>
                   <span style={{ flex: 1, color: 'var(--text-primary)' }}>{d.name}</span>
-                  <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>
-                    {d.status}
-                  </span>
+                  <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{d.status}</span>
                 </Link>
               ))}
               {myDrafts.length > 6 && (
@@ -294,75 +323,61 @@ function MyDashboardContent() {
         </Section>
 
         <Section
-          title="My Open Actions"
-          subtitle={`${myActions.filter((a) => a.status !== 'closed').length} open · ${myActionsOverdue} overdue`}
-          accent="#2D9EFF"
+          title={seeAll ? 'Open Mitigations' : 'My Open Actions'}
+          subtitle={`${openActions.length} open · ${myActionsOverdue} overdue`}
           cta={
             <Link href="/risk-register" style={ctaStyle}>
-              Open Register →
+              Open Register <ChevronRight size={11} />
             </Link>
           }
         >
-          {myActions.length === 0 ? (
-            <Empty>No mitigation actions assigned to this persona yet.</Empty>
+          {openActions.length === 0 ? (
+            <Empty>No mitigation actions in scope.</Empty>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {myActions
-                .filter((a) => a.status !== 'closed')
-                .slice(0, 6)
-                .map((a) => {
-                  const overdue = isOverdue(a)
-                  return (
-                    <Link
-                      key={a.id}
-                      href={`/risk-register?focus=${a.riskId}`}
-                      style={rowLinkStyle}
+              {openActions.slice(0, 6).map((a) => {
+                const overdue = isOverdue(a)
+                return (
+                  <Link key={a.id} href={`/risk-register?focus=${a.riskId}`} style={rowLinkStyle}>
+                    <span style={monoStyle}>{a.riskId}</span>
+                    <span style={{ flex: 1, color: 'var(--text-primary)' }}>{a.name}</span>
+                    <span
+                      style={{
+                        fontSize: 9,
+                        color: overdue ? '#FF3B3B' : 'var(--text-tertiary)',
+                        fontWeight: overdue ? 700 : 500,
+                      }}
                     >
-                      <span style={monoStyle}>{a.riskId}</span>
-                      <span style={{ flex: 1, color: 'var(--text-primary)' }}>{a.name}</span>
-                      <span
-                        style={{
-                          fontSize: 9,
-                          color: overdue ? '#FF3B3B' : 'var(--text-tertiary)',
-                          fontWeight: overdue ? 700 : 500,
-                        }}
-                      >
-                        {overdue ? `OVERDUE · ${a.dueDate}` : `due ${a.dueDate}`}
-                      </span>
-                    </Link>
-                  )
-                })}
+                      {overdue ? `OVERDUE · ${a.dueDate}` : `due ${a.dueDate}`}
+                    </span>
+                  </Link>
+                )
+              })}
             </div>
           )}
         </Section>
       </div>
 
-      {/* My KRIs */}
+      {/* ── KRI grid ──────────────────────────────────────────────────── */}
       <Section
-        title="My KRIs"
-        subtitle={`${myKRIs.length} KRI${myKRIs.length === 1 ? '' : 's'} owned by this persona — click to view trend / threshold / breach history`}
-        accent="#A855F7"
+        title={seeAll ? 'KRIs Monitored' : 'My KRIs'}
+        subtitle={`${myKRIs.length} KRI${myKRIs.length === 1 ? '' : 's'}${seeAll ? ' across the platform' : ' owned by you'} — click any tile to drill in`}
         cta={
           <Link href="/kri" style={ctaStyle}>
-            Open KRI Engine →
+            Open KRI Engine <ChevronRight size={11} />
           </Link>
         }
       >
         {myKRIs.length === 0 ? (
-          <Empty>No KRIs owned by this persona.</Empty>
+          <Empty>No KRIs in scope.</Empty>
         ) : (
-          <div style={{ display: 'grid', gap: 6, gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
-            {myKRIs.map((k) => {
+          <div style={{ display: 'grid', gap: 6, gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))' }}>
+            {myKRIs.slice(0, 12).map((k) => {
               const t = thresholdsFor(k)
               const latest = latestFor(k.id)
               const meta = latest
                 ? STATUS_META[computeKRIStatus(latest.value, t, k.direction)]
-                : {
-                    label: 'No Data',
-                    color: '#888888',
-                    bg: 'rgba(136,136,136,0.18)',
-                    border: 'rgba(136,136,136,0.55)',
-                  }
+                : { label: 'No Data', color: '#888888', bg: 'rgba(136,136,136,0.18)', border: 'rgba(136,136,136,0.55)' }
               return (
                 <Link
                   key={k.id}
@@ -401,9 +416,7 @@ function MyDashboardContent() {
                   </div>
                   <div style={{ fontSize: 12, fontWeight: 600 }}>{k.name}</div>
                   <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
-                    {latest
-                      ? `Latest ${latest.value} · ${latest.period}`
-                      : 'No entries yet'}
+                    {latest ? `Latest ${latest.value} · ${latest.period}` : 'No entries yet'}
                   </div>
                 </Link>
               )
@@ -412,11 +425,13 @@ function MyDashboardContent() {
         )}
       </Section>
 
-      {/* Recent audit activity */}
+      {/* ── External Intelligence (NEW — leadership wants one-screen view) ── */}
+      <ExternalIntelligenceFeed limit={5} />
+
+      {/* ── Recent activity ───────────────────────────────────────────── */}
       <Section
         title="Recent Activity"
-        subtitle="Last 10 audit-trail events across the platform — what changed, who touched it, when"
-        accent="#22C55E"
+        subtitle="Last 8 audit-trail events across the platform — what changed, who touched it, when"
         cta={
           <Link href="/audit-trail" style={ctaStyle}>
             <ShieldCheck size={11} /> Full Audit Trail
@@ -434,7 +449,7 @@ function MyDashboardContent() {
                   display: 'flex',
                   gap: 10,
                   alignItems: 'baseline',
-                  padding: '5px 8px',
+                  padding: '6px 10px',
                   background: 'var(--bg-primary)',
                   border: '1px solid var(--border-color)',
                   borderRadius: 4,
@@ -460,26 +475,102 @@ function MyDashboardContent() {
                 >
                   {e.category}
                 </span>
-                <span style={{ flex: 1, color: 'var(--text-primary)' }}>
-                  {e.summary}
-                </span>
-                <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>
-                  {e.actor}
-                </span>
+                <span style={{ flex: 1, color: 'var(--text-primary)' }}>{e.summary}</span>
+                <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>{e.actor}</span>
               </div>
             ))}
           </div>
         )}
       </Section>
+
+      {/* Trust footer */}
+      <div
+        style={{
+          marginTop: 4,
+          padding: '8px 12px',
+          borderRadius: 6,
+          border: '1px dashed var(--border-color)',
+          background: 'rgba(245,197,24,0.06)',
+          fontSize: 10,
+          color: 'var(--text-tertiary)',
+          letterSpacing: 0.3,
+          textAlign: 'center',
+        }}
+      >
+        <span style={{ color: '#F5C518', fontWeight: 700, marginRight: 6 }}>●</span>
+        {BASELINE_RISK_POSTURE.validationNote} · Source: {BASELINE_RISK_POSTURE.sourceType} ·
+        Persona binding: <strong style={{ color: 'var(--accent-primary)' }}>locked to login</strong>
+      </div>
     </div>
   )
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────────────────
 
 function sameDay(a: Date, b: Date): boolean {
   return (
     a.getFullYear() === b.getFullYear() &&
     a.getMonth() === b.getMonth() &&
     a.getDate() === b.getDate()
+  )
+}
+
+function HeroStat({
+  label,
+  value,
+  sub,
+  tone,
+}: {
+  label: string
+  value: string
+  sub?: string
+  tone: 'good' | 'warning' | 'danger' | 'neutral'
+}) {
+  const toneColor =
+    tone === 'good' ? '#22C55E'
+    : tone === 'warning' ? '#F5C518'
+    : tone === 'danger' ? '#FF3B3B'
+    : 'var(--accent-primary)'
+  return (
+    <div
+      style={{
+        background: 'var(--bg-secondary)',
+        border: '1px solid var(--border-color)',
+        borderRadius: 8,
+        padding: '12px 14px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 4,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 10,
+          fontWeight: 700,
+          letterSpacing: 0.5,
+          textTransform: 'uppercase',
+          color: 'var(--text-tertiary)',
+        }}
+      >
+        {label}
+      </div>
+      <div
+        style={{
+          fontSize: 22,
+          fontWeight: 700,
+          color: toneColor,
+          lineHeight: 1.1,
+          fontVariantNumeric: 'tabular-nums',
+        }}
+      >
+        {value}
+      </div>
+      {sub && (
+        <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{sub}</div>
+      )}
+    </div>
   )
 }
 
@@ -546,13 +637,11 @@ function KPITile({
 function Section({
   title,
   subtitle,
-  accent,
   cta,
   children,
 }: {
   title: string
   subtitle: string
-  accent: string
   cta?: React.ReactNode
   children: React.ReactNode
 }) {
@@ -561,8 +650,7 @@ function Section({
       style={{
         background: 'var(--bg-secondary)',
         border: '1px solid var(--border-color)',
-        borderLeft: `4px solid ${accent}`,
-        borderRadius: 8,
+        borderRadius: 10,
         padding: 14,
       }}
     >
@@ -579,11 +667,10 @@ function Section({
         <div>
           <div
             style={{
-              fontSize: 11,
-              fontWeight: 700,
-              color: accent,
-              letterSpacing: 0.5,
-              textTransform: 'uppercase',
+              fontSize: 13,
+              fontWeight: 600,
+              color: 'var(--text-primary)',
+              letterSpacing: '-0.005em',
             }}
           >
             {title}
