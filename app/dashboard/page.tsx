@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardBody } from '@/components/ui/Card'
 import { BASELINE_RISK_POSTURE } from '@/lib/data/baselineRiskPosture'
+import { Sparkline, baselineSeries } from '@/components/ui/Sparkline'
 import { LiveRiskSignals } from '@/components/dashboard/LiveRiskSignals'
 import { AIFusionPanel } from '@/components/dashboard/AIFusionPanel'
 import { KPIDrillDownPanel, AI_ALERT_COUNT, type KPIView } from '@/components/KPIDrillDownPanel'
@@ -82,6 +83,7 @@ function KPICard({
   onViewCalc,
   onRefresh,
   refreshing = false,
+  sparkSeed,
 }: {
   title: string
   value: number
@@ -95,8 +97,10 @@ function KPICard({
   onViewCalc?: () => void
   onRefresh?: () => void
   refreshing?: boolean
+  sparkSeed?: number
 }) {
   const animated = useCountUp(value, 1000 + delay * 200)
+  const series = typeof sparkSeed === 'number' ? baselineSeries(value || 1, 12, sparkSeed) : null
 
   return (
     <motion.div
@@ -139,21 +143,26 @@ function KPICard({
           <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '4px' }}>
             {title}
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-            <span
-              className="kpi-value"
-              style={{
-                color: 'var(--text-primary)',
-                fontWeight: 700,
-                letterSpacing: '-0.03em',
-                lineHeight: 1,
-                fontVariantNumeric: 'tabular-nums',
-              }}
-            >
-              {animated.toLocaleString()}
-            </span>
-            {unit && (
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{unit}</span>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+              <span
+                className="kpi-value"
+                style={{
+                  color: 'var(--text-primary)',
+                  fontWeight: 700,
+                  letterSpacing: '-0.03em',
+                  lineHeight: 1,
+                  fontVariantNumeric: 'tabular-nums',
+                }}
+              >
+                {animated.toLocaleString()}
+              </span>
+              {unit && (
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{unit}</span>
+              )}
+            </div>
+            {series && (
+              <Sparkline values={series} width={64} height={22} color={color} ariaLabel={`${title} trend`} />
             )}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px', gap: '6px' }}>
@@ -507,6 +516,7 @@ export default function DashboardPage() {
           trend="↑ +4 pts MTD"
           delay={0}
           onClick={() => setActiveView(activeView === 'overallRisk' ? null : 'overallRisk')}
+          sparkSeed={11}
         />
         <KPICard
           title="Critical & High Risks"
@@ -517,6 +527,7 @@ export default function DashboardPage() {
           trend={`${aggregateKPIs.highRisks} High · ${aggregateKPIs.criticalRisks} Critical`}
           delay={1}
           onClick={() => setActiveView(activeView === 'criticalRisks' ? null : 'criticalRisks')}
+          sparkSeed={23}
         />
         <KPICard
           title="Financial Exposure"
@@ -529,6 +540,7 @@ export default function DashboardPage() {
           delay={2}
           onClick={() => setActiveView(activeView === 'financialExposure' ? null : 'financialExposure')}
           onViewCalc={() => setCalcCtx({ type: 'total_exposure', value: liveKPIs.exposure, portfolioScores })}
+          sparkSeed={37}
         />
         <KPICard
           title="AI Alerts Today"
@@ -541,6 +553,7 @@ export default function DashboardPage() {
           onClick={() => setActiveView(activeView === 'aiAlerts' ? null : 'aiAlerts')}
           onRefresh={refreshAlerts}
           refreshing={alertsRefreshing}
+          sparkSeed={41}
         />
       </div>
 
