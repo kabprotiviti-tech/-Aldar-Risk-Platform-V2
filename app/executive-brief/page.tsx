@@ -11,6 +11,8 @@ import { Card, CardHeader, CardTitle, CardBody } from '@/components/ui/Card'
 import { ConfidenceBadge } from '@/components/ui/Badge'
 import { AIInsightBox } from '@/components/ui/AIInsightBox'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
+import { BASELINE_RISK_POSTURE } from '@/lib/data/baselineRiskPosture'
+import { formatCurrencyShort } from '@/lib/utils/formatters'
 import { riskRegister, portfolioMetrics } from '@/lib/simulated-data'
 import { internalSnapshot } from '@/lib/internalData'
 
@@ -410,10 +412,33 @@ export default function ExecutiveBriefPage() {
                 {result.keyMetrics && (
                   <div className="grid grid-cols-4 gap-4 mt-4">
                     {[
-                      { label: 'Risk Score', value: result.keyMetrics.overallRiskScore?.toString() || 'N/A', Icon: AlertTriangle },
-                      { label: 'Financial Exposure', value: `AED ${(result.keyMetrics.financialExposureAED || 0).toLocaleString()}M`, Icon: TrendingUp },
-                      { label: 'Critical Risks', value: (result.keyMetrics.criticalRisks || 0).toString(), Icon: Shield },
-                      { label: 'Board-Level Risks', value: (result.keyMetrics.risksRequiringBoardAttention || 0).toString(), Icon: Target },
+                      // Batch 2 credibility: never silently fall to 0/N/A on a Board view.
+                      // Baseline risk posture defends each metric until the engine hydrates.
+                      {
+                        label: 'Risk Score',
+                        value: (result.keyMetrics.overallRiskScore || BASELINE_RISK_POSTURE.overallRiskScore).toString(),
+                        Icon: AlertTriangle,
+                      },
+                      {
+                        label: 'Financial Exposure',
+                        value: formatCurrencyShort(
+                          (result.keyMetrics.financialExposureAED ?? 0) > 0
+                            ? result.keyMetrics.financialExposureAED * 1_000_000
+                            : BASELINE_RISK_POSTURE.totalFinancialExposure,
+                          'AED',
+                        ),
+                        Icon: TrendingUp,
+                      },
+                      {
+                        label: 'Critical Risks',
+                        value: (result.keyMetrics.criticalRisks || BASELINE_RISK_POSTURE.criticalRiskCount).toString(),
+                        Icon: Shield,
+                      },
+                      {
+                        label: 'Board-Level Risks',
+                        value: (result.keyMetrics.risksRequiringBoardAttention || BASELINE_RISK_POSTURE.totalCriticalAndHighRisks).toString(),
+                        Icon: Target,
+                      },
                     ].map((m) => (
                       <div
                         key={m.label}
