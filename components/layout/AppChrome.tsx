@@ -11,12 +11,14 @@ import { MobileNav } from './MobileNav'
 // import { AIRiskAdvisor } from '@/components/AIRiskAdvisor'
 import { RiskMemoryChat } from '@/components/RiskMemoryChat'
 import { StealthToggle } from './StealthToggle'
+import { CommandPalette, useCommandPalette } from './CommandPalette'
 
 export function AppChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isRootRedirect = pathname === '/'
   const isLogin = pathname === '/login'
   const isWelcome = pathname === '/welcome'
+  const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette()
 
   if (isLogin || isRootRedirect) {
     // Login screen + root-redirect both run without chrome.
@@ -51,6 +53,7 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
       <MobileNav />
       <RiskMemoryChat />
       <StealthToggle />
+      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
     </>
   )
 }
