@@ -49,6 +49,7 @@ import { useAuditTrail } from '@/lib/context/AuditTrailContext'
 import { KRI_DEFINITIONS } from '@/lib/data/kri-definitions'
 import { BASELINE_RISK_POSTURE, safeMetric } from '@/lib/data/baselineRiskPosture'
 import { TrustFooter } from '@/components/provenance/TrustFooter'
+import { Sparkline, baselineSeries } from '@/components/ui/Sparkline'
 import { computeKRIStatus } from '@/lib/data/kri-status'
 import { APPETITE_LEVEL_META } from '@/lib/data/group-appetite-statements'
 import { entityForRisk } from '@/lib/data/risk-entity-mapping'
@@ -293,18 +294,24 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
           value={`${criticalCount} / ${highCount}`}
           tone={criticalCount > 0 ? 'danger' : highCount > 3 ? 'warning' : 'neutral'}
           sub="of total risk count"
+          sparklineAnchor={criticalCount + highCount}
+          sparklineSeed={13}
         />
         <HeroStat
           label="KRI Breaches"
           value={`${kriPosture.red + kriPosture.amber}`}
           tone={kriPosture.red > 0 ? 'danger' : kriPosture.amber > 0 ? 'warning' : 'success'}
           sub={`${kriPosture.red} red · ${kriPosture.amber} amber`}
+          sparklineAnchor={kriPosture.red + kriPosture.amber}
+          sparklineSeed={29}
         />
         <HeroStat
           label="Items Awaiting You"
           value={`${pendingEsc.length + pendingApp.length + overdueCount}`}
           tone={pendingEsc.length + pendingApp.length + overdueCount > 0 ? 'warning' : 'success'}
           sub={`${pendingEsc.length} esc · ${pendingApp.length} appetite · ${overdueCount} overdue`}
+          sparklineAnchor={pendingEsc.length + pendingApp.length + overdueCount}
+          sparklineSeed={43}
         />
       </section>
 
@@ -711,11 +718,15 @@ function HeroStat({
   value,
   tone = 'neutral',
   sub,
+  sparklineAnchor,
+  sparklineSeed,
 }: {
   label: string
   value: string
   tone?: HeroTone
   sub?: string
+  sparklineAnchor?: number
+  sparklineSeed?: number
 }) {
   const toneColor: Record<HeroTone, string> = {
     neutral: 'var(--text-primary)',
@@ -723,6 +734,10 @@ function HeroStat({
     warning: 'var(--state-warning, #F5C518)',
     danger: 'var(--state-danger, #FF3B3B)',
   }
+  const series =
+    typeof sparklineAnchor === 'number'
+      ? baselineSeries(sparklineAnchor, 12, sparklineSeed ?? 7)
+      : null
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       <div
@@ -738,14 +753,32 @@ function HeroStat({
       </div>
       <div
         style={{
-          fontSize: 24,
-          fontWeight: 700,
-          color: toneColor[tone],
-          fontVariantNumeric: 'tabular-nums',
-          lineHeight: 1.1,
+          display: 'flex',
+          alignItems: 'baseline',
+          justifyContent: 'space-between',
+          gap: 8,
         }}
       >
-        {value}
+        <div
+          style={{
+            fontSize: 24,
+            fontWeight: 700,
+            color: toneColor[tone],
+            fontVariantNumeric: 'tabular-nums',
+            lineHeight: 1.1,
+          }}
+        >
+          {value}
+        </div>
+        {series && (
+          <Sparkline
+            values={series}
+            width={64}
+            height={22}
+            color={toneColor[tone]}
+            ariaLabel={`${label} trend`}
+          />
+        )}
       </div>
       {sub && (
         <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{sub}</div>
