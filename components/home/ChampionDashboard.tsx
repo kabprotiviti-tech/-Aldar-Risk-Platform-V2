@@ -58,6 +58,7 @@ import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { ExternalIntelligenceFeed } from '@/components/home/ExternalIntelligenceFeed'
 import { TrustFooter } from '@/components/provenance/TrustFooter'
+import { Sparkline, baselineSeries } from '@/components/ui/Sparkline'
 
 export function ChampionDashboard() {
   return (
@@ -178,25 +179,28 @@ function ChampionInner() {
           gap: 10,
         }}
       >
-        <KPI label="My Drafts" value={myDrafts.length} accent="#FF6600" href="/risk-register" />
+        <KPI label="My Drafts" value={myDrafts.length} accent="#FF6600" href="/risk-register" sparkSeed={7} />
         <KPI
           label="My Open Actions"
           value={myActions.length}
           accent="#2D9EFF"
           sub={overdue.length > 0 ? `${overdue.length} overdue` : 'on track'}
           subColor={overdue.length > 0 ? '#FF3B3B' : '#22C55E'}
+          sparkSeed={21}
         />
         <KPI
           label="My Subsidiary Risks"
           value={myRisks.length}
           accent="#A855F7"
           href="/risk-register"
+          sparkSeed={35}
         />
         <KPI
           label="Linked KRIs"
           value={myKRIs.length}
           accent="#22C55E"
           href="/kri"
+          sparkSeed={49}
         />
       </div>
 
@@ -413,6 +417,7 @@ function KPI({
   href,
   sub,
   subColor,
+  sparkSeed,
 }: {
   label: string
   value: number
@@ -420,6 +425,7 @@ function KPI({
   href?: string
   sub?: string
   subColor?: string
+  sparkSeed?: number
 }) {
   const inner = (
     <div
@@ -448,17 +454,22 @@ function KPI({
       >
         {label}
       </span>
-      <span
-        style={{
-          fontSize: 22,
-          fontWeight: 700,
-          color: 'var(--text-primary)',
-          lineHeight: 1.1,
-          fontVariantNumeric: 'tabular-nums',
-        }}
-      >
-        {value}
-      </span>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
+        <span
+          style={{
+            fontSize: 22,
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            lineHeight: 1.1,
+            fontVariantNumeric: 'tabular-nums',
+          }}
+        >
+          {value}
+        </span>
+        {typeof sparkSeed === 'number' && (
+          <Sparkline values={baselineSeries(value || 1, 10, sparkSeed)} width={56} height={20} color={accent} />
+        )}
+      </div>
       {sub && (
         <span style={{ fontSize: 10, color: subColor ?? 'var(--text-tertiary)', fontWeight: 600 }}>
           {sub}

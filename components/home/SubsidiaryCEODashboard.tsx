@@ -41,6 +41,7 @@ import { usePersona } from '@/lib/context/PersonaContext'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { TrustFooter } from '@/components/provenance/TrustFooter'
+import { Sparkline, baselineSeries } from '@/components/ui/Sparkline'
 import { ExternalIntelligenceFeed } from '@/components/home/ExternalIntelligenceFeed'
 
 export function SubsidiaryCEODashboard() {
@@ -128,10 +129,10 @@ function Inner() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 10 }}>
-        <KPI label={`${entity?.shortName ?? 'Sub'} Risks`} value={myRisks.length} accent="#A855F7" />
-        <KPI label="Total Exposure" value={`${(totalExposure / 1000).toFixed(2)}`} unit="AED bn" accent="#FF6600" />
-        <KPI label="Open Actions" value={myActions.length} sub={overdue > 0 ? `${overdue} overdue` : 'on track'} subColor={overdue > 0 ? '#FF3B3B' : '#22C55E'} accent="#2D9EFF" />
-        <KPI label="Linked KRIs" value={myKRIs.length} accent="#22C55E" />
+        <KPI label={`${entity?.shortName ?? 'Sub'} Risks`} value={myRisks.length} accent="#A855F7" sparkSeed={5} />
+        <KPI label="Total Exposure" value={`${(totalExposure / 1000).toFixed(2)}`} unit="AED bn" accent="#FF6600" sparkSeed={19} sparkAnchor={totalExposure / 1000} />
+        <KPI label="Open Actions" value={myActions.length} sub={overdue > 0 ? `${overdue} overdue` : 'on track'} subColor={overdue > 0 ? '#FF3B3B' : '#22C55E'} accent="#2D9EFF" sparkSeed={33} />
+        <KPI label="Linked KRIs" value={myKRIs.length} accent="#22C55E" sparkSeed={51} />
       </div>
 
       <Section title="Top 5 Risks at this Subsidiary" subtitle="By residual exposure" accent="#FF6600" icon={<AlertTriangle size={14} />} cta={<Link href="/risk-register" style={ctaSmall}>All risks →</Link>}>
@@ -197,14 +198,20 @@ function Inner() {
 }
 
 // shared bits
-function KPI({ label, value, accent, sub, subColor, unit }: { label: string; value: number | string; accent: string; sub?: string; subColor?: string; unit?: string }) {
+function KPI({ label, value, accent, sub, subColor, unit, sparkSeed, sparkAnchor }: { label: string; value: number | string; accent: string; sub?: string; subColor?: string; unit?: string; sparkSeed?: number; sparkAnchor?: number }) {
+  const anchor = typeof sparkAnchor === 'number' ? sparkAnchor : typeof value === 'number' ? value : 0
   return (
     <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderTop: `3px solid ${accent}`, borderRadius: 8, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
       <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', color: accent }}>{label}</span>
-      <span style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-        <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{value}</span>
-        {unit && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{unit}</span>}
-      </span>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
+        <span style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+          <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{value}</span>
+          {unit && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{unit}</span>}
+        </span>
+        {typeof sparkSeed === 'number' && (
+          <Sparkline values={baselineSeries(anchor || 1, 10, sparkSeed)} width={56} height={20} color={accent} />
+        )}
+      </div>
       {sub && <span style={{ fontSize: 10, color: subColor ?? 'var(--text-tertiary)', fontWeight: 600 }}>{sub}</span>}
     </div>
   )

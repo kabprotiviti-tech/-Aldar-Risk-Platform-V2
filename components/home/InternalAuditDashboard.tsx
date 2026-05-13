@@ -37,6 +37,7 @@ import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { ExternalIntelligenceFeed } from '@/components/home/ExternalIntelligenceFeed'
 import { TrustFooter } from '@/components/provenance/TrustFooter'
+import { Sparkline, baselineSeries } from '@/components/ui/Sparkline'
 
 export function InternalAuditDashboard() {
   return (
@@ -100,10 +101,10 @@ function Inner() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 10 }}>
-        <KPI label="Risks in Scope" value={risks.length} accent="#22C55E" />
-        <KPI label="Open Findings" value={openFindings.length} accent="#FF6600" sub="mitigation actions" />
-        <KPI label="Total Audit Events" value={events.length} accent="#2D9EFF" sub="this browser session" />
-        <KPI label="3LoD Roles" value={THREE_LINES.reduce((s, l) => s + l.roles.length, 0)} accent="#A855F7" />
+        <KPI label="Risks in Scope" value={risks.length} accent="#22C55E" sparkSeed={3} />
+        <KPI label="Open Findings" value={openFindings.length} accent="#FF6600" sub="mitigation actions" sparkSeed={17} />
+        <KPI label="Total Audit Events" value={events.length} accent="#2D9EFF" sub="this browser session" sparkSeed={31} />
+        <KPI label="3LoD Roles" value={THREE_LINES.reduce((s, l) => s + l.roles.length, 0)} accent="#A855F7" sparkSeed={47} />
       </div>
 
       <Section title="Assurance Coverage Gap (proxy)" subtitle="Risks with widest gap between inherent score and control count" accent="#FF6600" icon={<Search size={14} />} cta={<Link href="/risk-register" style={ctaSmall}>Open register →</Link>}>
@@ -161,11 +162,16 @@ function Inner() {
   )
 }
 
-function KPI({ label, value, accent, sub }: { label: string; value: number; accent: string; sub?: string }) {
+function KPI({ label, value, accent, sub, sparkSeed }: { label: string; value: number; accent: string; sub?: string; sparkSeed?: number }) {
   return (
     <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderTop: `3px solid ${accent}`, borderRadius: 8, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
       <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', color: accent }}>{label}</span>
-      <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{value}</span>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
+        <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{value}</span>
+        {typeof sparkSeed === 'number' && (
+          <Sparkline values={baselineSeries(value, 10, sparkSeed)} width={56} height={20} color={accent} />
+        )}
+      </div>
       {sub && <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>{sub}</span>}
     </div>
   )

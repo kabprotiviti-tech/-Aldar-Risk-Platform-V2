@@ -64,6 +64,7 @@ import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { TrustFooter } from '@/components/provenance/TrustFooter'
 import { ExternalIntelligenceFeed } from '@/components/home/ExternalIntelligenceFeed'
+import { Sparkline, baselineSeries } from '@/components/ui/Sparkline'
 
 export function ARCChairDashboard() {
   return (
@@ -135,10 +136,10 @@ function Inner() {
 
       <Section title="Since Last Meeting (30-day window)" subtitle="Material movement awaiting board awareness" accent="#F5C518" icon={<Clock size={14} />}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 8 }}>
-          <DeltaTile label="Audit events" value={recentEvents.length} accent="#F5C518" />
-          <DeltaTile label="Red KRIs" value={kriRed} accent="#FF3B3B" />
-          <DeltaTile label="Overdue mitigations" value={overdue} accent="#FF8C00" />
-          <DeltaTile label="Pending escalations" value={pendingEsc.length} accent="#A855F7" />
+          <DeltaTile label="Audit events" value={recentEvents.length} accent="#F5C518" sparkSeed={9} />
+          <DeltaTile label="Red KRIs" value={kriRed} accent="#FF3B3B" sparkSeed={25} />
+          <DeltaTile label="Overdue mitigations" value={overdue} accent="#FF8C00" sparkSeed={39} />
+          <DeltaTile label="Pending escalations" value={pendingEsc.length} accent="#A855F7" sparkSeed={53} />
         </div>
       </Section>
 
@@ -385,11 +386,16 @@ function SevTile({ label, value, color }: { label: string; value: number; color:
   )
 }
 
-function DeltaTile({ label, value, accent }: { label: string; value: number; accent: string }) {
+function DeltaTile({ label, value, accent, sparkSeed }: { label: string; value: number; accent: string; sparkSeed?: number }) {
   return (
     <div style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderLeft: `3px solid ${accent}`, borderRadius: 6, padding: '8px 10px' }}>
       <div style={{ fontSize: 9, fontWeight: 700, color: accent, textTransform: 'uppercase', letterSpacing: 0.4 }}>{label}</div>
-      <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>{value}</div>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
+        <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>{value}</div>
+        {typeof sparkSeed === 'number' && (
+          <Sparkline values={baselineSeries(value || 1, 10, sparkSeed)} width={52} height={18} color={accent} />
+        )}
+      </div>
     </div>
   )
 }
