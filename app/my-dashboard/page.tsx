@@ -59,6 +59,7 @@ import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { ExternalIntelligenceFeed } from '@/components/home/ExternalIntelligenceFeed'
 import { TrustFooter } from '@/components/provenance/TrustFooter'
+import { Sparkline, baselineSeries } from '@/components/ui/Sparkline'
 import {
   BASELINE_RISK_POSTURE,
   safeMetric,
@@ -223,24 +224,32 @@ function MyDashboardContent() {
             value={String(headlineRiskScore)}
             tone={headlineRiskScore >= 75 ? 'danger' : headlineRiskScore >= 60 ? 'warning' : 'good'}
             sub={`Trend ${BASELINE_RISK_POSTURE.riskScoreTrend > 0 ? '+' : ''}${BASELINE_RISK_POSTURE.riskScoreTrend} MoM`}
+            sparklineAnchor={headlineRiskScore}
+            sparklineSeed={11}
           />
           <HeroStat
             label="Critical + High"
             value={String(headlineCriticalHigh)}
             tone={headlineCriticalHigh > 8 ? 'danger' : headlineCriticalHigh > 4 ? 'warning' : 'good'}
             sub={`${BASELINE_RISK_POSTURE.criticalRiskCount} critical · ${BASELINE_RISK_POSTURE.highRiskCount} high`}
+            sparklineAnchor={headlineCriticalHigh}
+            sparklineSeed={23}
           />
           <HeroStat
             label="Gross exposure"
             value={formatCurrencyShort(headlineExposure, 'AED')}
             tone="neutral"
             sub={`Net unhedged ${formatCurrencyShort(BASELINE_RISK_POSTURE.netUnhedgedExposure, 'AED')}`}
+            sparklineAnchor={headlineExposure / 1_000_000}
+            sparklineSeed={37}
           />
           <HeroStat
             label="AI alerts today"
             value={String(BASELINE_RISK_POSTURE.aiAlertsToday)}
             tone={BASELINE_RISK_POSTURE.aiAlertsToday > 5 ? 'warning' : 'good'}
             sub={`${BASELINE_RISK_POSTURE.activeExternalSignals} external · ${BASELINE_RISK_POSTURE.activeControlWeaknesses} controls`}
+            sparklineAnchor={BASELINE_RISK_POSTURE.aiAlertsToday}
+            sparklineSeed={41}
           />
         </div>
       </header>
@@ -506,17 +515,29 @@ function HeroStat({
   value,
   sub,
   tone,
+  sparklineSeed,
+  sparklineAnchor,
 }: {
   label: string
   value: string
   sub?: string
   tone: 'good' | 'warning' | 'danger' | 'neutral'
+  /** Seed for the synthetic baseline series — keeps the line stable across renders. */
+  sparklineSeed?: number
+  /** Anchor value for the sparkline (typically the same number that's displayed). */
+  sparklineAnchor?: number
 }) {
   const toneColor =
     tone === 'good' ? '#22C55E'
     : tone === 'warning' ? '#F5C518'
     : tone === 'danger' ? '#FF3B3B'
     : 'var(--accent-primary)'
+
+  const series =
+    typeof sparklineAnchor === 'number'
+      ? baselineSeries(sparklineAnchor, 12, sparklineSeed ?? 7)
+      : null
+
   return (
     <div
       style={{
@@ -527,6 +548,7 @@ function HeroStat({
         display: 'flex',
         flexDirection: 'column',
         gap: 4,
+        minHeight: 92,
       }}
     >
       <div
@@ -542,14 +564,32 @@ function HeroStat({
       </div>
       <div
         style={{
-          fontSize: 22,
-          fontWeight: 700,
-          color: toneColor,
-          lineHeight: 1.1,
-          fontVariantNumeric: 'tabular-nums',
+          display: 'flex',
+          alignItems: 'baseline',
+          justifyContent: 'space-between',
+          gap: 8,
         }}
       >
-        {value}
+        <div
+          style={{
+            fontSize: 22,
+            fontWeight: 700,
+            color: toneColor,
+            lineHeight: 1.1,
+            fontVariantNumeric: 'tabular-nums',
+          }}
+        >
+          {value}
+        </div>
+        {series && (
+          <Sparkline
+            values={series}
+            width={64}
+            height={22}
+            color={toneColor}
+            ariaLabel={`${label} trend`}
+          />
+        )}
       </div>
       {sub && (
         <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{sub}</div>
