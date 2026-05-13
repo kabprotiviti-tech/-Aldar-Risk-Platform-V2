@@ -13,6 +13,7 @@ import { AIInsightBox } from '@/components/ui/AIInsightBox'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { BASELINE_RISK_POSTURE } from '@/lib/data/baselineRiskPosture'
 import { formatCurrencyShort } from '@/lib/utils/formatters'
+import { Skeleton, SkeletonKPICard } from '@/components/ui/Skeleton'
 import { riskRegister, portfolioMetrics } from '@/lib/simulated-data'
 import { internalSnapshot } from '@/lib/internalData'
 
@@ -335,26 +336,42 @@ export default function ExecutiveBriefPage() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          style={{ textAlign: 'center', padding: '60px 20px' }}
+          style={{ padding: '24px 0' }}
         >
-          <div
-            style={{
-              width: '64px',
-              height: '64px',
-              borderRadius: '50%',
-              border: '3px solid var(--border-color)',
-              borderTop: '3px solid var(--accent-primary)',
-              animation: 'spin 1s linear infinite',
-              margin: '0 auto 20px',
-            }}
-          />
-          <div style={{ color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 600, marginBottom: '8px' }}>
-            AI Board Brief Generation in Progress
+          {/* Headline KPI skeleton — same 4-tile rhythm the brief will render */}
+          <div className="grid grid-cols-4 gap-4 mb-6">
+            {[0, 1, 2, 3].map((i) => (
+              <SkeletonKPICard key={i} accent="var(--accent-primary)" />
+            ))}
           </div>
-          <div style={{ color: 'var(--text-muted)', fontSize: '0.825rem', maxWidth: '420px', margin: '0 auto' }}>
-            Synthesizing risk register, live ERP signals, portfolio metrics, and cross-portfolio propagation into a board-ready brief...
+          {/* Body skeleton lines */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+            <Skeleton width="40%" height={16} />
+            <Skeleton width="92%" height={11} />
+            <Skeleton width="88%" height={11} />
+            <Skeleton width="75%" height={11} />
           </div>
-          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          {/* Centered status */}
+          <div style={{ textAlign: 'center', padding: '8px 20px 32px' }}>
+            <div
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                border: '3px solid var(--border-color)',
+                borderTop: '3px solid var(--accent-primary)',
+                animation: 'spin 1s linear infinite',
+                margin: '0 auto 14px',
+              }}
+            />
+            <div style={{ color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 600, marginBottom: 6 }}>
+              AI Board Brief Generation in Progress
+            </div>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', maxWidth: '420px', margin: '0 auto' }}>
+              Synthesizing risk register, live ERP signals, portfolio metrics, and cross-portfolio propagation into a board-ready brief…
+            </div>
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          </div>
         </motion.div>
       )}
 
