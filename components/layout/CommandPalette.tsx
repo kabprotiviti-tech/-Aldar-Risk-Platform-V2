@@ -22,10 +22,13 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { usePersona } from '@/lib/context/PersonaContext'
+import { canAccessRoute } from '@/lib/rbac/policy'
 import {
   Search,
   ArrowRight,
   Command as CommandIcon,
+  Crown as PersonaIcon,
   type LucideIcon,
   LayoutDashboard,
   ListChecks,
@@ -92,20 +95,30 @@ interface CommandPaletteProps {
 
 export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const router = useRouter()
+  const { persona } = usePersona()
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
   const [query, setQuery] = useState('')
   const [activeIdx, setActiveIdx] = useState(0)
 
-  // Filter
+  // Persona-scoped item set — palette only surfaces routes the
+  // logged-in persona is authorised to view. Mirrors the sidebar
+  // and tightens the persona-binding theme: Cmd-K is now a
+  // legitimate alternative nav, not a back-door.
+  const personaItems = useMemo(() => {
+    if (!persona) return ITEMS // unauth (shouldn't happen — guard catches it)
+    return ITEMS.filter((it) => canAccessRoute(persona.id, it.href))
+  }, [persona])
+
+  // Free-text filter on top of the persona scope.
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return ITEMS
-    return ITEMS.filter((it) => {
+    if (!q) return personaItems
+    return personaItems.filter((it) => {
       const hay = `${it.label} ${it.description} ${it.group} ${(it.keywords ?? []).join(' ')}`.toLowerCase()
       return hay.includes(q)
     })
-  }, [query])
+  }, [query, personaItems])
 
   // Reset on open
   useEffect(() => {
@@ -227,7 +240,11 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
               setQuery(e.target.value)
               setActiveIdx(0)
             }}
-            placeholder="Jump to risk register, KRI, appetite, scenarios…"
+            placeholder={
+              persona
+                ? `Jump to anywhere you can access as ${persona.title}…`
+                : 'Jump to risk register, KRI, appetite, scenarios…'
+            }
             style={{
               flex: 1,
               background: 'transparent',
@@ -376,9 +393,30 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
             letterSpacing: 0.4,
           }}
         >
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
             <CommandIcon size={10} />
             <span style={{ fontWeight: 700, textTransform: 'uppercase' }}>Command palette</span>
+            {persona && (
+              <span
+                title={`Scoped to ${persona.title} · ${persona.line}`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  color: 'var(--accent-primary)',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.4,
+                  background: 'rgba(255,102,0,0.10)',
+                  border: '1px solid rgba(255,102,0,0.35)',
+                  padding: '1px 6px',
+                  borderRadius: 3,
+                }}
+              >
+                <PersonaIcon size={9} />
+                {persona.title} · {personaItems.length} routes
+              </span>
+            )}
           </div>
           <div style={{ display: 'inline-flex', gap: 12 }}>
             <span><kbd style={kbdStyle}>↑</kbd><kbd style={kbdStyle}>↓</kbd> navigate</span>
