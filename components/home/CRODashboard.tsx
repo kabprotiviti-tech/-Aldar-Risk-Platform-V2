@@ -183,7 +183,7 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
             }}
           >
             <Crown size={22} style={{ color: 'var(--accent-primary)' }} />
-            Risk Head cockpit
+            Risk Head dashboard
           </h1>
           <p
             style={{
