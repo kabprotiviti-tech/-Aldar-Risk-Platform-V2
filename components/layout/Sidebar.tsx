@@ -224,6 +224,13 @@ const NAV_GROUPS: NavGroup[] = [
         personas: ALL,
       },
       {
+        href: '/policy-and-procedure',
+        label: 'Policy & Procedure',
+        icon: BookMarked,
+        description: 'Policy register · status · review cycle',
+        personas: ALL,
+      },
+      {
         href: '/regulator-map',
         label: 'Regulator Map',
         icon: Landmark,

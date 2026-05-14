@@ -150,7 +150,7 @@ const ROUTE_ALLOWLIST: Record<PersonaId, string[]> = {
     '/kri', '/portfolio-tower', '/scenarios',
     '/audit-trail', '/documents',
     '/arc-pack',
-    '/risk-appetite', '/three-lines-of-defense', '/regulator-map',
+    '/risk-appetite', '/three-lines-of-defense', '/policy-and-procedure', '/regulator-map',
     '/standards-reference', '/bcm',
   ],
   'risk-champion': [
@@ -163,7 +163,7 @@ const ROUTE_ALLOWLIST: Record<PersonaId, string[]> = {
     '/risk-register', '/risk-library',
     '/kri', '/scenarios',
     '/audit-trail', '/documents',
-    '/risk-appetite', '/three-lines-of-defense',
+    '/risk-appetite', '/three-lines-of-defense', '/policy-and-procedure',
   ],
   'subsidiary-ceo': [
     '/', '/login', '/welcome', '/home',
@@ -176,7 +176,7 @@ const ROUTE_ALLOWLIST: Record<PersonaId, string[]> = {
     '/kri', '/portfolio-tower', '/scenarios',
     '/audit-trail',
     '/arc-pack',
-    '/risk-appetite', '/three-lines-of-defense',
+    '/risk-appetite', '/three-lines-of-defense', '/policy-and-procedure',
   ],
   'arc-chair': [
     '/', '/login', '/welcome', '/home',
@@ -189,7 +189,7 @@ const ROUTE_ALLOWLIST: Record<PersonaId, string[]> = {
     '/kri', '/portfolio-tower',
     '/audit-trail',
     '/arc-pack',
-    '/risk-appetite', '/three-lines-of-defense', '/regulator-map',
+    '/risk-appetite', '/three-lines-of-defense', '/policy-and-procedure', '/regulator-map',
     '/standards-reference', '/bcm',
   ],
 }

@@ -84,6 +84,7 @@ const ITEMS: PaletteItem[] = [
   // Governance
   { href: '/risk-appetite', label: 'Risk Appetite', group: 'Governance', description: 'Group + subsidiary tolerances', icon: ShieldHalf, keywords: ['tolerance', 'appetite'] },
   { href: '/three-lines-of-defense', label: 'Three Lines of Defense', group: 'Governance', description: 'IIA model + roles', icon: ShieldHalf, keywords: ['iia', '3-lines', 'lod'] },
+  { href: '/policy-and-procedure', label: 'Policy & Procedure', group: 'Governance', description: 'Policy register · status · review cycle', icon: BookOpen, keywords: ['policy', 'procedure', 'register', 'compliance'] },
   { href: '/regulator-map', label: 'Regulator Map', group: 'Governance', description: 'UAE regulator obligations', icon: Building2, keywords: ['sca', 'cbuae', 'adgm'] },
   { href: '/standards-reference', label: 'Standards Reference', group: 'Governance', description: 'COSO / ISO 31000 / SCA', icon: BookOpen, keywords: ['coso', 'iso', 'reference'] },
   { href: '/bcm', label: 'Business Continuity', group: 'Governance', description: 'BCM plans + tests', icon: Globe2, keywords: ['continuity', 'bcm', 'dr'] },

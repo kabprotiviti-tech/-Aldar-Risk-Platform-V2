@@ -291,13 +291,48 @@ function MyDashboardContent() {
           }
           sublineColor={kriStatus.r > 0 ? '#FF3B3B' : kriStatus.a > 0 ? '#F5C518' : '#22C55E'}
         />
-        <KPITile
-          icon={<Inbox size={14} />}
-          label="Audit events today"
-          value={auditToday}
-          accent="#22C55E"
-          href="/audit-trail"
-        />
+        <Link
+          href="/portfolio-tower"
+          style={{ textDecoration: 'none' }}
+          title="ERM annual plan — drill into Portfolio Tower"
+        >
+          <div
+            style={{
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-color)',
+              borderTop: '3px solid #22C55E',
+              borderRadius: 8,
+              padding: '12px 14px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 6,
+              cursor: 'pointer',
+              color: 'var(--text-primary)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#22C55E' }}>
+              <Inbox size={14} />
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase' }}>
+                ERM Annual Plan
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'baseline' }}>
+              <div>
+                <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--accent-primary)', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>8</div>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 700, letterSpacing: 0.4, textTransform: 'uppercase' }}>Planned</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 22, fontWeight: 700, color: '#FF3B3B', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>2</div>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 700, letterSpacing: 0.4, textTransform: 'uppercase' }}>Overdue</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 22, fontWeight: 700, color: '#22C55E', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>14</div>
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 700, letterSpacing: 0.4, textTransform: 'uppercase' }}>Completed</div>
+              </div>
+            </div>
+          </div>
+        </Link>
+      </div>
       </div>
 
       {/* ── 2-up: Drafts + Actions ────────────────────────────────────── */}
