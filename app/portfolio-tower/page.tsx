@@ -238,6 +238,9 @@ function EntityHeatmap({
   risks,
   isGroup,
 }: EntityHeatmapProps) {
+  // Cell drill-down modal state (Batch M).
+  const [drilledKey, setDrilledKey] = React.useState<string | null>(null)
+
   // Bucket risks by their inherent (likelihood, impact) integer pair.
   // BCG-1 audit fix: previously both L and I were rounded from the SAME
   // newInherent value, so every risk plotted on the diagonal (L = I).
@@ -260,6 +263,9 @@ function EntityHeatmap({
     arr.push(r)
     cells.set(key, arr)
   }
+
+  const drilledRisks = drilledKey ? cells.get(drilledKey) ?? [] : []
+  const [drilledL, drilledI] = drilledKey ? drilledKey.split('-').map(Number) : [0, 0]
 
   // Counts by rating for the header strip
   const counts = { Critical: 0, High: 0, Medium: 0, Low: 0 }
@@ -345,19 +351,20 @@ function EntityHeatmap({
               </div>
               {[1, 2, 3, 4, 5].map((i) => {
                 const score = l * i
-                // Find risks whose inherent score range maps to this L*I cell.
-                // For this MVP heatmap we bucket by score (1..25) into (L,I)
-                // pairs that match the score; first matching cell wins.
-                const matched: RiskState[] = []
-                for (const r of risks) {
-                  if (Math.round(r.newInherent) === score) {
-                    matched.push(r)
-                    break
-                  }
-                }
+                // Render risks using the L/I-bucketed `cells` map (joined to
+                // RiskDef by id) instead of the old score-based lookup which
+                // mis-attributed risks to wrong cells.
+                const cellKey = `${l}-${i}`
+                const matched = cells.get(cellKey) ?? []
+                const hasRisks = matched.length > 0
                 return (
-                  <div
-                    key={`${l}-${i}`}
+                  <button
+                    key={cellKey}
+                    type="button"
+                    onClick={() => hasRisks && setDrilledKey(cellKey)}
+                    disabled={!hasRisks}
+                    aria-label={hasRisks ? `Drill into ${matched.length} risk${matched.length === 1 ? '' : 's'} at L${l} × I${i}` : `No risks at L${l} × I${i}`}
+                    title={hasRisks ? `${matched.length} risk${matched.length === 1 ? '' : 's'} — click to drill` : undefined}
                     style={{
                       minHeight: 34,
                       background: cellColor(score),
@@ -369,13 +376,27 @@ function EntityHeatmap({
                       flexWrap: 'wrap',
                       gap: 2,
                       alignContent: 'flex-start',
+                      cursor: hasRisks ? 'pointer' : 'default',
+                      textAlign: 'left',
+                      font: 'inherit',
+                      color: 'inherit',
+                      transition: 'transform 120ms ease-out, box-shadow 120ms ease-out',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (hasRisks) {
+                        e.currentTarget.style.transform = 'scale(1.04)'
+                        e.currentTarget.style.boxShadow = `0 0 0 1px ${cellBorder(score).replace('0.50', '0.90')}`
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)'
+                      e.currentTarget.style.boxShadow = 'none'
                     }}
                   >
-                    {matched.map((r) => (
-                      <Link
+                    {matched.slice(0, 4).map((r) => (
+                      <span
                         key={r.id}
-                        href={`/risk-register?focus=${r.id}`}
-                        title={`${r.id} — ${r.name} (${r.ratingTo}) · click to drill down`}
+                        title={`${r.id} — ${r.name} (${r.ratingTo})`}
                         style={{
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -388,8 +409,6 @@ function EntityHeatmap({
                           padding: '1px 4px',
                           borderRadius: 8,
                           fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-                          textDecoration: 'none',
-                          cursor: 'pointer',
                         }}
                       >
                         <span
@@ -401,9 +420,21 @@ function EntityHeatmap({
                           }}
                         />
                         {r.id}
-                      </Link>
+                      </span>
                     ))}
-                  </div>
+                    {matched.length > 4 && (
+                      <span
+                        style={{
+                          fontSize: 8,
+                          fontWeight: 700,
+                          color: 'var(--text-tertiary)',
+                          padding: '1px 4px',
+                        }}
+                      >
+                        +{matched.length - 4}
+                      </span>
+                    )}
+                  </button>
                 )
               })}
             </React.Fragment>
@@ -425,6 +456,234 @@ function EntityHeatmap({
           ))}
         </div>
       )}
+
+      {/* Cell drill modal — Batch M */}
+      {drilledKey && (
+        <HeatmapDrillModal
+          entityName={entityName}
+          entityColor={entityColor}
+          likelihood={drilledL}
+          impact={drilledI}
+          risks={drilledRisks}
+          onClose={() => setDrilledKey(null)}
+        />
+      )}
+    </div>
+  )
+}
+
+// ── Heatmap cell drill modal ──────────────────────────────────────────────
+function HeatmapDrillModal({
+  entityName,
+  entityColor,
+  likelihood,
+  impact,
+  risks,
+  onClose,
+}: {
+  entityName: string
+  entityColor: string
+  likelihood: number
+  impact: number
+  risks: RiskState[]
+  onClose: () => void
+}) {
+  React.useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prev
+    }
+  }, [onClose])
+
+  const score = likelihood * impact
+  const sortedRisks = [...risks].sort((a, b) => b.newInherent - a.newInherent)
+
+  return (
+    <div
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Risks at L${likelihood} × I${impact} for ${entityName}`}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0,0,0,0.55)',
+        backdropFilter: 'blur(6px)',
+        zIndex: 10001,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 24,
+        animation: 'aldar-heatmap-modal-fade-in 220ms ease-out',
+      }}
+    >
+      <style>{`
+        @keyframes aldar-heatmap-modal-fade-in {
+          from { opacity: 0; transform: scale(0.98); }
+          to   { opacity: 1; transform: scale(1); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          [role="dialog"] { animation: none !important; }
+        }
+      `}</style>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: 'min(640px, 100%)',
+          maxHeight: '80vh',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--border-color)',
+          borderLeft: `3px solid ${entityColor}`,
+          borderRadius: 12,
+          boxShadow: 'var(--shadow-lg, 0 32px 64px rgba(0,0,0,0.55))',
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            padding: '16px 20px',
+            borderBottom: '1px solid var(--border-color)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            gap: 12,
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                color: entityColor,
+                textTransform: 'uppercase',
+                letterSpacing: 1,
+                marginBottom: 4,
+              }}
+            >
+              {entityName}
+            </div>
+            <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.005em' }}>
+              Likelihood {likelihood} × Impact {impact}
+              <span
+                style={{
+                  marginLeft: 8,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  background: cellColor(score),
+                  border: `1px solid ${cellBorder(score)}`,
+                  color: 'var(--text-secondary)',
+                  padding: '2px 6px',
+                  borderRadius: 3,
+                  letterSpacing: 0.4,
+                }}
+              >
+                score {score}
+              </span>
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>
+              {risks.length} risk{risks.length === 1 ? '' : 's'} mapped to this cell — sorted by residual exposure
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            style={{
+              background: 'transparent',
+              border: '1px solid var(--border-color)',
+              borderRadius: 4,
+              padding: '3px 8px',
+              fontSize: 10,
+              fontWeight: 700,
+              color: 'var(--text-tertiary)',
+              cursor: 'pointer',
+              letterSpacing: 0.4,
+            }}
+          >
+            ESC
+          </button>
+        </div>
+
+        {/* Body */}
+        <div style={{ overflowY: 'auto', padding: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {sortedRisks.map((r) => {
+            const def = RISKS.find((x) => x.id === r.id)
+            return (
+              <Link
+                key={r.id}
+                href={`/risk-register?focus=${r.id}`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 10,
+                  padding: '10px 12px',
+                  background: 'var(--bg-primary)',
+                  border: '1px solid var(--border-color)',
+                  borderLeft: `3px solid ${ratingColor(r.ratingTo)}`,
+                  borderRadius: 6,
+                  textDecoration: 'none',
+                  color: 'var(--text-primary)',
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                    <span
+                      style={{
+                        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                        fontSize: 10,
+                        fontWeight: 700,
+                        color: 'var(--text-tertiary)',
+                        letterSpacing: 0.4,
+                      }}
+                    >
+                      {r.id}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 9,
+                        fontWeight: 700,
+                        color: ratingColor(r.ratingTo),
+                        background: `${ratingColor(r.ratingTo)}1f`,
+                        border: `1px solid ${ratingColor(r.ratingTo)}55`,
+                        padding: '1px 6px',
+                        borderRadius: 3,
+                        letterSpacing: 0.4,
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      {r.ratingTo}
+                    </span>
+                    {def?.category && (
+                      <span style={{ fontSize: 9, color: 'var(--text-tertiary)', letterSpacing: 0.3 }}>
+                        {def.category}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 600, marginTop: 4, letterSpacing: '-0.005em' }}>
+                    {r.name}
+                  </div>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 4, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                    <span>Inherent <strong style={{ color: 'var(--text-secondary)' }}>{r.newInherent}</strong></span>
+                    <span>Residual <strong style={{ color: 'var(--text-secondary)' }}>{r.newResidual ?? '—'}</strong></span>
+                    <span>Exposure <strong style={{ color: 'var(--text-secondary)' }}>AED {r.exposureAedMn} M</strong></span>
+                  </div>
+                </div>
+                <span style={{ fontSize: 11, color: 'var(--accent-primary)', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                  Open →
+                </span>
+              </Link>
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
 }
