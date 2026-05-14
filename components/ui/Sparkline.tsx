@@ -68,9 +68,9 @@ export function Sparkline({
   const rawMin = Math.min(...values)
   const rawMax = Math.max(...values)
   const anchor = values[values.length - 1] || rawMax || 1
-  const pad = Math.max((rawMax - rawMin) * 0.6, Math.abs(anchor) * 0.2)
-  const min = rawMin - pad
-  const max = rawMax + pad
+  const rangePad = Math.max((rawMax - rawMin) * 0.6, Math.abs(anchor) * 0.2)
+  const min = rawMin - rangePad
+  const max = rawMax + rangePad
   const range = max - min || 1
 
   // Padding to leave room for stroke + dot
