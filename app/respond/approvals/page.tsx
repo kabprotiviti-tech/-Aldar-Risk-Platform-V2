@@ -45,6 +45,8 @@ import { usePersona } from '@/lib/context/PersonaContext'
 import { can } from '@/lib/rbac/policy'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
+import { WorkflowChain } from '@/components/workflow/WorkflowChain'
+import { buildWorkflowsSeed } from '@/lib/data/workflows-seed'
 
 export default function ApprovalsPage() {
   return (
@@ -128,6 +130,24 @@ function Content() {
         </div>
         <StatusBadge tier="MVP" note={`${proposals.length + pendingEsc.length + myDrafts.length} items`} />
       </div>
+
+      {/* N-step workflow chains — Batch F.
+          Illustrative instances showing the Champion → ERM → CRO → ARC
+          → Board chain mid-flight. Persona-aware: viewer who can advance
+          sees Action buttons. */}
+      <Section
+        title="Active workflow chains"
+        subtitle="N-step approval routing — current state per artefact"
+        accent="#2D9EFF"
+        icon={<ShieldQuestion size={14} />}
+        cta={<span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>4 illustrative · pilot wires live store</span>}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {buildWorkflowsSeed().map((wf) => (
+            <WorkflowChain key={wf.id} instance={wf} />
+          ))}
+        </div>
+      </Section>
 
       <Section
         title="Risk Appetite Proposals"
