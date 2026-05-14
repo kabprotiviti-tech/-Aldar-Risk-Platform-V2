@@ -7,6 +7,7 @@ import { DerivedRisksProvider } from '@/lib/context/DerivedRisksContext'
 import { UploadedDocumentProvider } from '@/lib/context/UploadedDocumentContext'
 import { AuditTrailProvider } from '@/lib/context/AuditTrailContext'
 import { PersonaProvider } from '@/lib/context/PersonaContext'
+import { MultiEntityScopeProvider } from '@/lib/context/MultiEntityScopeContext'
 import { AppChrome } from '@/components/layout/AppChrome'
 import { EnvironmentBanner } from '@/components/provenance/EnvironmentBanner'
 
@@ -45,12 +46,14 @@ export default function RootLayout({
         <ThemeProvider>
           <AuditTrailProvider>
             <PersonaProvider>
-              <UploadedDocumentProvider>
-                <DerivedRisksProvider>
-                  <EnvironmentBanner env="demo" />
-                  <AppChrome>{children}</AppChrome>
-                </DerivedRisksProvider>
-              </UploadedDocumentProvider>
+              <MultiEntityScopeProvider>
+                <UploadedDocumentProvider>
+                  <DerivedRisksProvider>
+                    <EnvironmentBanner env="demo" />
+                    <AppChrome>{children}</AppChrome>
+                  </DerivedRisksProvider>
+                </UploadedDocumentProvider>
+              </MultiEntityScopeProvider>
             </PersonaProvider>
           </AuditTrailProvider>
         </ThemeProvider>

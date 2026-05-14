@@ -6,6 +6,7 @@ import { ThemeSelector } from './ThemeSelector'
 import { MarketWidget } from '@/components/MarketWidget'
 import { PersonaBadge } from './PersonaBadge'
 import { EntityScopePicker } from './EntityScopePicker'
+import { MultiEntityScopeChip } from './MultiEntityScopeChip'
 import { NotificationsBell } from './NotificationsBell'
 import { useCommandPalette } from './CommandPalette'
 
@@ -312,6 +313,9 @@ export function Header() {
 
             {/* Entity scope picker — switch active subsidiary */}
             <EntityScopePicker />
+
+            {/* Multi-entity cross-sub scope picker */}
+            <MultiEntityScopeChip />
 
             {/* Persona badge — login chip with dropdown */}
             <PersonaBadge />

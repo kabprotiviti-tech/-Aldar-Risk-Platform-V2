@@ -36,18 +36,22 @@ import { entityForRisk, type EntityId } from '@/lib/data/risk-entity-mapping'
 import type { RiskState, Rating } from '@/lib/engine/types'
 import { RISKS } from '@/lib/engine/seedData'
 import { usePersona } from '@/lib/context/PersonaContext'
+import { useMultiEntityScope } from '@/lib/context/MultiEntityScopeContext'
 
 function PortfolioTowerContent() {
   const { risks: allRisks } = useSimulation()
   const { session } = usePersona()
+  const { isMultiActive, inScopeRisk } = useMultiEntityScope()
 
-  // P6 entity-scope filter: when a subsidiary scope is active, the
-  // Group-level heatmap + Concentration + Top-10 narrow to that
-  // subsidiary's risks. Per-subsidiary cards stay scoped to themselves
-  // regardless (so the viewer still sees the cross-entity context).
+  // Filter precedence: multi-entity scope > single entityScope > all.
+  // Batch E (multi-entity) lets a user cross-filter several subs; the
+  // single-scope path (P6) remains the default for Sub-CEO and CRO
+  // drill-down. Group-level risks (aldar-group) are always included
+  // when multi-scope is active so cross-portfolio context isn't lost.
   const scope = session.entityScope
-  const risks =
-    scope && scope !== 'aldar-group'
+  const risks = isMultiActive
+    ? allRisks.filter((r) => inScopeRisk(r.id))
+    : scope && scope !== 'aldar-group'
       ? allRisks.filter((r) => entityForRisk(r.id) === scope)
       : allRisks
 
