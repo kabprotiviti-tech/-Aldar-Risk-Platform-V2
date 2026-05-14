@@ -198,6 +198,7 @@ export function Header() {
           top: 0,
           zIndex: 30,
           width: '100%',
+          overflow: 'visible',
         }}
       >
         <div
@@ -269,17 +270,20 @@ export function Header() {
             </div>
           </div>
 
-          {/* RIGHT — controls row, scrolls on mobile rather than wrapping */}
+          {/* RIGHT — controls row. Note: overflow MUST stay visible so
+              that dropdown menus (Scope, Multi, Persona, Notifications,
+              Theme) are not clipped by the header. On narrow viewports
+              the row wraps instead of scrolling. */}
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              overflowX: 'auto',
+              overflow: 'visible',
               flexShrink: 1,
               minWidth: 0,
-              /* hide scrollbar but allow scroll */
-              scrollbarWidth: 'none',
+              flexWrap: 'wrap',
+              justifyContent: 'flex-end',
             }}
           >
             {/* Hidden on mobile — shown tablet+ */}
