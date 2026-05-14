@@ -61,6 +61,28 @@ export function canReject(instance: WorkflowInstance, personaId: PersonaId | nul
   return STEP_CATALOG[instance.state].advanceBy.includes(personaId)
 }
 
+/**
+ * Sign-off invariants — Q0 governance hardening.
+ * Defense-in-depth on top of step ordering: certain workflow kinds
+ * must NEVER reach `closed` without specific intermediate states in
+ * their history. If the invariant is violated, advance() refuses the
+ * transition.
+ */
+const REQUIRED_HISTORY_BEFORE_CLOSE: Record<string, WorkflowStepKey[]> = {
+  risk_approval: ['cro_approve', 'arc_signoff'],
+  appetite_change: ['cro_approve', 'arc_signoff'],
+  mitigation_closure: ['erm_review', 'cro_approve'],
+  kri_threshold_change: ['erm_review', 'cro_approve'],
+}
+
+function violatesCloseInvariant(instance: WorkflowInstance, target: WorkflowStepKey): boolean {
+  if (target !== 'closed') return false
+  const required = REQUIRED_HISTORY_BEFORE_CLOSE[instance.kind]
+  if (!required) return false
+  const seen = new Set(instance.history.map((h) => h.to))
+  return required.some((step) => !seen.has(step))
+}
+
 /** Pure transition — returns a NEW instance, never mutates the input. */
 export function advance(
   instance: WorkflowInstance,
@@ -71,6 +93,12 @@ export function advance(
   const next = nextStep(instance)
   if (!next) return instance
   if (!canAdvance(instance, by)) return instance
+  if (violatesCloseInvariant(instance, next)) {
+    // Block: the workflow cannot close without all required sign-off
+    // states having passed through history. This is a belt-and-braces
+    // guard on top of step ordering.
+    return instance
+  }
   const at = new Date().toISOString()
   const transition: WorkflowTransition = {
     at,

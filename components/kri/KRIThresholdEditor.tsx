@@ -16,6 +16,8 @@ import { Check, X, RotateCcw, Sparkles } from 'lucide-react'
 import { useKRIThresholds } from '@/lib/context/KRIThresholdsContext'
 import type { KRIDefinition, KRIThresholds } from '@/lib/data/kri-definitions'
 import { suggestThresholds } from '@/lib/ai/suggestions'
+import { recordAuditEventDirect } from '@/lib/context/AuditTrailContext'
+import { usePersona } from '@/lib/context/PersonaContext'
 
 interface Props {
   kri: KRIDefinition
@@ -25,6 +27,7 @@ interface Props {
 export function KRIThresholdEditor({ kri, onClose }: Props) {
   const { thresholdsFor, isOverridden, setThresholds, resetThresholds } =
     useKRIThresholds()
+  const { session } = usePersona()
   const current = thresholdsFor(kri)
 
   const [amber, setAmber] = useState<number>(current.amberBoundary)
@@ -255,6 +258,17 @@ export function KRIThresholdEditor({ kri, onClose }: Props) {
                 setAmber(suggestion.amberBoundary)
                 setRed(suggestion.redBoundary)
                 setError(validate(suggestion.amberBoundary, suggestion.redBoundary))
+                // Q0 BCG #3: record the AI hypothesis being applied, with
+                // its full rationale, so the audit trail has provenance
+                // when the user subsequently hits Save. Pilot will
+                // instantiate a kri_threshold_change workflow here.
+                recordAuditEventDirect({
+                  category: 'kri',
+                  action: 'create',
+                  actor: session.displayName || 'demo-user',
+                  targetId: kri.id,
+                  summary: `AI hypothesis applied to ${kri.id}: amber→${suggestion.amberBoundary}, red→${suggestion.redBoundary}. Rationale: ${suggestion.rationale}. Awaiting human Save + ERM review.`,
+                })
                 setSuggestion(null)
               }}
               style={{
