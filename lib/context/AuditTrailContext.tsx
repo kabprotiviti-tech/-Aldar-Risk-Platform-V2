@@ -43,6 +43,7 @@ export type AuditAction =
   | 'status_change'
   | 'login'
   | 'export'
+  | 'audit_cleared'
 
 export interface AuditEvent {
   id: string
@@ -118,8 +119,13 @@ interface CtxValue {
   ) => AuditEvent
   /** Full export of events as a CSV string (header + rows). */
   exportCSV: () => string
-  /** Clear all events — only intended for demo reset. */
-  clear: () => void
+  /**
+   * Clear all events — gated by RBAC (`audit:clear` permission) and
+   * requires a non-empty reason for compliance. Returns `true` on
+   * success, `false` if blocked. Writes a tombstone audit event
+   * recording the cleared range before wiping.
+   */
+  clear: (input: { actor: string; reason: string; personaId: import('@/lib/personas').PersonaId | null }) => boolean
 }
 
 const Ctx = React.createContext<CtxValue | null>(null)
@@ -171,7 +177,34 @@ function AuditInner({ children }: { children: React.ReactNode }) {
     return [header, ...rows].join('\n')
   }, [events])
 
-  const clear = useCallback<CtxValue['clear']>(() => setState([]), [setState])
+  const clear = useCallback<CtxValue['clear']>(
+    ({ actor, reason, personaId }) => {
+      // Q0 BCG #2: gate clear() by RBAC + mandatory reason. Refuse if
+      // the caller lacks `audit:clear` or didn't provide a reason.
+      // Write a tombstone event before wiping so the act of clearing
+      // is itself recorded.
+      // Dynamic import to avoid circular dependency at module load.
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { can } = require('@/lib/rbac/policy') as typeof import('@/lib/rbac/policy')
+      if (!can(personaId, 'audit:clear')) return false
+      if (!reason || !reason.trim()) return false
+      const idsCleared = events.map((e) => e.id)
+      const at = new Date().toISOString()
+      const tombstone: AuditEvent = {
+        id: uid('aud'),
+        at,
+        category: 'system',
+        action: 'audit_cleared',
+        actor,
+        targetId: null,
+        summary: `Audit trail cleared by ${actor}. Reason: ${reason}. ${idsCleared.length} events removed.`,
+        details: { clearedIds: idsCleared, reason, personaId },
+      }
+      setState([tombstone])
+      return true
+    },
+    [events, setState],
+  )
 
   const value = useMemo<CtxValue>(
     () => ({ events, recordEvent, exportCSV, clear }),
