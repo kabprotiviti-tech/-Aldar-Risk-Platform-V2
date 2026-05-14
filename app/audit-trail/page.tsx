@@ -15,6 +15,9 @@ import React, { useCallback, useMemo, useState } from 'react'
 import { Download, Search, Trash2, ShieldCheck } from 'lucide-react'
 import {
   useAuditTrail,
+} from '@/lib/context/AuditTrailContext'
+import { usePersona } from '@/lib/context/PersonaContext'
+import {
   type AuditCategory,
   type AuditAction,
   type AuditEvent,
@@ -45,6 +48,7 @@ const ACTION_META: Record<AuditAction, { label: string; color: string }> = {
 
 function AuditTrailContent() {
   const { events, exportCSV, clear } = useAuditTrail()
+  const { session, persona } = usePersona()
   const [query, setQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [actionFilter, setActionFilter] = useState<string>('all')
@@ -287,8 +291,13 @@ function AuditTrailContent() {
       {events.length > 0 && (
         <button
           onClick={() => {
-            if (confirm(`Clear all ${events.length} audit events from this browser? (Demo reset only — pilot will not allow this.)`)) {
-              clear()
+            const reason = prompt(`Clear all ${events.length} audit events from this browser?\n\nProvide a reason (mandatory — written to the tombstone audit event):`)
+            if (reason && reason.trim()) {
+              clear({
+                actor: session.displayName || 'demo-user',
+                reason: reason.trim(),
+                personaId: persona?.id ?? null,
+              })
             }
           }}
           style={{
