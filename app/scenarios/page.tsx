@@ -19,6 +19,7 @@ import { AIInsightBox } from '@/components/ui/AIInsightBox'
 import { FinancialCalculationPanel, ViewCalcButton, type FinancialCalcContext } from '@/components/FinancialCalculationPanel'
 import { scenarioTemplates, portfolioNames, type Portfolio } from '@/lib/simulated-data'
 import { ScenarioEngine } from '@/components/ScenarioEngine'
+import { CostOfInactionPanel } from '@/components/scenarios/CostOfInactionPanel'
 import { SimulationWorkbench } from '@/components/simulation/SimulationWorkbench'
 import { BaselineComparisonPanel } from '@/components/scenarios/BaselineComparisonPanel'
 
@@ -333,6 +334,12 @@ export default function ScenariosPage() {
         <div style={{ height: 12 }} />
         <SimulationWorkbench />
       </div>
+
+      {/* Cost of Inaction + Tiered Response Plan — Batch N
+          Executive hero block answering "what if we do nothing?" with
+          a single headline number, plus a 4-tier recommended response
+          plan (immediate / 30-day / 90-day / board decision). */}
+      <CostOfInactionPanel />
 
       {/* Quick Scenario Engine */}
       <ScenarioEngine />
