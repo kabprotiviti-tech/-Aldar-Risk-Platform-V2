@@ -333,7 +333,6 @@ function MyDashboardContent() {
           </div>
         </Link>
       </div>
-      </div>
 
       {/* ── 2-up: Drafts + Actions ────────────────────────────────────── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: 12 }}>
