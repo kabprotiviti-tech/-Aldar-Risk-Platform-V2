@@ -40,6 +40,7 @@ const ACTION_META: Record<AuditAction, { label: string; color: string }> = {
   status_change: { label: 'Status Change', color: 'var(--risk-medium)' },
   login: { label: 'Login', color: 'var(--text-secondary)' },
   export: { label: 'Export', color: 'var(--text-secondary)' },
+  audit_cleared: { label: 'Audit Cleared', color: 'var(--risk-critical)' },
 }
 
 function AuditTrailContent() {
