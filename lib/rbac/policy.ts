@@ -106,16 +106,6 @@ const PERSONA_PERMISSIONS: Record<PersonaId, Permission[]> = {
     'arc:view',
     'audit:view',
   ],
-  // ─── Chief Internal Auditor ── 3rd line, read-mostly assurance.
-  // CIA also sees confidential ARC content (they author the IA drafts).
-  'internal-audit': [
-    'risk:view',
-    'mitigation:edit', // can write findings → actions
-    'kri:view',
-    'appetite:view',
-    'arc:view', 'arc:confidential',
-    'audit:view', 'audit:export',
-  ],
   // ─── ARC Chair ── Governing body, approves appetite + sees ARC pack
   // PLUS confidential executive-session content (P5b).
   'arc-chair': [
@@ -187,20 +177,6 @@ const ROUTE_ALLOWLIST: Record<PersonaId, string[]> = {
     '/audit-trail',
     '/arc-pack',
     '/risk-appetite', '/three-lines-of-defense',
-  ],
-  'internal-audit': [
-    '/', '/login', '/welcome', '/home',
-    '/my-dashboard',
-    '/respond/approvals',
-    '/dashboard',
-    '/executive-brief',
-    '/control-command-center',
-    '/risk-register', '/risk-library',
-    '/kri', '/portfolio-tower',
-    '/audit-trail', '/documents',
-    '/arc-pack',
-    '/risk-appetite', '/three-lines-of-defense', '/regulator-map',
-    '/standards-reference',
   ],
   'arc-chair': [
     '/', '/login', '/welcome', '/home',

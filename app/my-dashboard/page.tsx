@@ -72,7 +72,6 @@ const PERSONA_OWNER_MATCH: Record<PersonaId, string[]> = {
   'group-cro':       [], // [] = see all (consolidated)
   'risk-champion':   ['Risk Champion (demo)', 'Risk Champion'],
   'subsidiary-ceo':  [], // entity-scope filter; sees all in scope
-  'internal-audit':  [], // read-mostly consolidated
   'arc-chair':       [], // governance lens consolidated
 }
 

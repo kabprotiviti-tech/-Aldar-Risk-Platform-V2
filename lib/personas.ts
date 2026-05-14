@@ -20,7 +20,6 @@ export type PersonaId =
   | 'group-cro'
   | 'risk-champion'
   | 'subsidiary-ceo'
-  | 'internal-audit'
   | 'arc-chair'
 
 export interface Persona {
@@ -50,7 +49,7 @@ const SUBSIDIARY_IDS: EntityId[] = [
 export const PERSONAS: Persona[] = [
   {
     id: 'group-cro',
-    title: 'Group CRO',
+    title: 'Risk Head',
     subtitle: 'Consumes consolidated risk synthesis · Prepares ARC pack',
     line: '2nd line',
     landing: '/home',
@@ -79,17 +78,6 @@ export const PERSONAS: Persona[] = [
     validSubsidiaries: SUBSIDIARY_IDS,
     killerQuestion:
       "How is MY P&L tracking and what is Group escalating to me?",
-  },
-  {
-    id: 'internal-audit',
-    title: 'Chief Internal Auditor',
-    subtitle: 'Independent assurance to ARC · Read-mostly · Audit planning',
-    line: '3rd line',
-    landing: '/home',
-    requiresSubsidiary: false,
-    validSubsidiaries: [],
-    killerQuestion:
-      "Where is the assurance gap between declared risk and tested controls?",
   },
   {
     id: 'arc-chair',

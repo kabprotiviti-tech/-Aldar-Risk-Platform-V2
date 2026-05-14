@@ -62,12 +62,11 @@ interface NavGroup {
   items: NavItem[]
 }
 
-// All 5 personas, used as a convenience for "visible to everyone".
+// All 4 personas, used as a convenience for "visible to everyone".
 const ALL: PersonaId[] = [
   'group-cro',
   'risk-champion',
   'subsidiary-ceo',
-  'internal-audit',
   'arc-chair',
 ]
 
@@ -103,7 +102,7 @@ const NAV_GROUPS: NavGroup[] = [
         label: 'Risk Library',
         icon: BookOpen,
         description: 'UAE risks + peer benchmark',
-        personas: ['group-cro', 'risk-champion', 'subsidiary-ceo', 'internal-audit'],
+        personas: ['group-cro', 'risk-champion', 'subsidiary-ceo'],
       },
     ],
   },
@@ -117,7 +116,7 @@ const NAV_GROUPS: NavGroup[] = [
         label: 'Portfolio Tower',
         icon: Network,
         description: 'Group + Subsidiaries',
-        personas: ['group-cro', 'subsidiary-ceo', 'internal-audit', 'arc-chair'],
+        personas: ['group-cro', 'subsidiary-ceo', 'arc-chair'],
       },
       {
         href: '/scenarios',
@@ -145,7 +144,7 @@ const NAV_GROUPS: NavGroup[] = [
         label: 'Control Center',
         icon: Gauge,
         description: 'ICOFR control catalog',
-        personas: ['group-cro', 'internal-audit', 'arc-chair', 'risk-champion'],
+        personas: ['group-cro', 'arc-chair', 'risk-champion'],
       },
       {
         href: '/kri',
@@ -159,14 +158,14 @@ const NAV_GROUPS: NavGroup[] = [
         label: 'Audit Trail',
         icon: ShieldCheck,
         description: 'Append-only event log',
-        personas: ['group-cro', 'internal-audit', 'arc-chair', 'subsidiary-ceo'],
+        personas: ['group-cro', 'arc-chair', 'subsidiary-ceo'],
       },
       {
         href: '/documents',
         label: 'Documents',
         icon: FileText,
         description: 'Document Intelligence',
-        personas: ['group-cro', 'risk-champion', 'internal-audit'],
+        personas: ['group-cro', 'risk-champion'],
       },
     ],
   },
@@ -194,7 +193,7 @@ const NAV_GROUPS: NavGroup[] = [
         label: 'ARC Pack',
         icon: FileBarChart,
         description: 'Board-ready PDF report',
-        personas: ['group-cro', 'arc-chair', 'subsidiary-ceo', 'internal-audit'],
+        personas: ['group-cro', 'arc-chair', 'subsidiary-ceo'],
       },
       {
         href: '/executive-brief',
@@ -229,14 +228,14 @@ const NAV_GROUPS: NavGroup[] = [
         label: 'Regulator Map',
         icon: Landmark,
         description: 'UAE regulatory bodies',
-        personas: ['group-cro', 'internal-audit', 'arc-chair'],
+        personas: ['group-cro', 'arc-chair'],
       },
       {
         href: '/standards-reference',
         label: 'Standards Ref',
         icon: BookMarked,
         description: 'ISO 31000 + COSO ERM',
-        personas: ['group-cro', 'internal-audit', 'arc-chair'],
+        personas: ['group-cro', 'arc-chair'],
       },
       {
         href: '/bcm',

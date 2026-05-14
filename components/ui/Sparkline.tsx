@@ -60,8 +60,17 @@ export function Sparkline({
     )
   }
 
-  const min = Math.min(...values)
-  const max = Math.max(...values)
+  // Pad the visible range so small absolute movements don't fill the chart.
+  // Without padding, a 0..2 series stretches the line corner-to-corner and
+  // executives read it as wild volatility. We pad by 60% of the observed
+  // range (or 20% of the anchor value, whichever is larger) so the line
+  // sits comfortably in the middle and shape is preserved.
+  const rawMin = Math.min(...values)
+  const rawMax = Math.max(...values)
+  const anchor = values[values.length - 1] || rawMax || 1
+  const pad = Math.max((rawMax - rawMin) * 0.6, Math.abs(anchor) * 0.2)
+  const min = rawMin - pad
+  const max = rawMax + pad
   const range = max - min || 1
 
   // Padding to leave room for stroke + dot
@@ -140,7 +149,7 @@ export function Sparkline({
  * Uses a seeded LCG so the same input always produces the same output —
  * no flicker on re-render.
  */
-export function baselineSeries(current: number, pointCount = 12, seed = 1, drift = 0.06): number[] {
+export function baselineSeries(current: number, pointCount = 12, seed = 1, drift = 0.025): number[] {
   let s = seed
   const rand = () => {
     s = (s * 9301 + 49297) % 233280

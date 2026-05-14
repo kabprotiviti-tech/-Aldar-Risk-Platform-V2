@@ -18,7 +18,6 @@ import { usePersona } from '@/lib/context/PersonaContext'
 import { CRODashboard } from '@/components/home/CRODashboard'
 import { ChampionDashboard } from '@/components/home/ChampionDashboard'
 import { SubsidiaryCEODashboard } from '@/components/home/SubsidiaryCEODashboard'
-import { InternalAuditDashboard } from '@/components/home/InternalAuditDashboard'
 import { ARCChairDashboard } from '@/components/home/ARCChairDashboard'
 
 export default function HomePage() {
@@ -55,8 +54,6 @@ export default function HomePage() {
       return <ChampionDashboard />
     case 'subsidiary-ceo':
       return <SubsidiaryCEODashboard />
-    case 'internal-audit':
-      return <InternalAuditDashboard />
     case 'arc-chair':
       return <ARCChairDashboard />
     default:

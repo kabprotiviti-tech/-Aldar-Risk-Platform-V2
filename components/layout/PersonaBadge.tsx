@@ -31,7 +31,6 @@ const PERSONA_ICONS: Record<PersonaId, LucideIcon> = {
   'group-cro': Crown,
   'risk-champion': Briefcase,
   'subsidiary-ceo': Building2,
-  'internal-audit': ClipboardCheck,
   'arc-chair': Gavel,
 }
 
@@ -39,7 +38,6 @@ const PERSONA_ACCENT: Record<PersonaId, string> = {
   'group-cro': '#FF6600',
   'risk-champion': '#2D9EFF',
   'subsidiary-ceo': '#A855F7',
-  'internal-audit': '#22C55E',
   'arc-chair': '#F5C518',
 }
 

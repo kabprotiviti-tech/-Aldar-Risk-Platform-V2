@@ -183,7 +183,7 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
             }}
           >
             <Crown size={22} style={{ color: 'var(--accent-primary)' }} />
-            Group CRO cockpit
+            Risk Head cockpit
           </h1>
           <p
             style={{
@@ -240,7 +240,24 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
           boxShadow: 'var(--shadow-md)',
         }}
       >
-        <div>
+        <Link
+          href="/portfolio-tower"
+          style={{
+            textDecoration: 'none',
+            color: 'inherit',
+            display: 'block',
+            padding: '4px 6px',
+            borderRadius: 8,
+            transition: 'background 120ms ease-out',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(255,102,0,0.04)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'transparent'
+          }}
+          title="Drill into the Portfolio Tower heatmap"
+        >
           <div
             style={{
               fontSize: 10,
@@ -273,7 +290,7 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
             >
               AED {totalExposureBn}
             </span>
-            <span style={{ fontSize: 16, color: 'var(--text-tertiary)', fontWeight: 500 }}>
+            <span style={{ fontSize: 'clamp(14px, 1.5vw, 20px)', color: 'var(--text-tertiary)', fontWeight: 500, lineHeight: 1 }}>
               bn
             </span>
             <span
@@ -287,7 +304,7 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
               across {risks.length} engine risks · {appetiteStatements.length} appetite statements
             </span>
           </div>
-        </div>
+        </Link>
 
         <HeroStat
           label="Critical / High"
@@ -296,6 +313,7 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
           sub="of total risk count"
           sparklineAnchor={criticalCount + highCount}
           sparklineSeed={13}
+          href="/risk-register"
         />
         <HeroStat
           label="KRI Breaches"
@@ -304,6 +322,7 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
           sub={`${kriPosture.red} red · ${kriPosture.amber} amber`}
           sparklineAnchor={kriPosture.red + kriPosture.amber}
           sparklineSeed={29}
+          href="/kri"
         />
         <HeroStat
           label="Items Awaiting You"
@@ -312,6 +331,7 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
           sub={`${pendingEsc.length} esc · ${pendingApp.length} appetite · ${overdueCount} overdue`}
           sparklineAnchor={pendingEsc.length + pendingApp.length + overdueCount}
           sparklineSeed={43}
+          href="/respond/approvals"
         />
       </section>
 
@@ -720,6 +740,7 @@ function HeroStat({
   sub,
   sparklineAnchor,
   sparklineSeed,
+  href,
 }: {
   label: string
   value: string
@@ -727,6 +748,8 @@ function HeroStat({
   sub?: string
   sparklineAnchor?: number
   sparklineSeed?: number
+  /** When present, the whole tile becomes a clickable link to this route. */
+  href?: string
 }) {
   const toneColor: Record<HeroTone, string> = {
     neutral: 'var(--text-primary)',
@@ -738,8 +761,24 @@ function HeroStat({
     typeof sparklineAnchor === 'number'
       ? baselineSeries(sparklineAnchor, 12, sparklineSeed ?? 7)
       : null
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+  const inner = (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 4,
+        padding: href ? '4px 6px' : 0,
+        borderRadius: 6,
+        cursor: href ? 'pointer' : 'default',
+        transition: 'background 120ms ease-out',
+      }}
+      onMouseEnter={(e) => {
+        if (href) e.currentTarget.style.background = 'rgba(255,102,0,0.05)'
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = 'transparent'
+      }}
+    >
       <div
         style={{
           fontSize: 10,
@@ -784,6 +823,13 @@ function HeroStat({
         <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{sub}</div>
       )}
     </div>
+  )
+  return href ? (
+    <Link href={href} style={{ textDecoration: 'none', color: 'inherit' }}>
+      {inner}
+    </Link>
+  ) : (
+    inner
   )
 }
 

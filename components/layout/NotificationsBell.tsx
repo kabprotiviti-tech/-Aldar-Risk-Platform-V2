@@ -24,7 +24,6 @@ import type { PersonaId } from '@/lib/personas'
 const CATEGORY_BY_PERSONA: Record<PersonaId, string[]> = {
   'group-cro': [],
   'arc-chair': ['escalation', 'risk_appetite', 'risk_status'],
-  'internal-audit': ['risk', 'mitigation', 'kri', 'audit'],
   'subsidiary-ceo': ['escalation', 'risk_status', 'mitigation', 'kri'],
   'risk-champion': ['risk', 'mitigation', 'kri'],
 }
