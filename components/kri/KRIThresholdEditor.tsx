@@ -263,8 +263,8 @@ export function KRIThresholdEditor({ kri, onClose }: Props) {
                 // when the user subsequently hits Save. Pilot will
                 // instantiate a kri_threshold_change workflow here.
                 recordAuditEventDirect({
-                  category: 'kri',
-                  action: 'create',
+                  category: 'kri_threshold',
+                  action: 'update',
                   actor: session.displayName || 'demo-user',
                   targetId: kri.id,
                   summary: `AI hypothesis applied to ${kri.id}: amber→${suggestion.amberBoundary}, red→${suggestion.redBoundary}. Rationale: ${suggestion.rationale}. Awaiting human Save + ERM review.`,
