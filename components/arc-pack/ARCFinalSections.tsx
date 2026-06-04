@@ -30,17 +30,30 @@ import {
 // ── 3. KRI Summary ───────────────────────────────────────────────────────
 function KRISummarySection() {
   const { thresholdsFor } = useKRIThresholds()
-  const { latestFor } = useKRIEntries()
+  const { latestFor, entriesFor } = useKRIEntries()
 
   const rows = KRI_DEFINITIONS.map((kri) => {
     const latest = latestFor(kri.id)
     const status: KRIStatus | null = latest
       ? computeKRIStatus(latest.value, thresholdsFor(kri), kri.direction)
       : null
+    // KRI movement — latest vs previous reading, direction-aware.
+    const history = entriesFor(kri.id)
+    let movement: { delta: number; improving: boolean } | null = null
+    if (history.length >= 2 && latest) {
+      const prev = history[history.length - 2]
+      const delta = latest.value - prev.value
+      if (Math.abs(delta) > 0.001) {
+        const improving =
+          kri.direction === 'higher_is_better' ? delta > 0 : delta < 0
+        movement = { delta, improving }
+      }
+    }
     return {
       kri,
       latest,
       status,
+      movement,
       thresholds: thresholdsFor(kri),
     }
   })
@@ -54,7 +67,7 @@ function KRISummarySection() {
   )
 
   return (
-    <SectionWrapper number="3" title="KRI Summary &amp; Breach Posture">
+    <SectionWrapper number="3" title="KRI Summary, Movement &amp; Breach Posture">
       <div
         style={{
           display: 'flex',
@@ -82,14 +95,14 @@ function KRISummarySection() {
             <Th>KRI</Th>
             <Th>Owner</Th>
             <Th right>Latest</Th>
-            <Th>Period</Th>
+            <Th>Movement</Th>
             <Th right>Amber</Th>
             <Th right>Red</Th>
             <Th>Status</Th>
           </tr>
         </thead>
         <tbody>
-          {rows.map(({ kri, latest, status, thresholds }) => (
+          {rows.map(({ kri, latest, status, movement, thresholds }) => (
             <tr key={kri.id} style={{ borderTop: '1px solid var(--border-color)' }}>
               <Td mono>{kri.id}</Td>
               <Td>{kri.name}</Td>
@@ -97,7 +110,28 @@ function KRISummarySection() {
               <Td right mono>
                 {latest ? latest.value : '—'}
               </Td>
-              <Td muted>{latest?.period ?? '—'}</Td>
+              <Td>
+                {movement ? (
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 3,
+                      fontSize: 10,
+                      fontWeight: 700,
+                      color: movement.improving ? '#22C55E' : '#FF3B3B',
+                    }}
+                  >
+                    {movement.delta > 0 ? '▲' : '▼'}
+                    {Math.abs(movement.delta).toFixed(0)}
+                    <span style={{ fontSize: 8, fontWeight: 600, opacity: 0.8 }}>
+                      {movement.improving ? 'improving' : 'worsening'}
+                    </span>
+                  </span>
+                ) : (
+                  <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>—</span>
+                )}
+              </Td>
               <Td right mono muted>
                 {thresholds.amberBoundary}
               </Td>
@@ -301,11 +335,19 @@ function ScenarioResultsSection() {
 // ── 5. Outstanding Mitigation Actions ───────────────────────────────────
 function MitigationActionsSection() {
   const { actions, isOverdue } = useMitigationActions()
-  const open = actions.filter((a) => a.status !== 'closed')
+  // Top / priority order: overdue first, then by earliest due date.
+  const open = actions
+    .filter((a) => a.status !== 'closed')
+    .sort((a, b) => {
+      const ao = isOverdue(a) ? 0 : 1
+      const bo = isOverdue(b) ? 0 : 1
+      if (ao !== bo) return ao - bo
+      return (a.dueDate || '').localeCompare(b.dueDate || '')
+    })
   const overdue = open.filter(isOverdue)
 
   return (
-    <SectionWrapper number="5" title="Outstanding Mitigation Actions">
+    <SectionWrapper number="5" title="Top Mitigation Actions (priority order)">
       {open.length === 0 ? (
         <div
           style={{

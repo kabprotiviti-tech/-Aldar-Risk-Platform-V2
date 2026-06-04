@@ -172,9 +172,9 @@ function TableOfContents() {
   const items: { num: string; title: string; status: string }[] = [
     { num: '1', title: 'Cover & Anchor Figures', status: 'live' },
     { num: '2', title: 'Group Risk Posture (top-10, heatmap, narrative)', status: 'live' },
-    { num: '3', title: 'KRI Summary & Breach Posture', status: 'live' },
+    { num: '3', title: 'KRI Summary, Movement & Breach Posture', status: 'live' },
     { num: '4', title: 'Scenario Results (Mild / Moderate / Severe)', status: 'live' },
-    { num: '5', title: 'Outstanding Mitigation Actions', status: 'live' },
+    { num: '5', title: 'Top Mitigation Actions', status: 'live' },
     { num: '6', title: 'Sign-off Block', status: 'live' },
   ]
   return (
