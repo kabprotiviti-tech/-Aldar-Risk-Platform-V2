@@ -3,7 +3,7 @@
 /**
  * Standards Reference — Patch F8
  * -------------------------------
- * ISO 31000:2018 and COSO ERM 2017 reference + Aldar platform-mapping.
+ * ISO 31000:2018 and COSO ERM 2017 reference + ABC platform-mapping.
  * Shows every principle / clause / component with the surfaces that
  * implement it on this platform, plus a status chip (live / partial /
  * roadmap).

@@ -9,7 +9,7 @@
  * via NumericValue with full provenance click-through.
  *
  * Honors CLAUDE.md: every number is verified and cited to the published
- * Aldar press release / FY24 Integrated AR. YoY% is computed inline,
+ * ABC press release / FY24 Integrated AR. YoY% is computed inline,
  * tagged as derived.
  */
 
@@ -17,29 +17,29 @@ import React from 'react'
 import { BarChart3 } from 'lucide-react'
 import { NumericValue } from '@/components/provenance/NumericValue'
 import {
-  ALDAR_FY25_GROUP_REVENUE,
-  ALDAR_FY25_GROUP_EBITDA,
-  ALDAR_FY25_NET_PROFIT_AFTER_TAX,
-  ALDAR_FY25_GROUP_SALES,
+  ABC_FY25_GROUP_REVENUE,
+  ABC_FY25_GROUP_EBITDA,
+  ABC_FY25_NET_PROFIT_AFTER_TAX,
+  ABC_FY25_GROUP_SALES,
 } from '@/lib/data/aldar-financials'
 import {
-  ALDAR_FY24_GROUP_REVENUE,
-  ALDAR_FY24_GROUP_EBITDA,
-  ALDAR_FY24_NET_PROFIT_AFTER_TAX,
-  ALDAR_FY24_GROUP_SALES,
+  ABC_FY24_GROUP_REVENUE,
+  ABC_FY24_GROUP_EBITDA,
+  ABC_FY24_NET_PROFIT_AFTER_TAX,
+  ABC_FY24_GROUP_SALES,
 } from '@/lib/data/aldar-fy24'
 
 interface Row {
   label: string
-  fy24: typeof ALDAR_FY24_GROUP_REVENUE
-  fy25: typeof ALDAR_FY25_GROUP_REVENUE
+  fy24: typeof ABC_FY24_GROUP_REVENUE
+  fy25: typeof ABC_FY25_GROUP_REVENUE
 }
 
 const ROWS: Row[] = [
-  { label: 'Group Revenue', fy24: ALDAR_FY24_GROUP_REVENUE, fy25: ALDAR_FY25_GROUP_REVENUE },
-  { label: 'Group EBITDA', fy24: ALDAR_FY24_GROUP_EBITDA, fy25: ALDAR_FY25_GROUP_EBITDA },
-  { label: 'Net Profit (after tax)', fy24: ALDAR_FY24_NET_PROFIT_AFTER_TAX, fy25: ALDAR_FY25_NET_PROFIT_AFTER_TAX },
-  { label: 'Group Sales', fy24: ALDAR_FY24_GROUP_SALES, fy25: ALDAR_FY25_GROUP_SALES },
+  { label: 'Group Revenue', fy24: ABC_FY24_GROUP_REVENUE, fy25: ABC_FY25_GROUP_REVENUE },
+  { label: 'Group EBITDA', fy24: ABC_FY24_GROUP_EBITDA, fy25: ABC_FY25_GROUP_EBITDA },
+  { label: 'Net Profit (after tax)', fy24: ABC_FY24_NET_PROFIT_AFTER_TAX, fy25: ABC_FY25_NET_PROFIT_AFTER_TAX },
+  { label: 'Group Sales', fy24: ABC_FY24_GROUP_SALES, fy25: ABC_FY25_GROUP_SALES },
 ]
 
 function yoyPct(fy25: number, fy24: number): number {
@@ -142,8 +142,8 @@ export function BaselineComparisonPanel() {
         }}
       >
         Each cell traces to its source — click any value to see the
-        provenance card. FY25 figures from Aldar Q4 FY2025 press release
-        (Feb 2026); FY24 figures from Aldar FY2024 Integrated Annual
+        provenance card. FY25 figures from ABC Q4 FY2025 press release
+        (Feb 2026); FY24 figures from ABC FY2024 Integrated Annual
         Report. YoY % is derived.
       </div>
     </div>

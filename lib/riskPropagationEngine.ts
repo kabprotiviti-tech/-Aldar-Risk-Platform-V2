@@ -1,7 +1,7 @@
 /**
- * Aldar Risk Propagation Engine
+ * ABC Risk Propagation Engine
  * ─────────────────────────────────────────────────────────────────────────────
- * Models how external macro/contextual signals cascade through Aldar's business
+ * Models how external macro/contextual signals cascade through ABC's business
  * units via causal dependency pathways, producing dynamic risk scores and
  * context-aware AI explanations.
  *

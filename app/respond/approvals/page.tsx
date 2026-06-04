@@ -91,7 +91,7 @@ function Content() {
 
   return (
     <div style={{ padding: '20px 28px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <IllustrativeDataBanner pilotFeeds="Aldar approval-workflow engine + delegated-authority matrix" />
+      <IllustrativeDataBanner pilotFeeds="ABC approval-workflow engine + delegated-authority matrix" />
 
       <div
         style={{
@@ -322,7 +322,7 @@ function Content() {
         <span>
           <strong style={{ color: 'var(--text-primary)' }}>Multi-step routing</strong>
           {' '}(level-1 → level-2 → escalate-after-N-days SLAs) is on the
-          pilot roadmap. Pilot wires Aldar's delegated-authority matrix
+          pilot roadmap. Pilot wires ABC's delegated-authority matrix
           and email/Slack notification stubs.
         </span>
       </div>

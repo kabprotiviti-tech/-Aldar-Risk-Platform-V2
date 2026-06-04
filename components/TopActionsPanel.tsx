@@ -235,7 +235,7 @@ function ActionRow({
         >
           {/* Impact */}
           <div
-            title="Based on total Aldar portfolio value: AED 10,000M"
+            title="Based on total ABC portfolio value: AED 10,000M"
             style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'help' }}
           >
             <Zap size={11} style={{ color: 'var(--text-muted)' }} />

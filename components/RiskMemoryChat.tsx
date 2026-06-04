@@ -46,7 +46,7 @@ interface Msg {
 
 const SUGGESTIONS = [
   'Show me R-008',
-  'Risks for Aldar Investment',
+  'Risks for ABC Investment',
   'Where does R-008 exposure come from',
   'KRI-12 latest status',
   'GA-FIN-01 appetite',
@@ -60,7 +60,7 @@ const WELCOME_MSG: Msg = {
   id: 'welcome',
   who: 'memory',
   text:
-    "Hi — I'm Risk Memory. Ask me about any R-NNN / DRAFT-NNN / KRI-NN / GA-* appetite, or filter risks by subsidiary (\"Aldar Investment\"). I look it up — I don't generate.",
+    "Hi — I'm Risk Memory. Ask me about any R-NNN / DRAFT-NNN / KRI-NN / GA-* appetite, or filter risks by subsidiary (\"ABC Investment\"). I look it up — I don't generate.",
 }
 
 export function RiskMemoryChat() {
@@ -380,7 +380,7 @@ export function RiskMemoryChat() {
       }
     }
 
-    // 9. Cross-entity reference — "show me risks for Aldar Investment"
+    // 9. Cross-entity reference — "show me risks for ABC Investment"
     const entityMatch = SUBSIDIARIES.find((e) => {
       const tokens = [
         e.shortName.toLowerCase(),
@@ -422,7 +422,7 @@ export function RiskMemoryChat() {
       id: uid(),
       who: 'memory',
       text:
-        "I don't have a template for that. Try: R-001..R-010, KRI-09..KRI-16, GA-FIN-01 (etc.), \"risks for Aldar Investment\", \"where does R-008 exposure come from\", or \"top risks\" / \"recent audit\" / \"escalations\".",
+        "I don't have a template for that. Try: R-001..R-010, KRI-09..KRI-16, GA-FIN-01 (etc.), \"risks for ABC Investment\", \"where does R-008 exposure come from\", or \"top risks\" / \"recent audit\" / \"escalations\".",
     }
   }
 
@@ -445,7 +445,7 @@ export function RiskMemoryChat() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          title="Ask Aldar Risk Assistant (Cmd+K) — R-NNN, KRI-NN, GA-*, audit trail"
+          title="Ask ABC Risk Assistant (Cmd+K) — R-NNN, KRI-NN, GA-*, audit trail"
           aria-label="Risk Assistant"
           style={{
             position: 'fixed',
@@ -532,7 +532,7 @@ export function RiskMemoryChat() {
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
-                Aldar Risk Assistant
+                ABC Risk Assistant
               </div>
               <div style={{ fontSize: 10, color: 'var(--text-tertiary)', letterSpacing: 0.3 }}>
                 Deterministic lookup · every answer traces to its source

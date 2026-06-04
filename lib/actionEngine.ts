@@ -85,7 +85,7 @@ export interface Action {
 }
 
 // ─── Portfolio context ────────────────────────────────────────────────────────
-// Total Aldar portfolio value used as the denominator for all impact % calculations.
+// Total ABC portfolio value used as the denominator for all impact % calculations.
 // All actions reference the same base so numbers are directly comparable.
 
 export const TOTAL_PORTFOLIO_VALUE_M = 10_000   // AED millions
@@ -332,7 +332,7 @@ function buildActions(): Action[] {
     ifActedExposureM: 82,
     recommendation: [
       'Introduce post-handover payment plans (60/40 split) across active off-plan launches within 14 days',
-      'Partner with ADCB and FAB on preferential mortgage rate packages for Aldar buyers — target sub-4.5% effective rate',
+      'Partner with ADCB and FAB on preferential mortgage rate packages for ABC buyers — target sub-4.5% effective rate',
       'Activate dedicated relationship management outreach for top 50 HNI accounts in Russia, CIS and GCC',
       'Enhance Golden Visa facilitation service as a differentiator for AED 2M+ purchases',
       'Fast-track launch of Yas Island branded residences to capture demand before next rate hike cycle',
@@ -481,11 +481,11 @@ function buildActions(): Action[] {
     triggerIds: ['R-006', 'N-006'],
     rootCauses: [
       `CISA issued critical advisory: coordinated nation-state attacks targeting GCC smart building infrastructure (N-006, severity: Critical, confidence 88%)`,
-      `Aldar's 40+ IoT-connected assets with BMS integration = 340% larger attack surface vs traditional assets (R-006, score ${r006.score}/25)`,
+      `ABC's 40+ IoT-connected assets with BMS integration = 340% larger attack surface vs traditional assets (R-006, score ${r006.score}/25)`,
       `R-006 trend: INCREASING — threat actor sophistication growing quarter-on-quarter`,
     ],
     propagationPath: [
-      { signal: 'CISA critical advisory — GCC smart building attacks', effect: 'Immediate threat to Aldar IoT portfolio', magnitude: '40+ assets at risk' },
+      { signal: 'CISA critical advisory — GCC smart building attacks', effect: 'Immediate threat to ABC IoT portfolio', magnitude: '40+ assets at risk' },
       { signal: 'OT/IT network not segmented', effect: 'Single breach = full portfolio exposure', magnitude: '340% larger attack surface' },
       { signal: 'BMS compromise', effect: 'Asset operational shutdown + guest data breach', magnitude: `AED ${r006.financialImpact}M remediation + liability` },
     ],
@@ -498,7 +498,7 @@ function buildActions(): Action[] {
       { label: 'Financial Impact (Scenario 5)', value: `AED ${r006.financialImpact}M`, source: 'Risk Register + Scenario Engine', breached: true },
     ],
     calculationLogic: `Scenario 5 (Major Cyber Attack) validation: Facilities AED ${r006.financialImpact}M + Retail AED 65M + Hospitality AED 95M = AED 340M tail risk. Base case immediate exposure: AED ${r006.financialImpact}M (remediation + SLA penalties). CISA advisory elevates probability from 14% to estimated 22%.`,
-    consequence: `Coordinated BMS attack could shut down 15+ assets simultaneously. Guest data breach liability + AED 65M tenant compensation claims + SLA penalties = AED ${r006.financialImpact}M minimum. Reputational damage to Aldar's smart city brand positioning is unquantifiable but significant.`,
+    consequence: `Coordinated BMS attack could shut down 15+ assets simultaneously. Guest data breach liability + AED 65M tenant compensation claims + SLA penalties = AED ${r006.financialImpact}M minimum. Reputational damage to ABC's smart city brand positioning is unquantifiable but significant.`,
     ifActed: `Tail risk reduces to AED 45M with OT/IT segmentation + 24/7 SOC monitoring. Attack surface reduced 70%. NCA ECC compliance posture achieved within 30 days, materially lowering breach probability from 22% to estimated 6%.`,
     ifIgnored: `AED ${r006.financialImpact}M+ remediation cost, SLA penalties and guest data breach liability. Coordinated attack on 15+ assets simultaneously could trigger operational shutdown across Facilities, Hospitality and Retail portfolios. Regulatory action by UAE NCA likely.`,
     ifActedExposureM: 45,

@@ -10,9 +10,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Scenario name is required' }, { status: 400 })
     }
 
-    const systemPrompt = `You are a strategic scenario modelling AI for Aldar Properties PJSC. You simulate the financial and operational impact of macro scenarios on Aldar's diversified portfolio.
+    const systemPrompt = `You are a strategic scenario modelling AI for ABC Holdings. You simulate the financial and operational impact of macro scenarios on ABC's diversified portfolio.
 
-Aldar's portfolio for scenario analysis:
+ABC's portfolio for scenario analysis:
 - Real Estate Development: AED 8.2Bn active pipeline, premium residential communities (Saadiyat, Yas, Reem)
 - Retail: Yas Mall (153,000 sqm GLA) + 15 community retail centres (~85,000 sqm GLA)
 - Hospitality: 8 hotels (~2,400 keys) + entertainment venues on Yas Island
@@ -28,7 +28,7 @@ Produce quantified, credible scenario impact analysis grounded in real estate an
 
 Always respond with a valid JSON object only — no markdown, no explanation outside the JSON.`
 
-    const userPrompt = `Run a scenario simulation for Aldar Properties:
+    const userPrompt = `Run a scenario simulation for ABC Holdings:
 
 SCENARIO: ${scenarioName}
 SCENARIO ID: ${scenarioId}
@@ -68,14 +68,14 @@ Respond with ONLY a valid JSON object (no markdown fences):
   "mitigationStrategies": [
     {
       "strategy": "string",
-      "owner": "string (Aldar role)",
+      "owner": "string (ABC role)",
       "timeToImplement": "string",
       "costAED": "string",
       "expectedBenefit": "string"
     }
   ],
   "opportunities": [
-    "string — silver lining opportunities this scenario creates for Aldar"
+    "string — silver lining opportunities this scenario creates for ABC"
   ],
   "confidence": 0.0 to 1.0,
   "keyAssumptions": ["array of 3-4 key modelling assumptions"]

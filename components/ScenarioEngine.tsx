@@ -486,7 +486,7 @@ export function ScenarioEngine() {
             >
               <Loader2 size={14} className="animate-spin" style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
               <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                AI is modelling propagation chain across Aldar portfolios...
+                AI is modelling propagation chain across ABC portfolios...
               </span>
             </motion.div>
           )}

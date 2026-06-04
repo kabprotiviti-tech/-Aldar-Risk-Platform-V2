@@ -12,9 +12,9 @@ export interface BusinessImpactResult {
   confidence: number          // 0–1
 }
 
-const SYSTEM_PROMPT = `You are Aldar Properties PJSC's enterprise AI risk advisor.
+const SYSTEM_PROMPT = `You are ABC Holdings's enterprise AI risk advisor.
 Provide concise, specific business impact analysis for each business unit based on current risk profile.
-Always be specific to Aldar's actual assets: Real Estate (Saadiyat, Yas, Al Raha Beach), Retail (Yas Mall, Al Jimi Mall, 8 malls, 350 tenants), Hospitality (14 hotels, Yas theme parks), Education (30+ schools, 30k students), Facilities (FM services Abu Dhabi).
+Always be specific to ABC's actual assets: Real Estate (Saadiyat, Yas, Al Raha Beach), Retail (Yas Mall, Al Jimi Mall, 8 malls, 350 tenants), Hospitality (14 hotels, Yas theme parks), Education (30+ schools, 30k students), Facilities (FM services Abu Dhabi).
 Return ONLY valid JSON — no markdown, no text outside the object.`
 
 export async function POST(req: NextRequest) {
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
 
     const profile = portfolioProfiles[portfolioId]
 
-    const prompt = `Generate a business impact analysis for Aldar Properties' ${profile.name} portfolio.
+    const prompt = `Generate a business impact analysis for ABC Holdings' ${profile.name} portfolio.
 
 PORTFOLIO DATA:
 - Assets: ${profile.assets} assets
@@ -54,7 +54,7 @@ ${profile.topRisks.slice(0, 3).map((r, i) => `${i + 1}. ${r.title} (Score: ${r.s
 
 Respond with ONLY this JSON:
 {
-  "aiInsight": "2-3 sentence specific business impact assessment referencing Aldar's actual assets and the current risk profile — be direct about what is most critical",
+  "aiInsight": "2-3 sentence specific business impact assessment referencing ABC's actual assets and the current risk profile — be direct about what is most critical",
   "revenueAtRisk": { "low": <number AED M>, "high": <number AED M> },
   "keyActions": ["action 1", "action 2", "action 3"],
   "watchIndicators": ["KPI 1", "KPI 2", "KPI 3"],

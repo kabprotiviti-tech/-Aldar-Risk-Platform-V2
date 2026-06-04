@@ -296,7 +296,7 @@ export function KRIEntryEditor({ kri, onClose }: Props) {
             <strong style={{ color: 'var(--text-primary)' }}>
               Manual entry only — no auto-fill.
             </strong>{' '}
-            Pilot will wire automated feeds from Aldar PMS / Yardi / SAP.
+            Pilot will wire automated feeds from ABC PMS / Yardi / SAP.
             Re-entering the same period replaces the prior value.
           </div>
         </div>

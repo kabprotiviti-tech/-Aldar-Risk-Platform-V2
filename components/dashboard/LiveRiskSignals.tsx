@@ -296,7 +296,7 @@ function NewsModal({
                 {ai?.riskType || 'Risk Signal'}
               </div>
               <div style={{ color: 'var(--text-muted)', fontSize: '0.62rem' }}>
-                External Intelligence — Aldar Risk Platform
+                External Intelligence — ABC Risk Platform
               </div>
             </div>
           </div>

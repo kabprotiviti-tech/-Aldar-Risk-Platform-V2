@@ -3,16 +3,16 @@
 /**
  * /login — Tier-1 redesign
  * -------------------------
- * Full-screen split-pane entry surface for Aldar Risk Platform.
+ * Full-screen split-pane entry surface for ABC Risk Platform.
  *
- * LEFT pane: brand hero with animated gradient mesh, the Aldar value
+ * LEFT pane: brand hero with animated gradient mesh, the ABC value
  * proposition, and trust strip (ADX-listed · ISO 31000 · COSO ERM ·
  * SCA Code).
  *
  * RIGHT pane: clean signin form → persona tiles → (optional) subsidiary
  * picker. 3-step flow with a visible breadcrumb.
  *
- * Honors CLAUDE.md: every assertion is either factual ("ADX:ALDAR") or
+ * Honors CLAUDE.md: every assertion is either factual ("ADX:ABC") or
  * tagged illustrative ("pre-pilot mock SSO").
  */
 
@@ -275,7 +275,7 @@ function BrandPane() {
               color: 'rgba(255,255,255,0.55)',
             }}
           >
-            Aldar Properties PJSC · ADX:ALDAR
+            ABC Holdings · ADX:ABC
           </div>
           <div style={{ fontSize: 16, fontWeight: 700 }}>Risk &amp; Control Operating System</div>
         </div>
@@ -307,7 +307,7 @@ function BrandPane() {
         >
           A single-pane synthesis of the Group's risk posture — engineered for
           the ARC, calibrated to ADX disclosure standards, anchored against
-          Aldar's published FY25 and Q1 FY26 results.
+          ABC's published FY25 and Q1 FY26 results.
         </p>
 
         <div style={{ marginTop: 26, display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -603,7 +603,7 @@ function CredentialsStep({
         }}
       >
         <strong style={{ color: '#F5C518' }}>Pre-pilot demo</strong> — any
-        credentials accepted. Pilot wires Aldar SSO + enterprise IdP +
+        credentials accepted. Pilot wires ABC SSO + enterprise IdP +
         field-level RBAC.
       </div>
     </form>
@@ -873,7 +873,7 @@ function FooterStrip() {
         color: 'var(--text-tertiary)',
       }}
     >
-      <span>© 2026 Aldar Properties PJSC · Demo</span>
+      <span>© 2026 ABC Holdings · Demo</span>
       <span>·</span>
       <span>Built for the Board, not for the spreadsheet</span>
     </div>

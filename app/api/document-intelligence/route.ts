@@ -21,17 +21,17 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const systemPrompt = `You are an intelligent risk document analyst for Aldar Properties PJSC. You extract, classify, and enhance risk information from corporate documents.
+    const systemPrompt = `You are an intelligent risk document analyst for ABC Holdings. You extract, classify, and enhance risk information from corporate documents.
 
 Your expertise includes:
 - UAE real estate regulatory and compliance landscape (ADEC, ADEK, ADX, CBUAE requirements)
-- Aldar's risk register taxonomy (Market, Credit, Operational, Regulatory, ESG, Cyber, Geopolitical, Concentration risks)
+- ABC's risk register taxonomy (Market, Credit, Operational, Regulatory, ESG, Cyber, Geopolitical, Concentration risks)
 - Best practice risk governance frameworks (ISO 31000, COSO ERM)
 - Board and audit committee reporting standards
 
 When analyzing documents:
 - Extract all explicit and implied risks
-- Classify them using Aldar's portfolio structure
+- Classify them using ABC's portfolio structure
 - Flag compliance issues specific to UAE regulations
 - Suggest register updates in a format ready for Risk Committee review
 
@@ -40,7 +40,7 @@ Always respond with a valid JSON object only — no markdown code fences, no bac
     // Truncate to 50000 chars to stay well within context limits
     const truncatedContent = content.substring(0, 50000)
 
-    const userPrompt = `Analyze the following ${documentType || 'corporate document'} for Aldar Properties and extract risk intelligence.
+    const userPrompt = `Analyze the following ${documentType || 'corporate document'} for ABC Holdings and extract risk intelligence.
 
 DOCUMENT CONTENT:
 ${truncatedContent}

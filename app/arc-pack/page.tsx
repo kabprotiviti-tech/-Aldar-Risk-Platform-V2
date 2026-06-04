@@ -14,7 +14,7 @@
  * E7 adds: top-10 risks section, group heatmap, narrative.
  * E8 adds: KRI summary section, scenario results, sign-off block.
  *
- * Honors CLAUDE.md: header sourced figures (Aldar FY25/Q1 26) carry
+ * Honors CLAUDE.md: header sourced figures (ABC FY25/Q1 26) carry
  * provenance click-throughs on screen; the page-level "Illustrative"
  * banner is hidden in print so the printed pack reads as a polished
  * deliverable while the on-screen review version stays honest.
@@ -30,10 +30,10 @@ import { ACTIONS } from '@/lib/engine/seedData'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { NumericValue } from '@/components/provenance/NumericValue'
 import {
-  ALDAR_FY25_GROUP_REVENUE,
-  ALDAR_FY25_GROUP_EBITDA,
-  ALDAR_FY25_NET_PROFIT_AFTER_TAX,
-  ALDAR_Q1_26_BACKLOG,
+  ABC_FY25_GROUP_REVENUE,
+  ABC_FY25_GROUP_EBITDA,
+  ABC_FY25_NET_PROFIT_AFTER_TAX,
+  ABC_Q1_26_BACKLOG,
 } from '@/lib/data/aldar-financials'
 import { RiskContentSection } from '@/components/arc-pack/RiskContentSection'
 import { ARCFinalSections } from '@/components/arc-pack/ARCFinalSections'
@@ -84,7 +84,7 @@ function CoverPage() {
           ARC Risk Pack
         </h1>
         <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 18 }}>
-          Aldar Properties PJSC · {today} · Q2 FY2026 review
+          ABC Holdings · {today} · Q2 FY2026 review
         </div>
         <div
           style={{
@@ -95,8 +95,8 @@ function CoverPage() {
           }}
         >
           Quarterly snapshot of Group enterprise risk, KRI breach posture,
-          and mitigation status across Aldar Development, Investment,
-          Education, and Hospitality. Sourced figures cite Aldar&rsquo;s
+          and mitigation status across ABC Development, Investment,
+          Education, and Hospitality. Sourced figures cite ABC&rsquo;s
           published FY2025 and Q1 FY2026 results; illustrative figures are
           labelled and remain pending pilot calibration.
         </div>
@@ -115,10 +115,10 @@ function CoverPage() {
           borderRadius: 6,
         }}
       >
-        <AnchorTile label="FY25 Group Revenue" data={ALDAR_FY25_GROUP_REVENUE} />
-        <AnchorTile label="FY25 EBITDA" data={ALDAR_FY25_GROUP_EBITDA} />
-        <AnchorTile label="FY25 Net Profit (PAT)" data={ALDAR_FY25_NET_PROFIT_AFTER_TAX} />
-        <AnchorTile label="Q1 FY26 Backlog" data={ALDAR_Q1_26_BACKLOG} />
+        <AnchorTile label="FY25 Group Revenue" data={ABC_FY25_GROUP_REVENUE} />
+        <AnchorTile label="FY25 EBITDA" data={ABC_FY25_GROUP_EBITDA} />
+        <AnchorTile label="FY25 Net Profit (PAT)" data={ABC_FY25_NET_PROFIT_AFTER_TAX} />
+        <AnchorTile label="Q1 FY26 Backlog" data={ABC_Q1_26_BACKLOG} />
       </div>
 
       <div

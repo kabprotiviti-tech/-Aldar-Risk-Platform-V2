@@ -232,7 +232,7 @@ export function Top10RisksTable() {
       >
         Δ shows change in AED exposure vs baseline scenario. Click any row
         to open the risk drawer on /risk-register. Entity ownership is
-        illustrative for MVP; pilot lifts from Aldar register.
+        illustrative for MVP; pilot lifts from ABC register.
       </div>
     </div>
   )

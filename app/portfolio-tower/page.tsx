@@ -75,7 +75,7 @@ function PortfolioTowerContent() {
 
   return (
     <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <IllustrativeDataBanner pilotFeeds="Aldar segment P&L for AED exposure baselines" />
+      <IllustrativeDataBanner pilotFeeds="ABC segment P&L for AED exposure baselines" />
       <div
         style={{
           display: 'flex',
@@ -191,8 +191,8 @@ function PortfolioTowerContent() {
         }}
       >
         {HIERARCHY_DISCLAIMER} Risk → entity ownership is illustrative
-        for MVP — production will lift it from Aldar&rsquo;s actual
-        per-entity register. Aldar Education appears with zero engine
+        for MVP — production will lift it from ABC&rsquo;s actual
+        per-entity register. ABC Education appears with zero engine
         risks because none of R-001..R-010 are education-specific in the
         seed register; Module 6 (Master-Subsidiary Linkage) will let the
         Group ERM Head cascade the parent framework into each

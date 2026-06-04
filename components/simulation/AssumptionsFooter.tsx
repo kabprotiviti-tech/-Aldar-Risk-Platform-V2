@@ -76,7 +76,7 @@ export function AssumptionsFooter() {
             <Row k="Sensitivity Medium" v={String(SENSITIVITY_FACTOR.medium)} />
             <Row k="Sensitivity High" v={String(SENSITIVITY_FACTOR.high)} />
             <Row k="Concurrency Amp" v="1.25× when ≥3 risks High/Critical" />
-            <Src>Calibrated to Aldar ERM policy v3 signed Oct-2024</Src>
+            <Src>Calibrated to ABC ERM policy v3 signed Oct-2024</Src>
           </Block>
 
           <Block title="Core Formulas">

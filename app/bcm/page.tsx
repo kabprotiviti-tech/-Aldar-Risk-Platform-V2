@@ -284,7 +284,7 @@ export default function BCMPage() {
         }}
       >
         Pilot wires real BIA workshop output + crisis-management roster from
-        Aldar HR + Group Operations.
+        ABC HR + Group Operations.
         <Link href="/" style={{ ...inlineLink, marginLeft: 6, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
           Back to home <ArrowRight size={10} />
         </Link>

@@ -142,7 +142,7 @@ export const riskRegister: Risk[] = [
     owner: 'Retail Asset Management',
     description: 'Two anchor tenants (combined 18,000 sqm) approaching lease expiry in Q4 2026. Global retail headwinds and e-commerce disruption creating uncertainty around renewal. Potential 14-month void period if replacements not secured.',
     financialImpact: 120,
-    aiInsight: 'Anchor tenant churn in GCC malls historically creates 18-24 month recovery cycles. Aldar should proactively engage experiential F&B and entertainment operators to reposition the footprint before formal expiry negotiations.',
+    aiInsight: 'Anchor tenant churn in GCC malls historically creates 18-24 month recovery cycles. ABC should proactively engage experiential F&B and entertainment operators to reposition the footprint before formal expiry negotiations.',
   },
   {
     id: 'R-003',
@@ -158,7 +158,7 @@ export const riskRegister: Risk[] = [
     owner: 'Hospitality Division',
     description: 'Shoulder season transition (April) with no major events until F1 GP (November) has pushed effective tourism index to 48/100. Hotel occupancy at 68% — below the 70% risk threshold. RevPAR declined 6.2% YoY. Signal propagation: geopolitical risk (medium) → tourism index compression → occupancy decline → RevPAR pressure → EBITDA margin erosion.',
     financialImpact: 115,
-    aiInsight: 'Propagation engine flags a 7-month demand valley (April–October) with no major event catalyst. Effective tourism index of 48/100 (geopolitical-adjusted, seasonality-adjusted) is approaching the 45/100 threshold that triggers high severity. Aldar should activate corporate long-stay packages and summer staycation promotions to bridge the gap before F1 season.',
+    aiInsight: 'Propagation engine flags a 7-month demand valley (April–October) with no major event catalyst. Effective tourism index of 48/100 (geopolitical-adjusted, seasonality-adjusted) is approaching the 45/100 threshold that triggers high severity. ABC should activate corporate long-stay packages and summer staycation promotions to bridge the gap before F1 season.',
   },
   {
     id: 'R-004',
@@ -178,7 +178,7 @@ export const riskRegister: Risk[] = [
   },
   {
     id: 'R-005',
-    title: 'Aldar Education Regulatory Compliance — ADEK Curriculum Changes',
+    title: 'ABC Education Regulatory Compliance — ADEK Curriculum Changes',
     category: 'Regulatory Risk',
     portfolio: 'education',
     likelihood: 3,
@@ -187,10 +187,10 @@ export const riskRegister: Risk[] = [
     status: 'mitigating',
     trend: 'stable',
     lastUpdated: '2026-04-10',
-    owner: 'Aldar Education CEO',
+    owner: 'ABC Education CEO',
     description: 'Abu Dhabi Department of Education and Knowledge (ADEK) mandating enhanced Arabic and UAE Studies integration across all curricula by September 2026. Requires significant teacher retraining and curriculum redesign across 30+ schools.',
     financialImpact: 35,
-    aiInsight: 'ADEK compliance is a non-negotiable. Aldar Education should treat this as a brand differentiation opportunity by launching a "UAE Heritage Excellence" program positioning schools as leaders in national curriculum integration.',
+    aiInsight: 'ADEK compliance is a non-negotiable. ABC Education should treat this as a brand differentiation opportunity by launching a "UAE Heritage Excellence" program positioning schools as leaders in national curriculum integration.',
   },
   {
     id: 'R-006',
@@ -204,7 +204,7 @@ export const riskRegister: Risk[] = [
     trend: 'increasing',
     lastUpdated: '2026-04-11',
     owner: 'CTO Office',
-    description: 'Aldar\'s smart building infrastructure across 40+ assets now integrated with IoT sensors and BMS platforms. Recent UAE sector cybersecurity advisories highlight increased nation-state threat actor targeting of real estate operators.',
+    description: 'ABC\'s smart building infrastructure across 40+ assets now integrated with IoT sensors and BMS platforms. Recent UAE sector cybersecurity advisories highlight increased nation-state threat actor targeting of real estate operators.',
     financialImpact: 180,
     aiInsight: 'IoT-connected building systems create a 340% larger attack surface vs. traditional assets. Recommend immediate OT/IT network segmentation audit and adopting UAE National Cybersecurity Authority (NCA) ECC framework compliance posture.',
   },
@@ -236,9 +236,9 @@ export const riskRegister: Risk[] = [
     trend: 'decreasing',
     lastUpdated: '2026-04-08',
     owner: 'Sustainability Office',
-    description: 'UAE mandatory ESG reporting requirements under ADX listing rules effective FY2026. Aldar\'s Scope 3 emissions data across construction supply chain remains incomplete, creating disclosure risk.',
+    description: 'UAE mandatory ESG reporting requirements under ADX listing rules effective FY2026. ABC\'s Scope 3 emissions data across construction supply chain remains incomplete, creating disclosure risk.',
     financialImpact: 45,
-    aiInsight: 'ADX ESG disclosure requirements align with ISSB IFRS S1/S2 standards. Aldar should implement AI-powered supply chain emissions tracking now to avoid restatement risk in first mandatory filings and protect international investor relations.',
+    aiInsight: 'ADX ESG disclosure requirements align with ISSB IFRS S1/S2 standards. ABC should implement AI-powered supply chain emissions tracking now to avoid restatement risk in first mandatory filings and protect international investor relations.',
   },
   {
     id: 'R-009',
@@ -267,7 +267,7 @@ export const riskRegister: Risk[] = [
     status: 'monitoring',
     trend: 'stable',
     lastUpdated: '2026-04-07',
-    owner: 'Aldar Investment Properties',
+    owner: 'ABC Investment Properties',
     description: 'Two key FM outsourcing partners (covering 60% of managed portfolio by area) showing declining SLA performance — CSAT scores dropped from 87% to 79% in Q1 2026. Contract renewal decisions due Q3 2026.',
     financialImpact: 28,
     aiInsight: 'FM service quality directly impacts tenant retention and asset valuation premiums. Recommend conducting independent FM benchmarking and issuing performance improvement notices with clawback provisions before entering renewal discussions.',
@@ -286,7 +286,7 @@ export const riskRegister: Risk[] = [
     owner: 'Market Intelligence',
     description: 'Abu Dhabi pipeline of 38,000 units expected for delivery 2026-2028 vs. annual demand of ~22,000 units. Oversupply conditions could compress secondary market capital values by 8-15% in non-premium locations.',
     financialImpact: 230,
-    aiInsight: 'Aldar\'s premium, masterplanned community positioning provides insulation vs. mid-market oversupply. Focus on differentiated buyer experience, community lifestyle features and school catchment desirability to maintain pricing premium.',
+    aiInsight: 'ABC\'s premium, masterplanned community positioning provides insulation vs. mid-market oversupply. Focus on differentiated buyer experience, community lifestyle features and school catchment desirability to maintain pricing premium.',
   },
   {
     id: 'R-012',
@@ -299,10 +299,10 @@ export const riskRegister: Risk[] = [
     status: 'monitoring',
     trend: 'stable',
     lastUpdated: '2026-04-06',
-    owner: 'Aldar Education CFO',
-    description: 'Three new Aldar Education campuses opening in 2026 require 850+ enrollment to breakeven in Year 1. Current pre-registration at 62% of target. Demographic shift toward smaller family sizes in UAE could persist.',
+    owner: 'ABC Education CFO',
+    description: 'Three new ABC Education campuses opening in 2026 require 850+ enrollment to breakeven in Year 1. Current pre-registration at 62% of target. Demographic shift toward smaller family sizes in UAE could persist.',
     financialImpact: 42,
-    aiInsight: 'Aldar Education enrollment is structurally linked to residential community launch sequencing. Synchronizing school openings with community handovers and offering guaranteed placement packages to homebuyers creates a captive enrollment pipeline.',
+    aiInsight: 'ABC Education enrollment is structurally linked to residential community launch sequencing. Synchronizing school openings with community handovers and offering guaranteed placement packages to homebuyers creates a captive enrollment pipeline.',
   },
   {
     id: 'R-013',
@@ -348,7 +348,7 @@ export const riskRegister: Risk[] = [
     trend: 'increasing',
     lastUpdated: '2026-04-14',
     owner: 'CTO Office',
-    description: 'AI-powered predictive maintenance and autonomous building management platforms are disrupting traditional FM models. Competitors adopting these technologies are achieving 22% cost reductions. Aldar FM digital maturity lags industry leaders.',
+    description: 'AI-powered predictive maintenance and autonomous building management platforms are disrupting traditional FM models. Competitors adopting these technologies are achieving 22% cost reductions. ABC FM digital maturity lags industry leaders.',
     financialImpact: 55,
     aiInsight: 'Opportunity cost of FM digitization delay is estimated at AED 55M annually in maintenance inefficiencies. Recommend piloting AI-powered BMS at 5 flagship assets in H1 2026 before broader rollout, targeting 18% opex reduction.',
   },
@@ -372,7 +372,7 @@ export const externalNews: ExternalNews[] = [
       portfoliosAffected: ['real-estate', 'retail'],
       confidence: 0.91,
     },
-    aiExplanation: 'USD-pegged AED means UAE interest rates move in lockstep with US Fed. Two additional 25bps hikes would further compress mortgage affordability and commercial real estate cap rate compression, directly impacting Aldar\'s off-plan sales velocity and asset valuations.',
+    aiExplanation: 'USD-pegged AED means UAE interest rates move in lockstep with US Fed. Two additional 25bps hikes would further compress mortgage affordability and commercial real estate cap rate compression, directly impacting ABC\'s off-plan sales velocity and asset valuations.',
   },
   {
     id: 'N-002',
@@ -402,7 +402,7 @@ export const externalNews: ExternalNews[] = [
       portfoliosAffected: ['real-estate', 'facilities'],
       confidence: 0.89,
     },
-    aiExplanation: 'Continued Red Sea disruptions extend construction material import cost inflation. Aldar\'s AED 8.2Bn development pipeline uses significant imported steel, MEP components and specialist materials. 34% freight cost increase translates to ~AED 180M additional pipeline cost exposure.',
+    aiExplanation: 'Continued Red Sea disruptions extend construction material import cost inflation. ABC\'s AED 8.2Bn development pipeline uses significant imported steel, MEP components and specialist materials. 34% freight cost increase translates to ~AED 180M additional pipeline cost exposure.',
   },
   {
     id: 'N-004',
@@ -417,7 +417,7 @@ export const externalNews: ExternalNews[] = [
       portfoliosAffected: ['real-estate', 'education'],
       confidence: 0.95,
     },
-    aiExplanation: 'Record Golden Visa uptake is a structural positive for premium residential demand. Aldar\'s target HNI buyer segment (AED 3M+ properties) is directly incentivized by visa benefits. This also drives school enrollment demand as HNI families relocate, benefiting Aldar Education.',
+    aiExplanation: 'Record Golden Visa uptake is a structural positive for premium residential demand. ABC\'s target HNI buyer segment (AED 3M+ properties) is directly incentivized by visa benefits. This also drives school enrollment demand as HNI families relocate, benefiting ABC Education.',
   },
   {
     id: 'N-005',
@@ -432,7 +432,7 @@ export const externalNews: ExternalNews[] = [
       portfoliosAffected: ['real-estate'],
       confidence: 0.93,
     },
-    aiExplanation: 'Record Abu Dhabi transaction volumes validate Aldar\'s core residential development strategy. Premium community prices rose 11% YoY. This positive demand environment provides runway for planned 2026 launches but also signals potential oversupply risk if pipeline is not managed.',
+    aiExplanation: 'Record Abu Dhabi transaction volumes validate ABC\'s core residential development strategy. Premium community prices rose 11% YoY. This positive demand environment provides runway for planned 2026 launches but also signals potential oversupply risk if pipeline is not managed.',
   },
   {
     id: 'N-006',
@@ -447,7 +447,7 @@ export const externalNews: ExternalNews[] = [
       portfoliosAffected: ['facilities', 'real-estate', 'retail'],
       confidence: 0.88,
     },
-    aiExplanation: 'Coordinated attacks on smart building infrastructure in the GCC region require immediate response. Aldar\'s IoT-connected portfolio of 40+ assets with BMS integration is directly exposed. Recommend urgent security posture review and threat intelligence sharing with UAE NCA.',
+    aiExplanation: 'Coordinated attacks on smart building infrastructure in the GCC region require immediate response. ABC\'s IoT-connected portfolio of 40+ assets with BMS integration is directly exposed. Recommend urgent security posture review and threat intelligence sharing with UAE NCA.',
   },
   {
     id: 'N-007',
@@ -462,7 +462,7 @@ export const externalNews: ExternalNews[] = [
       portfoliosAffected: ['education'],
       confidence: 0.82,
     },
-    aiExplanation: 'Teacher attrition at 23% above normal rates creates quality risk for Aldar Education\'s 30+ school network. Replacing specialist STEM and IB teachers in Abu Dhabi takes 4-6 months and costs AED 45,000+ per replacement. Risk to school ratings and parent retention is secondary concern.',
+    aiExplanation: 'Teacher attrition at 23% above normal rates creates quality risk for ABC Education\'s 30+ school network. Replacing specialist STEM and IB teachers in Abu Dhabi takes 4-6 months and costs AED 45,000+ per replacement. Risk to school ratings and parent retention is secondary concern.',
   },
   {
     id: 'N-008',
@@ -477,7 +477,7 @@ export const externalNews: ExternalNews[] = [
       portfoliosAffected: ['retail'],
       confidence: 0.86,
     },
-    aiExplanation: 'GCC e-commerce growth accelerating, reaching 18% penetration vs. 14% in 2024. Fashion and electronics categories most affected — both major tenant categories at Yas Mall. Aldar Retail should accelerate experiential and F&B-led repositioning to maintain footfall and tenant covenant strength.',
+    aiExplanation: 'GCC e-commerce growth accelerating, reaching 18% penetration vs. 14% in 2024. Fashion and electronics categories most affected — both major tenant categories at Yas Mall. ABC Retail should accelerate experiential and F&B-led repositioning to maintain footfall and tenant covenant strength.',
   },
   {
     id: 'N-009',
@@ -492,7 +492,7 @@ export const externalNews: ExternalNews[] = [
       portfoliosAffected: ['real-estate', 'retail', 'hospitality', 'education', 'facilities'],
       confidence: 0.97,
     },
-    aiExplanation: 'ADX ESG mandate is now confirmed for FY2026 reporting. Aldar, as an ADX-listed company, must deliver IFRS S1 general sustainability and S2 climate-related disclosures. Incomplete Scope 3 data across construction supply chain creates material non-compliance risk if not addressed in H1 2026.',
+    aiExplanation: 'ADX ESG mandate is now confirmed for FY2026 reporting. ABC, as an ADX-listed company, must deliver IFRS S1 general sustainability and S2 climate-related disclosures. Incomplete Scope 3 data across construction supply chain creates material non-compliance risk if not addressed in H1 2026.',
   },
   {
     id: 'N-010',
@@ -507,7 +507,7 @@ export const externalNews: ExternalNews[] = [
       portfoliosAffected: ['real-estate', 'facilities'],
       confidence: 0.79,
     },
-    aiExplanation: 'Construction labor cost inflation of 14% YoY in UAE, driven by competing demand from Saudi Giga-projects and Gulf infrastructure boom. Skilled trades (MEP, fit-out) most affected. Aldar\'s active construction pipeline faces AED 95M additional labor cost exposure if not locked in via multi-year labor contracts.',
+    aiExplanation: 'Construction labor cost inflation of 14% YoY in UAE, driven by competing demand from Saudi Giga-projects and Gulf infrastructure boom. Skilled trades (MEP, fit-out) most affected. ABC\'s active construction pipeline faces AED 95M additional labor cost exposure if not locked in via multi-year labor contracts.',
   },
 ]
 
@@ -721,7 +721,7 @@ export const scenarioTemplates: ScenarioTemplate[] = [
   {
     id: 'S-005',
     name: 'Major Cyber Attack — Smart Building Infrastructure',
-    description: 'Coordinated nation-state cyber attack targets Aldar\'s IoT-connected BMS across 40+ assets, causing operational disruption, data breach, and reputational damage',
+    description: 'Coordinated nation-state cyber attack targets ABC\'s IoT-connected BMS across 40+ assets, causing operational disruption, data breach, and reputational damage',
     category: 'Cyber / Operational Crisis',
     affectedPortfolios: ['facilities', 'retail', 'hospitality'],
     estimatedImpact: [
@@ -749,7 +749,7 @@ export const scenarioTemplates: ScenarioTemplate[] = [
   {
     id: 'S-007',
     name: 'ESG Regulatory Non-Compliance',
-    description: 'ADX imposes material penalties for IFRS S1/S2 non-compliance; international institutional investors divest Aldar shares pending ESG restatement, causing share price decline and cost of capital increase',
+    description: 'ADX imposes material penalties for IFRS S1/S2 non-compliance; international institutional investors divest ABC shares pending ESG restatement, causing share price decline and cost of capital increase',
     category: 'Regulatory / ESG',
     affectedPortfolios: ['real-estate', 'retail', 'hospitality', 'education', 'facilities'],
     estimatedImpact: [

@@ -11,21 +11,21 @@ export interface FusionResult {
   contributingFactors: string[]
 }
 
-const SYSTEM_PROMPT = `You are an enterprise AI risk intelligence system for Aldar Properties PJSC (ADX: ALDAR), Abu Dhabi's largest listed real estate developer.
+const SYSTEM_PROMPT = `You are an enterprise AI risk intelligence system for ABC Holdings (ADX: ABC), Abu Dhabi's largest listed real estate developer.
 
 Your role is to perform cross-signal risk fusion: combining external market intelligence with internal operational data to generate enterprise-level risk insights.
 
-Aldar's business units:
+ABC's business units:
 - Real Estate: Yas Island, Saadiyat, Al Raha Beach residential & commercial
 - Retail: Yas Mall, Al Jimi Mall (8 malls total, ~350 tenants)
 - Hospitality: 14 hotels + Yas Island theme parks
-- Education: Aldar Education (30+ schools, 30,000 students)
+- Education: ABC Education (30+ schools, 30,000 students)
 - Facilities: FM services across Abu Dhabi
 
 Fusion principles:
 - Risk is AMPLIFIED when external signal aligns with internal stress (e.g., rising rates + low sales)
 - Risk is MITIGATED when internal resilience offsets external headwind (e.g., high occupancy vs sector slowdown)
-- Always be specific to Aldar's actual portfolio context
+- Always be specific to ABC's actual portfolio context
 - Return ONLY valid JSON — no markdown, no text outside the object`
 
 export async function POST(req: NextRequest) {
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     // Summarise internal signals into a concise block for the prompt
     const internalSummary = buildInternalSummary(internalData)
 
-    const userPrompt = `Perform risk fusion analysis for Aldar Properties.
+    const userPrompt = `Perform risk fusion analysis for ABC Holdings.
 
 EXTERNAL SIGNAL:
 Source: "${externalSource || 'News Feed'}"
@@ -59,10 +59,10 @@ ${internalSummary}
 
 Respond with ONLY this JSON object:
 {
-  "fusionInsight": "2-3 sentence fused risk assessment combining the external signal with Aldar's current internal state",
+  "fusionInsight": "2-3 sentence fused risk assessment combining the external signal with ABC's current internal state",
   "impactLevel": "low | medium | high | critical",
   "affectedBusiness": "one of: Real Estate | Retail | Hospitality | Education | Cross-Portfolio",
-  "reasoning": "3-4 sentences of detailed reasoning: how the external signal interacts with internal conditions, what amplifies or mitigates the risk, and what Aldar's management should monitor",
+  "reasoning": "3-4 sentences of detailed reasoning: how the external signal interacts with internal conditions, what amplifies or mitigates the risk, and what ABC's management should monitor",
   "amplified": true if external signal worsens an existing internal stress / false if internal resilience offsets it,
   "contributingFactors": ["factor 1", "factor 2", "factor 3"] — exactly 3 short strings naming the key risk drivers
 }`

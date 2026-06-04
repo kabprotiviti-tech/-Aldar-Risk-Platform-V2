@@ -78,23 +78,23 @@ RECOMMENDED ACTIONS
   },
   {
     label: 'Risk Committee Agenda — Q2 2026',
-    content: `ALDAR PROPERTIES RISK COMMITTEE — Q2 2026 MEETING PAPERS
+    content: `ABC PROPERTIES RISK COMMITTEE — Q2 2026 MEETING PAPERS
 
 AGENDA ITEM 3: EMERGING RISKS UPDATE
 
 The following emerging risks have been identified by management for Risk Committee review:
 
 1. CYBER RESILIENCE — SMART BUILDING INFRASTRUCTURE
-Following the UAE NCA advisory issued March 2026 regarding nation-state targeting of smart building systems, internal IT security reviewed Aldar's BMS (Building Management System) integration across 23 commercial assets. Findings indicate that 8 assets are using legacy OT protocols (Modbus, BACnet) without adequate IT/OT network segmentation. A penetration testing exercise is recommended at cost of approximately AED 850,000. The CTO has escalated this as a Priority 1 matter requiring Committee endorsement.
+Following the UAE NCA advisory issued March 2026 regarding nation-state targeting of smart building systems, internal IT security reviewed ABC's BMS (Building Management System) integration across 23 commercial assets. Findings indicate that 8 assets are using legacy OT protocols (Modbus, BACnet) without adequate IT/OT network segmentation. A penetration testing exercise is recommended at cost of approximately AED 850,000. The CTO has escalated this as a Priority 1 matter requiring Committee endorsement.
 
 2. TENANT COVENANT RISK — RETAIL PORTFOLIO
 Legal has flagged that two retail tenants representing AED 28M annual income are subject to parent company restructuring processes. Covenant strength assessments are being updated. Rent deposits of 3-months remain in place. The Risk team recommends upgrading these tenants from 'Monitoring' to 'Active Management' in the risk register.
 
 3. EDUCATION REGULATORY COMPLIANCE
-ADEK has issued supplementary guidance requiring all IB schools operating in Abu Dhabi to integrate an expanded UAE Social Studies curriculum component from September 2026. Aldar Education's 8 IB schools will require curriculum redesign, teacher CPD programmes and new learning materials. Total estimated cost: AED 4.2M. Non-compliance would risk school rating downgrade which could affect parent retention.
+ADEK has issued supplementary guidance requiring all IB schools operating in Abu Dhabi to integrate an expanded UAE Social Studies curriculum component from September 2026. ABC Education's 8 IB schools will require curriculum redesign, teacher CPD programmes and new learning materials. Total estimated cost: AED 4.2M. Non-compliance would risk school rating downgrade which could affect parent retention.
 
 4. ESG REPORTING READINESS
-ADX has confirmed the mandatory IFRS S1/S2 sustainability reporting requirement for FY2026 annual reports. Aldar's ESG team has identified a gap in Scope 3 emissions data coverage — currently only 34% of construction supply chain by spend is covered by emissions data. External consultant engagement required to address gap before year-end. Estimated cost: AED 1.8M.`,
+ADX has confirmed the mandatory IFRS S1/S2 sustainability reporting requirement for FY2026 annual reports. ABC's ESG team has identified a gap in Scope 3 emissions data coverage — currently only 34% of construction supply chain by spend is covered by emissions data. External consultant engagement required to address gap before year-end. Estimated cost: AED 1.8M.`,
   },
 ]
 
@@ -1348,7 +1348,7 @@ export default function DocumentsPage() {
             })()}
           </div>
           <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>
-            APIs connect to existing Aldar systems in production
+            APIs connect to existing ABC systems in production
           </span>
         </div>
 

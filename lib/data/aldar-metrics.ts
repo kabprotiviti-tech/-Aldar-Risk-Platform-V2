@@ -1,5 +1,5 @@
 /**
- * Aldar-Specific Strategic Metrics — Block 2 P9
+ * ABC-Specific Strategic Metrics — Block 2 P9
  * ----------------------------------------------
  * The 4 must-have metrics flagged by BCG-partner reviews as
  * non-negotiable for an ADX-listed UAE real-estate group's CRO/CEO
@@ -11,7 +11,7 @@
  *      vs Development — the de-risking equity story)
  *   4. Escrow compliance status (RERA / DLD / ADREC)
  *
- * All figures derive from Aldar's published FY25 + Q1 26 results where
+ * All figures derive from ABC's published FY25 + Q1 26 results where
  * disclosed; the remainder are illustrative pre-pilot and tagged.
  */
 
@@ -22,16 +22,16 @@ import {
   type DataPoint,
 } from '@/lib/provenance/types'
 import {
-  SRC_ALDAR_FY25_RESULTS,
-  SRC_ALDAR_Q1_2026,
+  SRC_ABC_FY25_RESULTS,
+  SRC_ABC_Q1_2026,
   SRC_ADREC_MARKET,
 } from '@/lib/provenance/sources'
 import {
-  ALDAR_FY25_DEV_REVENUE,
-  ALDAR_FY25_INV_REVENUE,
-  ALDAR_FY25_SODIC_REVENUE,
-  ALDAR_FY25_LONDON_SQUARE_REVENUE,
-  ALDAR_FY24_EDUCATION_EBITDA,
+  ABC_FY25_DEV_REVENUE,
+  ABC_FY25_INV_REVENUE,
+  ABC_FY25_SODIC_REVENUE,
+  ABC_FY25_LONDON_SQUARE_REVENUE,
+  ABC_FY24_EDUCATION_EBITDA,
 } from './aldar-financials'
 
 // ============================================================
@@ -41,7 +41,7 @@ import {
 export const SALES_BACKLOG_Q1_26: DataPoint = verified(
   72_100,
   'AED mn',
-  SRC_ALDAR_Q1_2026,
+  SRC_ABC_Q1_2026,
   {
     confidenceNote:
       'Group development revenue backlog at end of March 2026 — record level. Analysts watch this as the strongest leading indicator for the next 18 months of revenue.',
@@ -51,7 +51,7 @@ export const SALES_BACKLOG_Q1_26: DataPoint = verified(
 export const SALES_BACKLOG_FY25_YEAREND: DataPoint = verified(
   71_700,
   'AED mn',
-  SRC_ALDAR_FY25_RESULTS,
+  SRC_ABC_FY25_RESULTS,
   {
     confidenceNote:
       'Group development revenue backlog at end of Dec 2025; AED 61.0bn UAE-attributable; AED 10.7bn international.',
@@ -61,7 +61,7 @@ export const SALES_BACKLOG_FY25_YEAREND: DataPoint = verified(
 // ============================================================
 // 2. Land bank inventory + GFA pipeline
 // ============================================================
-// Aldar's land bank is reported in aggregate; specific GFA splits per
+// ABC's land bank is reported in aggregate; specific GFA splits per
 // emirate are illustrative pre-pilot.
 
 export const LAND_BANK_GFA_TOTAL_MSQM: DataPoint = illustrative(
@@ -89,27 +89,27 @@ export const LAND_BANK_UAE_PCT: DataPoint = illustrative(
 // share of total revenue vs Development.
 
 const FY25_TOTAL_REVENUE_AED_MN =
-  ALDAR_FY25_DEV_REVENUE.value +
-  ALDAR_FY25_INV_REVENUE.value +
-  ALDAR_FY25_SODIC_REVENUE.value +
-  ALDAR_FY25_LONDON_SQUARE_REVENUE.value
+  ABC_FY25_DEV_REVENUE.value +
+  ABC_FY25_INV_REVENUE.value +
+  ABC_FY25_SODIC_REVENUE.value +
+  ABC_FY25_LONDON_SQUARE_REVENUE.value
 
-const FY25_RECURRING_AED_MN = ALDAR_FY25_INV_REVENUE.value // Investment + Education + Hospitality treated as recurring
+const FY25_RECURRING_AED_MN = ABC_FY25_INV_REVENUE.value // Investment + Education + Hospitality treated as recurring
 
 export const RECURRING_MIX_PCT: DataPoint = verified(
   Math.round((FY25_RECURRING_AED_MN / FY25_TOTAL_REVENUE_AED_MN) * 100),
   '%',
-  SRC_ALDAR_FY25_RESULTS,
+  SRC_ABC_FY25_RESULTS,
   {
     confidenceNote:
-      'Recurring (Investment FY25 AED 8.1bn) ÷ total disclosed segment revenue (AED 36.1bn). Aldar Hospitality + Aldar Education segment revenues are not separately broken out in FY25 press release — recurring share is therefore conservative.',
+      'Recurring (Investment FY25 AED 8.1bn) ÷ total disclosed segment revenue (AED 36.1bn). ABC Hospitality + ABC Education segment revenues are not separately broken out in FY25 press release — recurring share is therefore conservative.',
   },
 )
 
 export const RECURRING_MIX_TARGET_PCT: DataPoint = illustrative(
   35,
   '%',
-  'Strategic target for recurring-revenue share in 5-year plan (illustrative). Pilot wires Aldar published guidance.',
+  'Strategic target for recurring-revenue share in 5-year plan (illustrative). Pilot wires ABC published guidance.',
 )
 
 // ============================================================

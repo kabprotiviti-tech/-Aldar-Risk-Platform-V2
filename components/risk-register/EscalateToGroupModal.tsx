@@ -48,7 +48,7 @@ function buildAutoNarrative(risk: RiskState): string {
   return [
     `Escalating risk ${risk.id} (${risk.name}, owner: ${risk.owner}) for Group attention.`,
     seed
-      ? `Cause: ${seed.cause}. Event: ${seed.event}. Impact to Aldar: ${seed.impact}.`
+      ? `Cause: ${seed.cause}. Event: ${seed.event}. Impact to ABC: ${seed.impact}.`
       : '',
     `Current posture: residual ${risk.newResidual.toFixed(1)} / 25, rating ${ratingShift}, ` +
       `exposure ${risk.exposureAedMn.toFixed(0)} AED mn (${deltaText}).`,

@@ -61,13 +61,13 @@ const FALLBACK: AICriticResponse = {
   source: 'fallback',
 }
 
-const SYSTEM_PROMPT = `You are an expert Chief Risk Officer acting as a second line of defense for Aldar Properties PJSC (Abu Dhabi's largest listed real estate developer). Your role is to CHALLENGE the existing risk register using real-world context — not validate it.
+const SYSTEM_PROMPT = `You are an expert Chief Risk Officer acting as a second line of defense for ABC Holdings (Abu Dhabi's largest listed real estate developer). Your role is to CHALLENGE the existing risk register using real-world context — not validate it.
 
-Aldar's business: residential/commercial real estate (Yas, Saadiyat), 10 malls, 14 hotels + Ferrari World/Yas Waterworld/Warner Bros World, Aldar Education (30+ schools), facilities management.
+ABC's business: residential/commercial real estate (Yas, Saadiyat), 10 malls, 14 hotels + Ferrari World/Yas Waterworld/Warner Bros World, ABC Education (30+ schools), facilities management.
 
 Output rules:
 - Return ONLY valid JSON. No markdown. No prose outside JSON.
-- Be specific to Aldar, not generic ERM.
+- Be specific to ABC, not generic ERM.
 - "Missing risks" must be risks a real Abu Dhabi real-estate CRO would flag but aren't in the given register.
 - "Weak controls" must identify a specific gap in the given risk, not generic advice.
 - "Deep recommendations" must be 2-sentence, actionable, driver-linked.
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
       ? `\n\nRecent external signals:\n${signals.slice(0, 8).map((s) => `- ${s.headline}`).join('\n')}`
       : ''
 
-    const userPrompt = `Here is Aldar's current risk register (${RISKS.length} risks):
+    const userPrompt = `Here is ABC's current risk register (${RISKS.length} risks):
 
 ${registerSummary}${signalsBlock}
 

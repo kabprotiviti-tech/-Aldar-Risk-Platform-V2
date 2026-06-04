@@ -1,6 +1,6 @@
-// ─── Aldar Internal Signals — Simulated ERP / CRM / Project Data ─────────────
+// ─── ABC Internal Signals — Simulated ERP / CRM / Project Data ─────────────
 // In production: integrated with Oracle Fusion ERP, Salesforce CRM,
-// Primavera P6 project management, and Aldar risk register systems.
+// Primavera P6 project management, and ABC risk register systems.
 
 export interface InternalSignal {
   id: string

@@ -118,7 +118,7 @@ export const RISK_BASELINE_PROVENANCE: Record<RiskId, RiskBaselineProvenance> = 
     engineDataPoint: illustrative(
       compute(RISKS.find((r) => r.id === 'R-005')!),
       'AED mn',
-      'R-005 Occupancy Decline — exposure derives from hospitality revenue anchor (placeholder per Aldar disclosure gap). Pilot calibrates to internal segment P&L.',
+      'R-005 Occupancy Decline — exposure derives from hospitality revenue anchor (placeholder per ABC disclosure gap). Pilot calibrates to internal segment P&L.',
     ),
     calibrationPlan:
       'Wire hotel PMS + residential occupancy systems; replace placeholder anchor with actual segment revenue.',
@@ -154,7 +154,7 @@ export const RISK_BASELINE_PROVENANCE: Record<RiskId, RiskBaselineProvenance> = 
     engineDataPoint: illustrative(
       compute(RISKS.find((r) => r.id === 'R-008')!),
       'AED mn',
-      'R-008 Cash Flow / Liquidity Stress — exposure derives from portfolio revenue anchor (illustrative MVP, understates actual Aldar group revenue). Pilot calibrates to 13-week cash forecast + RCF headroom.',
+      'R-008 Cash Flow / Liquidity Stress — exposure derives from portfolio revenue anchor (illustrative MVP, understates actual ABC group revenue). Pilot calibrates to 13-week cash forecast + RCF headroom.',
     ),
     calibrationPlan:
       'Wire Group Treasury feed + 13-week rolling cash forecast; calibrate to actual liquidity headroom against covenants.',

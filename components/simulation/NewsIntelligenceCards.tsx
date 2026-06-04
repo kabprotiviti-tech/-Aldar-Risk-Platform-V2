@@ -5,7 +5,7 @@
  * ---------------------
  * For each external headline, render a structured card with:
  *   - Problem  (what the signal is, classified)
- *   - Impact   (which Aldar risks/drivers are affected + direction)
+ *   - Impact   (which ABC risks/drivers are affected + direction)
  *   - Recommendation (action to take)
  *
  * Pure, additive, read-only. Does NOT modify any existing news panel.

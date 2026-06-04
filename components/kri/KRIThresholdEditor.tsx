@@ -188,7 +188,7 @@ export function KRIThresholdEditor({ kri, onClose }: Props) {
       >
         Default: amber {kri.defaultThresholds.amberBoundary}, red{' '}
         {kri.defaultThresholds.redBoundary}{' '}
-        ({kri.defaultThresholds.unit}). Pilot will calibrate to Aldar
+        ({kri.defaultThresholds.unit}). Pilot will calibrate to ABC
         appetite & tolerance.
       </div>
 

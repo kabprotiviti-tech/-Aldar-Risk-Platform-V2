@@ -571,7 +571,7 @@ export default function ScenariosPage() {
             }}
           >
             <Loader2 size={24} className="animate-spin mx-auto mb-3" style={{ color: 'var(--accent-primary)' }} />
-            AI is modelling scenario impact across Aldar portfolios...
+            AI is modelling scenario impact across ABC portfolios...
           </div>
         </motion.div>
       )}

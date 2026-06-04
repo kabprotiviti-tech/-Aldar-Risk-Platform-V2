@@ -67,7 +67,7 @@ export function EnvironmentBanner({ env = 'demo', version }: EnvironmentBannerPr
         {v}
       </span>
       <span style={{ color: 'var(--text-tertiary)' }}>
-        Aldar ERM Platform · sourced from Aldar FY25 / Q1 2026 public disclosures
+        ABC ERM Platform · sourced from ABC FY25 / Q1 2026 public disclosures
         + clearly-labeled illustrative samples · pre-contract POC
       </span>
     </div>

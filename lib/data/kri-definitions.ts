@@ -11,7 +11,7 @@
  *   - a provenance entry from DRIVER_BASELINE_PROVENANCE.
  *
  * Owner / frequency / target are illustrative placeholders that will be
- * calibrated to Aldar's actual ERM operating model during pilot.
+ * calibrated to ABC's actual ERM operating model during pilot.
  */
 
 import type { DriverId } from '@/lib/engine/types'
@@ -30,7 +30,7 @@ export type KRIDirection = 'higher_is_better' | 'lower_is_better'
 
 /**
  * Default threshold suggestion (illustrative). Pilot will calibrate to
- * actual Aldar appetite & tolerance. Boundaries are inclusive on the
+ * actual ABC appetite & tolerance. Boundaries are inclusive on the
  * AMBER side (green strictly better, red strictly worse).
  *   For higher_is_better: green ≥ amberBoundary, amber [redBoundary, amberBoundary), red < redBoundary
  *   For lower_is_better : green ≤ amberBoundary, amber (amberBoundary, redBoundary], red > redBoundary
@@ -65,7 +65,7 @@ export interface KRIDefinition {
   name: string
   /** Which engine driver holds the current value. */
   driverId: DriverId
-  /** Owner (illustrative — will be set per Aldar operating model in pilot). */
+  /** Owner (illustrative — will be set per ABC operating model in pilot). */
   owner: string
   frequency: KRIFrequency
   /** One-line plain English description for the KRI. */
@@ -100,10 +100,10 @@ export const KRI_DEFINITIONS: KRIDefinition[] = [
     id: 'KRI-09',
     name: 'Residential Occupancy',
     driverId: 'DRV-09',
-    owner: 'Head of Aldar Investment',
+    owner: 'Head of ABC Investment',
     frequency: 'monthly',
     description:
-      'Occupied residential units (under Aldar Investment portfolio) as % of available stock. Trips amber/red as occupancy drops below appetite.',
+      'Occupied residential units (under ABC Investment portfolio) as % of available stock. Trips amber/red as occupancy drops below appetite.',
     baselineProvenance: DRIVER_BASELINE_PROVENANCE['DRV-09'],
     linkedRiskIds: risksReferencingDriver('DRV-09'),
     direction: 'higher_is_better',
@@ -119,10 +119,10 @@ export const KRI_DEFINITIONS: KRIDefinition[] = [
     id: 'KRI-10',
     name: 'Commercial Occupancy',
     driverId: 'DRV-10',
-    owner: 'Head of Aldar Investment',
+    owner: 'Head of ABC Investment',
     frequency: 'monthly',
     description:
-      'Leased commercial GLA as % of total leasable area across investment portfolio. Aldar FY24 retail occupancy was 97% (Yas Mall 99%).',
+      'Leased commercial GLA as % of total leasable area across investment portfolio. ABC FY24 retail occupancy was 97% (Yas Mall 99%).',
     baselineProvenance: DRIVER_BASELINE_PROVENANCE['DRV-10'],
     linkedRiskIds: risksReferencingDriver('DRV-10'),
     direction: 'higher_is_better',
@@ -195,7 +195,7 @@ export const KRI_DEFINITIONS: KRIDefinition[] = [
     id: 'KRI-14',
     name: 'Residential Price Index',
     driverId: 'DRV-14',
-    owner: 'Head of Aldar Development',
+    owner: 'Head of ABC Development',
     frequency: 'monthly',
     description:
       'ADREC / Bayut benchmark residential price index vs. budget. -25% / -35% / -50% map to Mild / Moderate / Severe scenario intensities.',
@@ -214,7 +214,7 @@ export const KRI_DEFINITIONS: KRIDefinition[] = [
     id: 'KRI-15',
     name: 'Commercial Rent Index',
     driverId: 'DRV-15',
-    owner: 'Head of Aldar Investment',
+    owner: 'Head of ABC Investment',
     frequency: 'monthly',
     description:
       'Commercial rent re-basing index vs. budget. Tracks rental market softness on renewals.',

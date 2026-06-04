@@ -608,7 +608,7 @@ export function AIFusionPanel() {
             }}
           >
             <p style={{ color: 'var(--text-muted)', fontSize: '0.62rem', lineHeight: 1.55, textAlign: 'center' }}>
-              Simulated internal signals for demo. In production, integrated with Oracle Fusion ERP, Salesforce CRM, Primavera P6, and Aldar risk register systems.
+              Simulated internal signals for demo. In production, integrated with Oracle Fusion ERP, Salesforce CRM, Primavera P6, and ABC risk register systems.
             </p>
           </div>
 

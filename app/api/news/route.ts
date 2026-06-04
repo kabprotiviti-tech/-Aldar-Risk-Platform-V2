@@ -18,7 +18,7 @@ const RSS_QUERIES = [
   'real+estate+UAE+Abu+Dhabi',
   'hospitality+UAE+hotel',
   'retail+UAE+commercial',
-  'Aldar+Properties',
+  'ABC+Properties',
 ]
 
 // ─── Fallback data ────────────────────────────────────────────────────────────
@@ -31,7 +31,7 @@ const MOCK_NEWS: NewsItem[] = [
   { id: 'mock-6', headline: 'ADX mandates ESG disclosure for listed real estate firms from Q3 2026', source: 'ADX Bulletin', url: '#', publishedAt: new Date(Date.now() - 11 * 3600 * 1000).toISOString(), sourceType: 'google' },
   { id: 'mock-7', headline: 'Global supply chain disruptions delay building materials to Gulf contractors', source: 'Bloomberg', url: '#', publishedAt: new Date(Date.now() - 13 * 3600 * 1000).toISOString(), sourceType: 'gdelt' },
   { id: 'mock-8', headline: 'ADIB raises mortgage rates — analysts warn of 8% cooling in off-plan sales', source: 'Gulf News', url: '#', publishedAt: new Date(Date.now() - 16 * 3600 * 1000).toISOString(), sourceType: 'google' },
-  { id: 'mock-9', headline: 'Aldar announces AED 2.5Bn expansion of Yas Mall anchored retail district', source: 'WAM', url: '#', publishedAt: new Date(Date.now() - 20 * 3600 * 1000).toISOString(), sourceType: 'guardian' },
+  { id: 'mock-9', headline: 'ABC announces AED 2.5Bn expansion of Yas Mall anchored retail district', source: 'WAM', url: '#', publishedAt: new Date(Date.now() - 20 * 3600 * 1000).toISOString(), sourceType: 'guardian' },
   { id: 'mock-10', headline: 'UAE geopolitical risk premium rises — institutional investors reassess GCC exposure', source: 'Financial Times', url: '#', publishedAt: new Date(Date.now() - 24 * 3600 * 1000).toISOString(), sourceType: 'ft' },
   { id: 'mock-11', headline: 'World Bank raises MENA growth forecast — UAE leads regional economic recovery', source: 'World Bank', url: '#', publishedAt: new Date(Date.now() - 28 * 3600 * 1000).toISOString(), sourceType: 'worldbank' },
   { id: 'mock-12', headline: 'IMF Article IV: UAE fiscal position strengthens as oil revenues outperform', source: 'IMF', url: '#', publishedAt: new Date(Date.now() - 32 * 3600 * 1000).toISOString(), sourceType: 'imf' },
@@ -149,7 +149,7 @@ async function fetchNewsAPI(): Promise<NewsItem[]> {
   const key = process.env.NEWS_API_KEY
   if (!key) return []
   const res = await fetch(
-    `https://newsapi.org/v2/everything?q=UAE+real+estate+OR+Abu+Dhabi+property+OR+Aldar&language=en&sortBy=publishedAt&pageSize=10`,
+    `https://newsapi.org/v2/everything?q=UAE+real+estate+OR+Abu+Dhabi+property+OR+ABC&language=en&sortBy=publishedAt&pageSize=10`,
     { headers: { 'X-Api-Key': key }, signal: AbortSignal.timeout(8000) }
   )
   if (!res.ok) return []

@@ -347,7 +347,7 @@ export function RiskDetailDrawer({ risk, onClose }: Props) {
                   <span>
                     Engine: <NumericValue data={anchorRef.engineDataPoint} />
                   </span>
-                  <span style={{ color: 'var(--text-tertiary)' }}>vs Aldar:</span>
+                  <span style={{ color: 'var(--text-tertiary)' }}>vs ABC:</span>
                   <span>
                     <NumericValue data={anchorRef.aldarReference} />
                   </span>

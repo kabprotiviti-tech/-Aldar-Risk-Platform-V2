@@ -20,7 +20,7 @@ const FALLBACK: AIClassification = {
   severity: 'medium',
   impactedBusiness: 'real estate',
   regionsAffected: 'UAE',
-  explanation: 'Signal received. Manual review recommended for Aldar portfolio impact assessment.',
+  explanation: 'Signal received. Manual review recommended for ABC portfolio impact assessment.',
   confidenceScore: 35,
 }
 
@@ -82,22 +82,22 @@ function safeParseJSON(text: string): AIClassification[] | null {
   }
 }
 
-const SYSTEM_PROMPT = `You are an expert AI risk analyst for Aldar Properties PJSC — Abu Dhabi's largest listed real estate developer (ADX: ALDAR).
+const SYSTEM_PROMPT = `You are an expert AI risk analyst for ABC Holdings — Abu Dhabi's largest listed real estate developer (ADX: ABC).
 
-Aldar's core portfolio:
+ABC's core portfolio:
 - Real Estate: Residential communities, commercial towers, mixed-use developments (Yas Island, Saadiyat, Al Raha)
 - Retail: Yas Mall, Al Jimi Mall, and 8 other malls across Abu Dhabi
 - Hospitality: 14 hotels, Ferrari World, Yas Waterworld, Warner Bros. World
-- Education: Aldar Education — 30+ schools, 30,000+ students across UAE
+- Education: ABC Education — 30+ schools, 30,000+ students across UAE
 - Facilities Management: FM services across Abu Dhabi and wider UAE
 
-Your role: Classify each news headline for its risk impact on Aldar specifically.
+Your role: Classify each news headline for its risk impact on ABC specifically.
 
 Output rules:
 - severity must be exactly one of: low | medium | high | critical
 - impactedBusiness must be exactly one of: real estate | retail | hospitality | education | cross-portfolio
-- explanation is 2-3 concise sentences on Aldar-specific business impact (not generic)
-- confidenceScore: 0-100 reflecting how directly this news affects Aldar (>80 = direct Aldar mention or UAE regulatory, 50-80 = sector-wide, <50 = global/indirect)
+- explanation is 2-3 concise sentences on ABC-specific business impact (not generic)
+- confidenceScore: 0-100 reflecting how directly this news affects ABC (>80 = direct ABC mention or UAE regulatory, 50-80 = sector-wide, <50 = global/indirect)
 - Return ONLY a valid JSON array. No markdown. No explanation outside the array.`
 
 export async function POST(req: NextRequest) {
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
       .map((item, i) => `${i + 1}. SOURCE: "${item.source}" | HEADLINE: "${item.headline}"`)
       .join('\n')
 
-    const userPrompt = `Classify each of the following ${batch.length} news items for Aldar risk intelligence.
+    const userPrompt = `Classify each of the following ${batch.length} news items for ABC risk intelligence.
 
 ${itemsText}
 
@@ -129,7 +129,7 @@ Respond with a JSON array of exactly ${batch.length} objects in the same order:
     "severity": "low | medium | high | critical",
     "impactedBusiness": "real estate | retail | hospitality | education | cross-portfolio",
     "regionsAffected": "e.g. Abu Dhabi | UAE-wide | GCC | Global",
-    "explanation": "2-3 sentences on Aldar-specific business impact",
+    "explanation": "2-3 sentences on ABC-specific business impact",
     "confidenceScore": 0-100
   }
 ]`

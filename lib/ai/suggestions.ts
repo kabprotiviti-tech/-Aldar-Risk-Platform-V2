@@ -49,7 +49,7 @@ const CATEGORY_PLAYBOOK: Record<string, SuggestedMitigation[]> = {
       effort: 'Low',
       horizon: 'immediate',
       rationale:
-        'Steel + cement represent ~35% of typical Aldar fit-out cost. Forward hedging caps the variance the project ledger transmits to the P&L.',
+        'Steel + cement represent ~35% of typical ABC fit-out cost. Forward hedging caps the variance the project ledger transmits to the P&L.',
     },
   ],
   'Market/Sales': [

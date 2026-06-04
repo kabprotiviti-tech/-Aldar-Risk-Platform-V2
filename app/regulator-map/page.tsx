@@ -3,7 +3,7 @@
 /**
  * UAE Regulator Map — Module 11 (I1)
  * -----------------------------------
- * Single-screen view of every regulator whose mandate touches Aldar.
+ * Single-screen view of every regulator whose mandate touches ABC.
  * Roles, obligations, reporting cadence, and linked Group Appetite
  * Statements. Static reference page — pilot will replace with the live
  * compliance obligations register and per-regulator deadline tracker.
@@ -50,7 +50,7 @@ export default function RegulatorMapPage() {
 
   return (
     <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 18 }}>
-      <IllustrativeDataBanner pilotFeeds="Aldar Compliance team's authoritative obligations register and per-regulator deadline tracker" />
+      <IllustrativeDataBanner pilotFeeds="ABC Compliance team's authoritative obligations register and per-regulator deadline tracker" />
 
       <div
         style={{
@@ -85,9 +85,9 @@ export default function RegulatorMapPage() {
               lineHeight: 1.55,
             }}
           >
-            Every regulator whose mandate touches Aldar — federal,
+            Every regulator whose mandate touches ABC — federal,
             emirate-level, market, and sector. Each card lists the body's
-            authority, Aldar's key obligations, the reporting cadence, and
+            authority, ABC's key obligations, the reporting cadence, and
             the Group Appetite Statements that anchor our tolerance for
             non-compliance.
           </p>
@@ -258,7 +258,7 @@ function RegulatorCard({ r, accent }: { r: Regulator; accent: string }) {
             marginBottom: 4,
           }}
         >
-          Aldar's Obligations
+          ABC's Obligations
         </div>
         <ul style={{ margin: 0, paddingLeft: 16, fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.55 }}>
           {r.obligations.map((o, i) => (

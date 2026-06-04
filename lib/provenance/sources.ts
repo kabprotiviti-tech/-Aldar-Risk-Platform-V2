@@ -6,7 +6,7 @@
  * downstream DataPoint that references it.
  *
  * Categories:
- *   - Aldar published documents (annual reports, ADX disclosures)
+ *   - ABC published documents (annual reports, ADX disclosures)
  *   - UAE regulators (CBUAE, SCA, ADREC)
  *   - International standards (ISO 31000, COSO ERM)
  *
@@ -18,43 +18,43 @@
 import type { Source } from './types'
 
 // ============================================================
-// ALDAR PUBLISHED DOCUMENTS
+// ABC PUBLISHED DOCUMENTS
 // ============================================================
 
-export const SRC_ALDAR_FY24_AR: Source = {
+export const SRC_ABC_FY24_AR: Source = {
   id: 'src.aldar.fy24.ar',
   kind: 'annual_report',
-  title: 'Aldar Properties PJSC — FY2024 Integrated Annual Report',
+  title: 'ABC Holdings — FY2024 Integrated Annual Report',
   url: 'https://www.aldar.com/en/investor-relations/financial-information/annual-reports',
   fetchedAt: '2026-05-05',
   fetchedBy: 'system',
   note: 'Public investor document. Use only figures explicitly disclosed; do not interpolate.',
 }
 
-export const SRC_ALDAR_FY25_RESULTS: Source = {
+export const SRC_ABC_FY25_RESULTS: Source = {
   id: 'src.aldar.fy25.results',
   kind: 'annual_report',
-  title: 'Aldar Properties PJSC — FY2025 Q4 Financial Results (announced Feb 2026)',
+  title: 'ABC Holdings — FY2025 Q4 Financial Results (announced Feb 2026)',
   url: 'https://www.aldar.com/en/news-and-media/aldar-q4-fy-2025-financial-results',
   fetchedAt: '2026-05-05',
   fetchedBy: 'system',
   note: 'Public press release. Group revenue AED 33.8B, EBITDA AED 11.2B, net profit AED 8.8B.',
 }
 
-export const SRC_ALDAR_Q1_2026: Source = {
+export const SRC_ABC_Q1_2026: Source = {
   id: 'src.aldar.q1.2026',
   kind: 'adx_disclosure',
-  title: 'Aldar Properties PJSC — Q1 FY2026 Financial Results (announced Apr 28, 2026)',
+  title: 'ABC Holdings — Q1 FY2026 Financial Results (announced Apr 28, 2026)',
   url: 'https://www.aldar.com/en/news-and-media/aldar-q1-fy-2026-financial-results',
   fetchedAt: '2026-05-05',
   fetchedBy: 'system',
   note: 'Public Q1 release. Revenue AED 8.7B, EBITDA AED 3.0B, net profit AED 2.3B, backlog AED 72.1B.',
 }
 
-export const SRC_ALDAR_ADX_PROFILE: Source = {
+export const SRC_ABC_ADX_PROFILE: Source = {
   id: 'src.aldar.adx.profile',
   kind: 'adx_disclosure',
-  title: 'ADX — Aldar Properties (ALDAR) Listed Company Profile',
+  title: 'ADX — ABC Holdings (ABC) Listed Company Profile',
   url: 'https://www.adx.ae/english/pages/productandservices/tradingservices/companyprofilepage.aspx?issuerid=158',
   fetchedAt: '2026-05-05',
   fetchedBy: 'system',
@@ -107,10 +107,10 @@ export const SRC_COSO_ERM: Source = {
 // ============================================================
 
 export const ALL_SOURCES: Source[] = [
-  SRC_ALDAR_FY24_AR,
-  SRC_ALDAR_FY25_RESULTS,
-  SRC_ALDAR_Q1_2026,
-  SRC_ALDAR_ADX_PROFILE,
+  SRC_ABC_FY24_AR,
+  SRC_ABC_FY25_RESULTS,
+  SRC_ABC_Q1_2026,
+  SRC_ABC_ADX_PROFILE,
   SRC_CBUAE_RATES,
   SRC_ADREC_MARKET,
   SRC_ISO_31000,

@@ -19,7 +19,7 @@ export async function GET() {
         { name: 'Nurai Island Villas Ph.3', delayDays: 19, criticalPath: false, cause: 'Marine access window restriction', revisedCompletion: 'Q4 2026' },
         { name: 'Al Raha Lofts — Tower 2', delayDays: 12, criticalPath: false, cause: 'Structural steel lead time overrun', revisedCompletion: 'Q1 2027' },
         { name: 'Jubail Mangroves Ph.1', delayDays: 8,  criticalPath: false, cause: 'EAD environmental permit extension required', revisedCompletion: 'Q3 2026' },
-        { name: 'Aldar HQ Tower Fit-Out', delayDays: 6,  criticalPath: false, cause: 'Bespoke furniture lead time', revisedCompletion: 'Q2 2026' },
+        { name: 'ABC HQ Tower Fit-Out', delayDays: 6,  criticalPath: false, cause: 'Bespoke furniture lead time', revisedCompletion: 'Q2 2026' },
       ],
       milestonesThisMonth: 18,
       milestonesAchieved: 14,
@@ -32,6 +32,6 @@ export async function GET() {
       onTimeDeliveryRate: '73.9%',
       safetyLTIFR: 0.42,
     },
-    note: 'Live integration requires Primavera Cloud API key + network peering to Aldar data centre. Mock data reflects latest manual report input.',
+    note: 'Live integration requires Primavera Cloud API key + network peering to ABC data centre. Mock data reflects latest manual report input.',
   })
 }

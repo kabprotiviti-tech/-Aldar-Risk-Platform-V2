@@ -11,7 +11,7 @@
  *
  * Honors CLAUDE.md: every figure derives from engine output. The
  * narrative is a pure template — no AI hallucination. Anchor figures
- * (Aldar FY25/Q1 26) shown via NumericValue with provenance.
+ * (ABC FY25/Q1 26) shown via NumericValue with provenance.
  */
 
 import React from 'react'

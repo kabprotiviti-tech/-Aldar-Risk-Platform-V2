@@ -45,7 +45,7 @@ export function MarketWidget() {
     return (
       <div style={pill}>
         <Minus size={11} style={{ color: 'var(--text-muted)' }} />
-        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>ALDAR</span>
+        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>ABC</span>
       </div>
     )
   }
@@ -56,7 +56,7 @@ export function MarketWidget() {
       <div title="ADX market data temporarily unavailable" style={pill}>
         <WifiOff size={11} style={{ color: 'var(--text-muted)' }} />
         <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
-          <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', letterSpacing: '0.04em' }}>ALDAR · ADX</span>
+          <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', letterSpacing: '0.04em' }}>ABC · ADX</span>
           <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Unavailable</span>
         </div>
       </div>
@@ -75,7 +75,7 @@ export function MarketWidget() {
       <Icon size={12} style={{ color, flexShrink: 0 }} />
       <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
         <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', letterSpacing: '0.04em' }}>
-          ALDAR · ADX
+          ABC · ADX
         </span>
         <span style={{ fontSize: '0.75rem', fontWeight: 700, color }}>
           AED {price.toFixed(2)}{' '}

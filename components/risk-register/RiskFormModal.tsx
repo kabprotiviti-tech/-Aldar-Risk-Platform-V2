@@ -487,7 +487,7 @@ export function RiskFormModal({ open, mode, initial, onClose, onSaved }: Props) 
             />
           </Field>
 
-          <Field label="Impact (consequence to Aldar)" error={errors.impact} required>
+          <Field label="Impact (consequence to ABC)" error={errors.impact} required>
             <textarea
               value={form.impact}
               onChange={(e) => setForm({ ...form, impact: e.target.value })}

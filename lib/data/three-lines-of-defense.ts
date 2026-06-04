@@ -1,9 +1,9 @@
 /**
- * Three Lines of Defense — Aldar adaptation
+ * Three Lines of Defense — ABC adaptation
  * ------------------------------------------
  * The IIA's 2020 Three Lines Model adapted to a UAE listed real estate
  * group with Group ERM at the centre. Roles are illustrative and
- * pre-pilot — pilot will replace these names with the actual Aldar
+ * pre-pilot — pilot will replace these names with the actual ABC
  * operating model after stakeholder workshops.
  *
  * Convention used here:
@@ -82,7 +82,7 @@ export const THREE_LINES: DefenseLine[] = [
     roles: [
       {
         title: 'Subsidiary CEO / MD',
-        scope: 'Aldar Development / Investment / Education / Hospitality',
+        scope: 'ABC Development / Investment / Education / Hospitality',
         responsibilities: [
           'Accountable for risk profile within the subsidiary',
           'Approve subsidiary risk register and key mitigation programmes',
@@ -103,7 +103,7 @@ export const THREE_LINES: DefenseLine[] = [
       },
       {
         title: 'Project Director / Construction',
-        scope: 'Aldar Development',
+        scope: 'ABC Development',
         responsibilities: [
           'Own project-phase delay and handover delay KRIs (KRI-11, KRI-12)',
           'Run cost-overrun controls and supplier-stability monitoring',
@@ -113,7 +113,7 @@ export const THREE_LINES: DefenseLine[] = [
       },
       {
         title: 'Asset Manager',
-        scope: 'Aldar Investment',
+        scope: 'ABC Investment',
         responsibilities: [
           'Own residential and commercial occupancy KRIs (KRI-09, KRI-10)',
           'Maintain re-pricing and tenant-mix actions',
@@ -213,8 +213,8 @@ export const THREE_LINES: DefenseLine[] = [
         title: 'IA Manager — Operational',
         scope: 'Group',
         responsibilities: [
-          'Test project gating and handover controls (Aldar Development)',
-          'Test occupancy reconciliation controls (Aldar Investment)',
+          'Test project gating and handover controls (ABC Development)',
+          'Test occupancy reconciliation controls (ABC Investment)',
           'Test KRI source-data integrity in PMS / Yardi feeds',
         ],
         platformSurfaces: ['/audit-trail', '/risk-register'],

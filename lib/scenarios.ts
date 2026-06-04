@@ -207,7 +207,7 @@ export const QUICK_SCENARIOS: Record<QuickScenario['id'], QuickScenario> = {
     affectedPortfolios: ['retail', 'facilities'],
     impactLevel: 'critical',
     description:
-      'An economic downturn triggers a CVA wave across UAE retail — 15 Aldar tenants fail to meet Q2 rent obligations. Yas Mall and Al Jimi Mall face accelerated vacancy risk with AED 42M annual rent in arrears.',
+      'An economic downturn triggers a CVA wave across UAE retail — 15 ABC tenants fail to meet Q2 rent obligations. Yas Mall and Al Jimi Mall face accelerated vacancy risk with AED 42M annual rent in arrears.',
     color: '#F97316',
     totalImpactAED: 198,
     impactPct: 2.0,

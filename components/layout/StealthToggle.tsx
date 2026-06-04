@@ -4,7 +4,7 @@
  * StealthToggle
  * -------------
  * Tiny, nearly-invisible dot in the bottom-right corner. Clicking it toggles
- * "client anonymisation mode" — every occurrence of "Aldar" / "Aldar Properties"
+ * "client anonymisation mode" — every occurrence of "ABC" / "ABC Holdings"
  * in the DOM is swapped live for a neutral alias ("ABC" / "ABC Holdings").
  *
  * Implementation: one MutationObserver walks text nodes + a handful of common
@@ -16,7 +16,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 const STORAGE_KEY = 'client-stealth-mode'
 
-// Ordered longest-first so "Aldar Properties" matches before "Aldar".
+// Ordered longest-first so "ABC Holdings" matches before "ABC".
 // The URL rule MUST run before the generic `aldar` rule, otherwise
 // "https://aldar.com/..." would become "https://abc.com/..." (a real,
 // unrelated company), leaking what we tried to anonymise. Replace any
@@ -25,11 +25,11 @@ const REPLACEMENTS: Array<[RegExp, string]> = [
   // 1. URL redaction (covers href + cdn URLs in src strings)
   [/https?:\/\/[^\s"'<>)]*aldar[^\s"'<>)]*/gi, '#source-redacted-anonymisation-mode'],
   // 2. Brand strings — longest-first
-  [/Aldar Properties PJSC/g, 'ABC Holdings PJSC'],
-  [/Aldar Properties/g, 'ABC Holdings'],
-  [/ALDAR PROPERTIES/g, 'ABC HOLDINGS'],
-  [/ALDAR/g, 'ABC'],
-  [/Aldar/g, 'ABC'],
+  [/ABC Holdings/g, 'ABC Holdings PJSC'],
+  [/ABC Holdings/g, 'ABC Holdings'],
+  [/ABC PROPERTIES/g, 'ABC HOLDINGS'],
+  [/ABC/g, 'ABC'],
+  [/ABC/g, 'ABC'],
   [/aldar/g, 'abc'],
 ]
 
@@ -37,10 +37,10 @@ const REPLACEMENTS: Array<[RegExp, string]> = [
 // path is gone). Toggling stealth OFF triggers a page reload to restore
 // the original DOM rather than relying on regex un-mangling.
 const REVERSE: Array<[RegExp, string]> = [
-  [/ABC Holdings PJSC/g, 'Aldar Properties PJSC'],
-  [/ABC Holdings/g, 'Aldar Properties'],
-  [/ABC HOLDINGS/g, 'ALDAR PROPERTIES'],
-  [/\bABC\b/g, 'Aldar'],
+  [/ABC Holdings PJSC/g, 'ABC Holdings'],
+  [/ABC Holdings/g, 'ABC Holdings'],
+  [/ABC HOLDINGS/g, 'ABC PROPERTIES'],
+  [/\bABC\b/g, 'ABC'],
   [/\babc\b/g, 'aldar'],
 ]
 

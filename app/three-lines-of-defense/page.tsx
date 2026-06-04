@@ -3,8 +3,8 @@
 /**
  * Three Lines of Defense — Module 10 (H1)
  * ----------------------------------------
- * Visualises the IIA 2020 Three Lines Model adapted to Aldar's operating
- * structure. Roles are illustrative — pilot will replace with real Aldar
+ * Visualises the IIA 2020 Three Lines Model adapted to ABC's operating
+ * structure. Roles are illustrative — pilot will replace with real ABC
  * ERM operating model after stakeholder workshops.
  *
  * Honors CLAUDE.md: every name and responsibility is labelled illustrative
@@ -23,7 +23,7 @@ export default function ThreeLinesPage() {
 
   return (
     <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 18 }}>
-      <IllustrativeDataBanner pilotFeeds="Aldar HR / ERM operating model after pilot stakeholder workshops" />
+      <IllustrativeDataBanner pilotFeeds="ABC HR / ERM operating model after pilot stakeholder workshops" />
 
       <div
         style={{
@@ -58,7 +58,7 @@ export default function ThreeLinesPage() {
               lineHeight: 1.55,
             }}
           >
-            The IIA 2020 Three Lines Model adapted to Aldar's structure.
+            The IIA 2020 Three Lines Model adapted to ABC's structure.
             Operational management owns the risk; Group ERM, Compliance, and
             Treasury frame and monitor it; Internal Audit provides
             independent assurance to the Audit &amp; Risk Committee (ARC).
@@ -86,7 +86,7 @@ export default function ThreeLinesPage() {
           borderTop: '1px dashed var(--border-color)',
         }}
       >
-        Reference: IIA Three Lines Model (2020). Mapping to Aldar roles is
+        Reference: IIA Three Lines Model (2020). Mapping to ABC roles is
         illustrative pre-pilot. Independence of Internal Audit (Line 3) is
         preserved through dual reporting to the Audit & Risk Committee.
       </div>

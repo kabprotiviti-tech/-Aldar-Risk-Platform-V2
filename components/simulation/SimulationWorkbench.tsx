@@ -123,7 +123,7 @@ function WorkbenchBody() {
       <ScenarioControlPanel />
       <ScenarioImpactPanel />
       <ScenarioSliderPanel />
-      {/* Immediate "so what for Aldar" readout — sits under the sliders so
+      {/* Immediate "so what for ABC" readout — sits under the sliders so
           every drag shows P&L / NOI / GDV consequences without scrolling. */}
       <LiveBusinessImpact />
 

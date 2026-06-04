@@ -156,7 +156,7 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
 
   return (
     <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <IllustrativeDataBanner pilotFeeds="Aldar live ERM feeds (PMS / Yardi / SAP / escrow)" />
+      <IllustrativeDataBanner pilotFeeds="ABC live ERM feeds (PMS / Yardi / SAP / escrow)" />
 
       {/* Header */}
       <div

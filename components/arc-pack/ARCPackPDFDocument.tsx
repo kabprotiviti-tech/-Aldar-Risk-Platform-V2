@@ -11,7 +11,7 @@
  * a deterministic A4 multi-page PDF.
  *
  * Honors CLAUDE.md: every numeric on the cover anchors traces back to
- * the published Aldar press release; illustrative values are tagged.
+ * the published ABC press release; illustrative values are tagged.
  */
 
 import React from 'react'
@@ -24,10 +24,10 @@ import {
   pdf,
 } from '@react-pdf/renderer'
 import {
-  ALDAR_FY25_GROUP_REVENUE,
-  ALDAR_FY25_GROUP_EBITDA,
-  ALDAR_FY25_NET_PROFIT_AFTER_TAX,
-  ALDAR_Q1_26_BACKLOG,
+  ABC_FY25_GROUP_REVENUE,
+  ABC_FY25_GROUP_EBITDA,
+  ABC_FY25_NET_PROFIT_AFTER_TAX,
+  ABC_Q1_26_BACKLOG,
 } from '@/lib/data/aldar-financials'
 import { RISKS, type ActionDef } from '@/lib/engine/seedData'
 import { KRI_DEFINITIONS } from '@/lib/data/kri-definitions'
@@ -204,10 +204,10 @@ export function ARCPackPDFDocument({ topMitigations }: ARCPDFProps) {
 
   return (
     <Document
-      title="Aldar ARC Risk Pack"
-      author="Aldar Group ERM"
+      title="ABC ARC Risk Pack"
+      author="ABC Group ERM"
       subject="Audit & Risk Committee Quarterly Pack"
-      keywords="Aldar, ARC, ERM, risk"
+      keywords="ABC, ARC, ERM, risk"
     >
       {/* SECTION 1 — COVER */}
       <Page size="A4" style={s.page}>
@@ -215,13 +215,13 @@ export function ARCPackPDFDocument({ topMitigations }: ARCPDFProps) {
           <Text style={s.sectionLabel}>Audit &amp; Risk Committee</Text>
           <Text style={s.h1}>ARC Risk Pack</Text>
           <Text style={[s.body, { marginBottom: 12 }]}>
-            Aldar Properties PJSC · {today} · Q2 FY2026 review
+            ABC Holdings · {today} · Q2 FY2026 review
           </Text>
           <Text style={[s.body, { color: COLORS.muted, marginBottom: 20 }]}>
             Quarterly snapshot of Group enterprise risk, KRI breach
-            posture, and mitigation status across Aldar Development,
+            posture, and mitigation status across ABC Development,
             Investment, Education, and Hospitality. Sourced figures cite
-            Aldar's published FY2025 and Q1 FY2026 results; illustrative
+            ABC's published FY2025 and Q1 FY2026 results; illustrative
             figures are labelled and remain pending pilot calibration.
           </Text>
         </View>
@@ -230,25 +230,25 @@ export function ARCPackPDFDocument({ topMitigations }: ARCPDFProps) {
           <View style={s.tile}>
             <Text style={s.tileLabel}>FY25 Group Revenue</Text>
             <Text style={s.tileValue}>
-              {fmt(ALDAR_FY25_GROUP_REVENUE.value, ALDAR_FY25_GROUP_REVENUE.unit)}
+              {fmt(ABC_FY25_GROUP_REVENUE.value, ABC_FY25_GROUP_REVENUE.unit)}
             </Text>
           </View>
           <View style={s.tile}>
             <Text style={s.tileLabel}>FY25 EBITDA</Text>
             <Text style={s.tileValue}>
-              {fmt(ALDAR_FY25_GROUP_EBITDA.value, ALDAR_FY25_GROUP_EBITDA.unit)}
+              {fmt(ABC_FY25_GROUP_EBITDA.value, ABC_FY25_GROUP_EBITDA.unit)}
             </Text>
           </View>
           <View style={s.tile}>
             <Text style={s.tileLabel}>FY25 Net Profit (PAT)</Text>
             <Text style={s.tileValue}>
-              {fmt(ALDAR_FY25_NET_PROFIT_AFTER_TAX.value, ALDAR_FY25_NET_PROFIT_AFTER_TAX.unit)}
+              {fmt(ABC_FY25_NET_PROFIT_AFTER_TAX.value, ABC_FY25_NET_PROFIT_AFTER_TAX.unit)}
             </Text>
           </View>
           <View style={s.tile}>
             <Text style={s.tileLabel}>Q1 FY26 Backlog</Text>
             <Text style={s.tileValue}>
-              {fmt(ALDAR_Q1_26_BACKLOG.value, ALDAR_Q1_26_BACKLOG.unit)}
+              {fmt(ABC_Q1_26_BACKLOG.value, ABC_Q1_26_BACKLOG.unit)}
             </Text>
           </View>
         </View>
@@ -258,7 +258,7 @@ export function ARCPackPDFDocument({ topMitigations }: ARCPDFProps) {
         </Text>
 
         <Text style={s.footerBar} fixed>
-          Aldar ARC Pack · {today} · Page 1 of 5
+          ABC ARC Pack · {today} · Page 1 of 5
         </Text>
       </Page>
 
@@ -303,7 +303,7 @@ export function ARCPackPDFDocument({ topMitigations }: ARCPDFProps) {
         </Text>
 
         <Text style={s.footerBar} fixed>
-          Aldar ARC Pack · {today} · Page 2 of 5
+          ABC ARC Pack · {today} · Page 2 of 5
         </Text>
       </Page>
 
@@ -342,7 +342,7 @@ export function ARCPackPDFDocument({ topMitigations }: ARCPDFProps) {
         </View>
 
         <Text style={s.footerBar} fixed>
-          Aldar ARC Pack · {today} · Page 3 of 5
+          ABC ARC Pack · {today} · Page 3 of 5
         </Text>
       </Page>
 
@@ -358,7 +358,7 @@ export function ARCPackPDFDocument({ topMitigations }: ARCPDFProps) {
         <View style={{ marginBottom: 6 }}>
           {[
             { name: 'Residential Price Collapse', driver: 'KRI-14 Residential Price Index', impact: 'Compresses GDV on unsold inventory; engine routes through R-003 + R-008.' },
-            { name: 'Commercial Rental Decline', driver: 'KRI-15 Commercial Rent Index, KRI-10 Commercial Occupancy', impact: 'Compresses Aldar Investment NOI; routes through R-004 + R-005.' },
+            { name: 'Commercial Rental Decline', driver: 'KRI-15 Commercial Rent Index, KRI-10 Commercial Occupancy', impact: 'Compresses ABC Investment NOI; routes through R-004 + R-005.' },
             { name: 'Global Financial Stress', driver: 'KRI-13 + KRI-16 default rates, KRI-14 + KRI-15 indices', impact: 'Compound stress; routes through R-008 (liquidity) primarily.' },
           ].map((scen, i) => (
             <View key={i} style={{ marginBottom: 6 }}>
@@ -397,7 +397,7 @@ export function ARCPackPDFDocument({ topMitigations }: ARCPDFProps) {
         </View>
 
         <Text style={s.footerBar} fixed>
-          Aldar ARC Pack · {today} · Page 4 of 5
+          ABC ARC Pack · {today} · Page 4 of 5
         </Text>
       </Page>
 
@@ -408,7 +408,7 @@ export function ARCPackPDFDocument({ topMitigations }: ARCPDFProps) {
         <Text style={[s.body, { marginBottom: 14 }]}>
           The undersigned confirm that the risks, KRIs, scenarios and
           mitigation programmes presented above represent Group ERM's
-          best assessment of the Aldar enterprise risk profile as at
+          best assessment of the ABC enterprise risk profile as at
           {' '}{today}, and that all material exposures above appetite have
           been escalated to the Audit &amp; Risk Committee.
         </Text>
@@ -428,15 +428,15 @@ export function ARCPackPDFDocument({ topMitigations }: ARCPDFProps) {
         <View style={s.divider} />
 
         <Text style={s.muted}>
-          Generated by the Aldar Risk Platform. Anchor figures verified
-          against Aldar published results (FY25 Q4 + Q1 FY26 press
+          Generated by the ABC Risk Platform. Anchor figures verified
+          against ABC published results (FY25 Q4 + Q1 FY26 press
           releases). Engine-derived figures are illustrative MVP
           calibration — pilot replaces them with live feeds from PMS /
           Yardi / SAP / escrow agents.
         </Text>
 
         <Text style={s.footerBar} fixed>
-          Aldar ARC Pack · {today} · Page 5 of 5
+          ABC ARC Pack · {today} · Page 5 of 5
         </Text>
       </Page>
     </Document>

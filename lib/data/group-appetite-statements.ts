@@ -7,7 +7,7 @@
  * acknowledges; per-KRI numerical thresholds derive from them.
  *
  * All statements are illustrative pre-pilot calibrations. Pilot will
- * replace these with the Aldar-approved appetite framework signed off
+ * replace these with the ABC-approved appetite framework signed off
  * by the Audit & Risk Committee.
  */
 
@@ -133,7 +133,7 @@ export const GROUP_APPETITE_STATEMENTS: GroupAppetiteStatement[] = [
     category: 'strategic',
     title: 'Portfolio Mix & Growth',
     statement:
-      'Eager to expand recurring-income (Investment, Education, Hospitality) share of EBITDA, while preserving Aldar Development pipeline depth. Open to opportunistic land-bank additions where unit economics support ≥18% margin.',
+      'Eager to expand recurring-income (Investment, Education, Hospitality) share of EBITDA, while preserving ABC Development pipeline depth. Open to opportunistic land-bank additions where unit economics support ≥18% margin.',
     level: 'eager',
     approvedBy: 'Board of Directors (illustrative)',
     lastReviewed: '2025-11-20',

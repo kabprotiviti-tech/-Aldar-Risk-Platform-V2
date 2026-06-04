@@ -250,7 +250,7 @@ export function Header() {
                   whiteSpace: 'nowrap',
                 }}
               >
-                Aldar Properties
+                ABC Holdings
               </span>
               <h1
                 className="header-title"

@@ -489,7 +489,7 @@ export default function DashboardPage() {
         <div className="flex items-center gap-2">
           <Activity size={14} style={{ color: 'var(--accent-primary)' }} />
           <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-            Aldar Properties — Enterprise Risk Dashboard · Q2 2026
+            ABC Holdings — Enterprise Risk Dashboard · Q2 2026
           </span>
         </div>
         <div className="flex items-center gap-2">

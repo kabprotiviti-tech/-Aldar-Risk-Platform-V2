@@ -1,14 +1,14 @@
 /**
- * Aldar Entity Hierarchy — Demo
+ * ABC Entity Hierarchy — Demo
  * -----------------------------
- * Mirrors Aldar's publicly disclosed business segments. Used as the spine
+ * Mirrors ABC's publicly disclosed business segments. Used as the spine
  * for the master-subsidiary cascade, portfolio roll-up, and RBAC scoping.
  *
  * IMPORTANT: this is the DEMO hierarchy, surfaced clearly in the UI as:
- *   "Demo hierarchy mirrors Aldar's public business segments. Production
- *    will reflect Aldar's actual legal entity structure post-IT review."
+ *   "Demo hierarchy mirrors ABC's public business segments. Production
+ *    will reflect ABC's actual legal entity structure post-IT review."
  *
- * Source: Aldar Properties PJSC FY2024 Integrated Annual Report
+ * Source: ABC Holdings FY2024 Integrated Annual Report
  * (segment reporting). Public investor document.
  */
 
@@ -22,7 +22,7 @@ export interface Entity {
   shortName: string
   /** Parent entity id; null for the holding. */
   parentId: string | null
-  /** Public segment description from Aldar disclosures. */
+  /** Public segment description from ABC disclosures. */
   description: string
   /** ISO-3166 country code for the primary operating jurisdiction. */
   country: string
@@ -37,20 +37,20 @@ export const ENTITIES: Entity[] = [
   {
     id: 'aldar-group',
     kind: 'holding',
-    name: 'Aldar Properties PJSC',
-    shortName: 'Aldar Group',
+    name: 'ABC Holdings',
+    shortName: 'ABC Group',
     parentId: null,
     description:
       'Listed Abu Dhabi real estate group; operates across development, investment, education and hospitality.',
     country: 'AE',
-    ticker: 'ALDAR',
+    ticker: 'ABC',
     color: '#C9A84C',
   },
   // ---- Subsidiaries ----
   {
     id: 'aldar-development',
     kind: 'subsidiary',
-    name: 'Aldar Development',
+    name: 'ABC Development',
     shortName: 'Development',
     parentId: 'aldar-group',
     description:
@@ -61,7 +61,7 @@ export const ENTITIES: Entity[] = [
   {
     id: 'aldar-investment',
     kind: 'subsidiary',
-    name: 'Aldar Investment',
+    name: 'ABC Investment',
     shortName: 'Investment',
     parentId: 'aldar-group',
     description:
@@ -72,7 +72,7 @@ export const ENTITIES: Entity[] = [
   {
     id: 'aldar-education',
     kind: 'subsidiary',
-    name: 'Aldar Education',
+    name: 'ABC Education',
     shortName: 'Education',
     parentId: 'aldar-group',
     description:
@@ -83,11 +83,11 @@ export const ENTITIES: Entity[] = [
   {
     id: 'aldar-hospitality',
     kind: 'subsidiary',
-    name: 'Aldar Hospitality',
+    name: 'ABC Hospitality',
     shortName: 'Hospitality',
     parentId: 'aldar-group',
     description:
-      'Hotel, leisure and theme park operations including assets on Yas Island and Saadiyat (held within the Aldar group structure).',
+      'Hotel, leisure and theme park operations including assets on Yas Island and Saadiyat (held within the ABC group structure).',
     country: 'AE',
     color: '#A855F7',
   },
@@ -111,4 +111,4 @@ export function getChildren(parentId: string): Entity[] {
  * Caveat string surfaced on every cross-entity screen, per CLAUDE.md.
  */
 export const HIERARCHY_DISCLAIMER =
-  "Demo hierarchy mirrors Aldar's public business segments. Production will reflect Aldar's actual legal entity structure post-IT review."
+  "Demo hierarchy mirrors ABC's public business segments. Production will reflect ABC's actual legal entity structure post-IT review."

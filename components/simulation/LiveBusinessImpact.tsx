@@ -4,7 +4,7 @@
  * Executive Impact Panel
  * ----------------------
  * Sits directly under the slider controls and answers, in <5 seconds,
- * "So what does this mean for Aldar?"
+ * "So what does this mean for ABC?"
  *
  * ⚠️ Additive only — NO new simulation logic. All numbers come from existing
  *    engine outputs exposed via SimulationContext + decisionEngine:
@@ -25,10 +25,10 @@ import { costOfDelay, ceoSummary } from '@/lib/engine/decisionEngine'
 import type { DriverId } from '@/lib/engine/types'
 import { NumericValue } from '@/components/provenance/NumericValue'
 import {
-  ALDAR_FY25_GROUP_REVENUE,
-  ALDAR_FY25_GROUP_EBITDA,
-  ALDAR_FY25_NET_PROFIT_AFTER_TAX,
-  ALDAR_Q1_26_BACKLOG,
+  ABC_FY25_GROUP_REVENUE,
+  ABC_FY25_GROUP_EBITDA,
+  ABC_FY25_NET_PROFIT_AFTER_TAX,
+  ABC_Q1_26_BACKLOG,
 } from '@/lib/data/aldar-financials'
 
 // ─── Driver source classification (metadata only — no new math) ──────────────
@@ -241,8 +241,8 @@ export function LiveBusinessImpact() {
   const atRest = Math.abs(exposurePct) < 0.5
   const dir = exposureDelta >= 0 ? 'worsens' : 'improves'
   const headline = atRest
-    ? `Aldar is within baseline tolerance — no material change from current assumptions.`
-    : `Aldar's risk-weighted exposure ${dir} by ${fmtAbsMn(Math.abs(exposureDelta))} (${fmtPct(exposurePct)}). ${
+    ? `ABC is within baseline tolerance — no material change from current assumptions.`
+    : `ABC's risk-weighted exposure ${dir} by ${fmtAbsMn(Math.abs(exposureDelta))} (${fmtPct(exposurePct)}). ${
         portfolio.ratingFrom !== portfolio.ratingTo
           ? `Portfolio moves ${portfolio.ratingFrom} → ${portfolio.ratingTo}.`
           : `Portfolio band holds at ${portfolio.ratingTo}.`
@@ -271,7 +271,7 @@ export function LiveBusinessImpact() {
             letterSpacing: 1.2,
           }}
         >
-          Executive Impact Panel · So what does this mean for Aldar?
+          Executive Impact Panel · So what does this mean for ABC?
         </div>
         <div
           style={{
@@ -286,7 +286,7 @@ export function LiveBusinessImpact() {
         </div>
       </div>
 
-      {/* ── Aldar FY25 / Q1 2026 Anchor Strip — every figure clicks through to source ── */}
+      {/* ── ABC FY25 / Q1 2026 Anchor Strip — every figure clicks through to source ── */}
       <div
         style={{
           background: 'var(--bg-secondary)',
@@ -309,12 +309,12 @@ export function LiveBusinessImpact() {
             letterSpacing: 0.8,
           }}
         >
-          Anchored against Aldar
+          Anchored against ABC
         </span>
-        <AnchorItem label="FY25 Revenue" data={ALDAR_FY25_GROUP_REVENUE} />
-        <AnchorItem label="FY25 EBITDA" data={ALDAR_FY25_GROUP_EBITDA} />
-        <AnchorItem label="FY25 Net Profit" data={ALDAR_FY25_NET_PROFIT_AFTER_TAX} />
-        <AnchorItem label="Q1'26 Backlog" data={ALDAR_Q1_26_BACKLOG} />
+        <AnchorItem label="FY25 Revenue" data={ABC_FY25_GROUP_REVENUE} />
+        <AnchorItem label="FY25 EBITDA" data={ABC_FY25_GROUP_EBITDA} />
+        <AnchorItem label="FY25 Net Profit" data={ABC_FY25_NET_PROFIT_AFTER_TAX} />
+        <AnchorItem label="Q1'26 Backlog" data={ABC_Q1_26_BACKLOG} />
         <span
           style={{
             marginLeft: 'auto',
@@ -723,7 +723,7 @@ export function LiveBusinessImpact() {
                 Impact is calculated using a <b>driver-based model</b> that
                 links business KPIs (occupancy, sales velocity, price index,
                 construction cost, etc.) to risk exposure using <b>predefined
-                sensitivities</b> drawn from Aldar&rsquo;s risk register and
+                sensitivities</b> drawn from ABC&rsquo;s risk register and
                 control library.
               </div>
               <ul

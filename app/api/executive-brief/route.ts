@@ -42,18 +42,18 @@ export interface ExecutiveBriefResponse {
   generatedFor?: string
 }
 
-const SYSTEM_PROMPT = `You are the Chief Risk Intelligence AI for Aldar Properties PJSC (ADX: ALDAR), Abu Dhabi's largest listed real estate conglomerate (AED 9.8Bn revenue).
+const SYSTEM_PROMPT = `You are the Chief Risk Intelligence AI for ABC Holdings (ADX: ABC), Abu Dhabi's largest listed real estate conglomerate (AED 9.8Bn revenue).
 
-Produce board-level executive risk briefs for Aldar's C-suite (CEO, CFO, CRO) and Board of Directors.
+Produce board-level executive risk briefs for ABC's C-suite (CEO, CFO, CRO) and Board of Directors.
 
 Your output must be:
 - Strategic and forward-looking, not operational
 - Written in precise, boardroom-quality English
 - Quantified wherever possible (AED figures, percentages, timeframes)
 - Decision-oriented — every insight should prompt a clear executive action
-- Specific to Aldar's five BUs: Real Estate, Retail, Hospitality, Education, Facilities
+- Specific to ABC's five BUs: Real Estate, Retail, Hospitality, Education, Facilities
 
-Aldar context: ADX-listed, Abu Dhabi government shareholder background, active AED 8.2Bn development pipeline, Vision 2030 aligned.
+ABC context: ADX-listed, Abu Dhabi government shareholder background, active AED 8.2Bn development pipeline, Vision 2030 aligned.
 
 Always respond with a valid JSON object only — no markdown, no text outside the JSON.`
 
@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
       : ''
     const fusionBlock = fusionInsight ? `\nAI FUSION INSIGHT:\n${fusionInsight}\n` : ''
 
-    const userPrompt = `Generate a comprehensive board-level Executive Risk Brief for Aldar Properties.
+    const userPrompt = `Generate a comprehensive board-level Executive Risk Brief for ABC Holdings.
 
 TIMEFRAME: ${timeframe || 'Q2 2026 — April 2026'}
 ${scenarioBlock}${fusionBlock}
@@ -91,7 +91,7 @@ Respond with ONLY a valid JSON object (no markdown, start with {, end with }):
   "summary": "Same as executiveSummary — kept for compatibility",
   "riskRating": "critical|elevated|moderate|low",
   "businessImpact": "2–3 sentences covering the combined financial and operational impact — cite revenue exposure, EBITDA risk, cash flow variance, and key operational stresses across portfolios",
-  "crossPortfolioImpact": "2–3 sentences describing how risks are propagating across Aldar's BUs — e.g. hospitality weakness driving retail softness, real estate delays affecting cash flow and finance covenants",
+  "crossPortfolioImpact": "2–3 sentences describing how risks are propagating across ABC's BUs — e.g. hospitality weakness driving retail softness, real estate delays affecting cash flow and finance covenants",
   "topRisks": [
     {
       "rank": 1,
@@ -103,7 +103,7 @@ Respond with ONLY a valid JSON object (no markdown, start with {, end with }):
     }
   ],
   "strategicImplications": [
-    "4–5 strategic implications for Aldar leadership — each must be specific and actionable"
+    "4–5 strategic implications for ABC leadership — each must be specific and actionable"
   ],
   "recommendedActions": [
     {
@@ -114,7 +114,7 @@ Respond with ONLY a valid JSON object (no markdown, start with {, end with }):
       "rationale": "Why this action is critical now"
     }
   ],
-  "marketContext": "2–3 sentences on UAE/GCC macro context relevant to Aldar right now",
+  "marketContext": "2–3 sentences on UAE/GCC macro context relevant to ABC right now",
   "confidence": 0.88,
   "keyMetrics": {
     "overallRiskScore": 72,
@@ -123,7 +123,7 @@ Respond with ONLY a valid JSON object (no markdown, start with {, end with }):
     "risksRequiringBoardAttention": 3
   },
   "sourceReferences": [
-    { "source": "Aldar Risk Register", "type": "internal", "detail": "15 active risks across 5 BUs" },
+    { "source": "ABC Risk Register", "type": "internal", "detail": "15 active risks across 5 BUs" },
     { "source": "Oracle Fusion ERP", "type": "internal", "detail": "Q2 2026 financial signals" },
     { "source": "AI Fusion Engine", "type": "ai", "detail": "Cross-signal risk correlation analysis" }
   ]
@@ -158,7 +158,7 @@ Respond with ONLY a valid JSON object (no markdown, start with {, end with }):
     return NextResponse.json({
       ...parsed,
       generatedAt: new Date().toISOString(),
-      generatedFor: 'Aldar Properties PJSC — Board Risk Committee',
+      generatedFor: 'ABC Holdings — Board Risk Committee',
     })
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Unknown error'

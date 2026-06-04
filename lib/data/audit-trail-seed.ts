@@ -123,7 +123,7 @@ export function buildAuditTrailSeed(now: Date = new Date()): SeedAuditEvent[] {
       at: t(2880),
       category: 'kri_entry',
       action: 'create',
-      actor: 'Head of Aldar Investment',
+      actor: 'Head of ABC Investment',
       targetId: 'KRI-10',
       summary: 'KRI-10 2026-04: value 94 entered (commercial occupancy).',
     },

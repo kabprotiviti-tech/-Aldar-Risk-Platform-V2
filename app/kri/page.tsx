@@ -58,7 +58,7 @@ function KRIContent() {
 
   return (
     <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <IllustrativeDataBanner pilotFeeds="Aldar PMS / Yardi / SAP for live KRI feeds" />
+      <IllustrativeDataBanner pilotFeeds="ABC PMS / Yardi / SAP for live KRI feeds" />
       <div
         style={{
           display: 'flex',
@@ -88,7 +88,7 @@ function KRIContent() {
               lineHeight: 1.5,
             }}
           >
-            The 8 KRIs Aldar tracks across the development, investment,
+            The 8 KRIs ABC tracks across the development, investment,
             and sales pipelines. Current values flow from the simulation
             engine drivers; thresholds are user-editable per KRI and
             persist locally. Manual entry, traffic-light status, breach
@@ -149,7 +149,7 @@ function KRIContent() {
       >
         Most baseline values are normalized indices (100 = budget / plan)
         — click ⓘ on any value to see source and calibration plan. Live
-        feeds from Aldar PMS / Yardi / SAP are wired in pilot.
+        feeds from ABC PMS / Yardi / SAP are wired in pilot.
       </div>
 
       {/* Threshold editor modal (D2) */}

@@ -181,7 +181,7 @@ function RiskRegisterContent() {
 
   return (
     <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <IllustrativeDataBanner pilotFeeds="Aldar segment P&L for AED exposure baselines" />
+      <IllustrativeDataBanner pilotFeeds="ABC segment P&L for AED exposure baselines" />
       {/* Header + status badge */}
       <div
         style={{
@@ -212,7 +212,7 @@ function RiskRegisterContent() {
               lineHeight: 1.5,
             }}
           >
-            Cause-Event-Impact register for Aldar Group. Inherent and residual scores
+            Cause-Event-Impact register for ABC Group. Inherent and residual scores
             for engine risks come from the simulation. User-added risks are stored
             locally as DRAFT and persist between sessions in this browser. Click any
             row for the detail drawer — mitigation actions, status workflow,

@@ -1,5 +1,5 @@
 // lib/portfolioData.ts
-// Enterprise-scale portfolio risk universe — Aldar Properties PJSC
+// Enterprise-scale portfolio risk universe — ABC Holdings
 // Simulates 200–400 risks per business unit as would feed from Oracle Fusion ERP + risk register
 
 export type PortfolioKey = 'real-estate' | 'retail' | 'hospitality' | 'education' | 'facilities'
@@ -142,7 +142,7 @@ const TITLES: Record<PortfolioKey, Record<RiskCategory, string[]>> = {
       'PropTech Disintermediation — Digital Sales Bypass',
       'Global Investor Sentiment — Emerging Market Risk-Off',
       'UAE Visa Policy Change — Golden Visa Program Impact',
-      'ADX Aldar Share Price Sensitivity to Development Volumes',
+      'ADX ABC Share Price Sensitivity to Development Volumes',
     ],
     operational: [
       'Construction Delay — Saadiyat Phase 3 Foundation Works',

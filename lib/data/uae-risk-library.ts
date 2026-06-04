@@ -1,13 +1,13 @@
 /**
  * UAE Risk Library — sector-specific risk scenarios
  * --------------------------------------------------
- * A curated library of risks Aldar's peer set across the UAE listed
+ * A curated library of risks ABC's peer set across the UAE listed
  * real-estate sector typically discloses or that materially affects the
  * Abu Dhabi / Dubai property cycle. Risk Champions can review and lift
  * any of these into the Risk Register as a starting draft.
  *
  * All exposure ranges and likelihood narratives are illustrative pilot-
- * pre-calibration. Pilot will replace with Aldar's actual residual
+ * pre-calibration. Pilot will replace with ABC's actual residual
  * exposure and Champion-attributed appetite.
  */
 
@@ -27,7 +27,7 @@ export interface RiskLibraryEntry {
   category: RiskLibraryCategory
   /** 1-2 sentence cause-event-impact narrative. */
   description: string
-  /** Why this risk is material to Aldar specifically. */
+  /** Why this risk is material to ABC specifically. */
   aldarRelevance: string
   /** Illustrative residual exposure range (AED mn). */
   exposureRangeAedMn: [number, number]
@@ -65,7 +65,7 @@ export const RISK_LIBRARY: RiskLibraryEntry[] = [
     description:
       'Construction or fit-out delays push contractual handover dates, triggering DLD penalties, deferred revenue recognition, and customer-default cascades.',
     aldarRelevance:
-      'Aldar Development carries a multi-billion AED off-plan pipeline; handover slip rates are tracked monthly via KRI-12. FY25 disclosed delivery records ~88% on-plan.',
+      'ABC Development carries a multi-billion AED off-plan pipeline; handover slip rates are tracked monthly via KRI-12. FY25 disclosed delivery records ~88% on-plan.',
     exposureRangeAedMn: [200, 600],
     likelihood: 'high',
     linkedKRIs: ['KRI-11', 'KRI-12'],
@@ -122,7 +122,7 @@ export const RISK_LIBRARY: RiskLibraryEntry[] = [
     description:
       'Commercial rent index falls / lease-renewal terms compress on expiring contracts; vacancy in office and retail GLA increases above appetite.',
     aldarRelevance:
-      'Aldar Investment Commercial portfolio (incl. Yas Mall) carries multi-billion AED valuation. KRI-10 (commercial occupancy) and KRI-15 (rent index) track this.',
+      'ABC Investment Commercial portfolio (incl. Yas Mall) carries multi-billion AED valuation. KRI-10 (commercial occupancy) and KRI-15 (rent index) track this.',
     exposureRangeAedMn: [200, 800],
     likelihood: 'medium',
     linkedKRIs: ['KRI-10', 'KRI-15'],
@@ -160,7 +160,7 @@ export const RISK_LIBRARY: RiskLibraryEntry[] = [
     description:
       'Material information not disclosed within statutory windows or disclosed inconsistently across channels — triggers ADX / SCA penalty and reputational damage.',
     aldarRelevance:
-      'ADX-listed (ALDAR). Quarterly results, M&A, and material contract awards must hit continuous-disclosure rules. Investor-relations workflow is the front-line control.',
+      'ADX-listed (ABC). Quarterly results, M&A, and material contract awards must hit continuous-disclosure rules. Investor-relations workflow is the front-line control.',
     exposureRangeAedMn: [10, 100],
     likelihood: 'low',
     linkedKRIs: [],
@@ -179,7 +179,7 @@ export const RISK_LIBRARY: RiskLibraryEntry[] = [
     description:
       'Materials or labour cost inflation, scope creep, or contractor failure pushes project costs above approved budget, eroding margin and IRR.',
     aldarRelevance:
-      'Aldar Development pipeline includes mixed-use flagships with significant fit-out cost components. Steel / cement price moves are watched.',
+      'ABC Development pipeline includes mixed-use flagships with significant fit-out cost components. Steel / cement price moves are watched.',
     exposureRangeAedMn: [80, 350],
     likelihood: 'medium',
     linkedKRIs: [],
@@ -196,9 +196,9 @@ export const RISK_LIBRARY: RiskLibraryEntry[] = [
     name: 'School inspection downgrade',
     category: 'regulatory',
     description:
-      'ADEK / KHDA inspection rating downgrade triggers parent-driven enrolment loss and fee-cap downside on existing Aldar Education assets.',
+      'ADEK / KHDA inspection rating downgrade triggers parent-driven enrolment loss and fee-cap downside on existing ABC Education assets.',
     aldarRelevance:
-      'Aldar Education portfolio depends on inspection ratings for fee-tier permission and parent enrolment retention. Linked to GA-REP-01.',
+      'ABC Education portfolio depends on inspection ratings for fee-tier permission and parent enrolment retention. Linked to GA-REP-01.',
     exposureRangeAedMn: [20, 120],
     likelihood: 'low',
     linkedKRIs: [],
@@ -236,7 +236,7 @@ export const RISK_LIBRARY: RiskLibraryEntry[] = [
     description:
       'Material slippage from disclosed net-zero or Estidama / LEED commitments triggers ESG-rating downgrade, sustainability-linked-loan margin step-up, and reputational damage.',
     aldarRelevance:
-      'Aldar has published net-zero and green-financing commitments. Rating-watch by MSCI / Sustainalytics is material to investor relations.',
+      'ABC has published net-zero and green-financing commitments. Rating-watch by MSCI / Sustainalytics is material to investor relations.',
     exposureRangeAedMn: [10, 80],
     likelihood: 'low',
     linkedKRIs: [],
@@ -253,9 +253,9 @@ export const RISK_LIBRARY: RiskLibraryEntry[] = [
     name: 'Interest-rate / FX shock',
     category: 'macro',
     description:
-      'Sustained UAE policy-rate uplift or AED-pegged dollar tightening compresses buyer affordability, raises Aldar finance costs, and stresses non-AED revenue lines.',
+      'Sustained UAE policy-rate uplift or AED-pegged dollar tightening compresses buyer affordability, raises ABC finance costs, and stresses non-AED revenue lines.',
     aldarRelevance:
-      'Aldar holds AED-denominated debt; AED-USD peg means Fed moves transmit. Affordability stress on KRI-13 and KRI-16 is the leading indicator.',
+      'ABC holds AED-denominated debt; AED-USD peg means Fed moves transmit. Affordability stress on KRI-13 and KRI-16 is the leading indicator.',
     exposureRangeAedMn: [60, 300],
     likelihood: 'medium',
     linkedKRIs: ['KRI-13', 'KRI-16'],
@@ -272,9 +272,9 @@ export const RISK_LIBRARY: RiskLibraryEntry[] = [
     name: 'Hospitality demand shock',
     category: 'operational',
     description:
-      'Geopolitical event, pandemic recurrence, or inbound-tourism slowdown materially compresses hotel occupancy and ADR across Aldar Hospitality assets.',
+      'Geopolitical event, pandemic recurrence, or inbound-tourism slowdown materially compresses hotel occupancy and ADR across ABC Hospitality assets.',
     aldarRelevance:
-      'Aldar Hospitality assets sensitive to Abu Dhabi tourism cycles. ADR / occupancy KPIs roll into segment EBITDA contribution.',
+      'ABC Hospitality assets sensitive to Abu Dhabi tourism cycles. ADR / occupancy KPIs roll into segment EBITDA contribution.',
     exposureRangeAedMn: [30, 180],
     likelihood: 'low',
     linkedKRIs: [],

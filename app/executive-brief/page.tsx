@@ -173,7 +173,7 @@ export default function ExecutiveBriefPage() {
                 </h2>
               </div>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.825rem', maxWidth: '520px', lineHeight: 1.6 }}>
-                AI-powered risk intelligence brief for Aldar Properties Board of Directors. Synthesizes all portfolio risks, financial exposures, cross-portfolio propagation, and strategic recommendations.
+                AI-powered risk intelligence brief for ABC Holdings Board of Directors. Synthesizes all portfolio risks, financial exposures, cross-portfolio propagation, and strategic recommendations.
               </p>
               <div className="flex items-center gap-3 mt-3 flex-wrap">
                 {['15 Risks Analyzed', '5 Portfolios', 'AED 2.35Bn Exposure', 'Q2 2026'].map((tag) => (
@@ -706,9 +706,9 @@ export default function ExecutiveBriefPage() {
                   {result.marketContext}
                 </p>
                 <AIInsightBox
-                  insight="This executive brief synthesizes Aldar's internal risk register, live ERP/CRM signals, and AI fusion analysis. All assessments are AI-generated and should be reviewed by the Risk Management team before formal board submission."
+                  insight="This executive brief synthesizes ABC's internal risk register, live ERP/CRM signals, and AI fusion analysis. All assessments are AI-generated and should be reviewed by the Risk Management team before formal board submission."
                   confidence={result.confidence}
-                  source="Aldar AI Risk Engine — Executive Brief Module"
+                  source="ABC AI Risk Engine — Executive Brief Module"
                 />
               </CardBody>
             </Card>

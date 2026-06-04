@@ -3,10 +3,10 @@
  * ----------------------------------------
  * Each engine risk is tagged with the subsidiary that primarily owns it.
  * This is ILLUSTRATIVE for MVP — production will lift entity ownership
- * from Aldar's actual register where each risk has a real entity-level
+ * from ABC's actual register where each risk has a real entity-level
  * accountable executive.
  *
- * Standing rule (CLAUDE.md): tagged honestly. Aldar Education appears
+ * Standing rule (CLAUDE.md): tagged honestly. ABC Education appears
  * with zero engine risks because none of R-001..R-010 are education-
  * specific in the seed register. The Portfolio Tower surfaces this
  * truthfully rather than fabricating an Education risk.

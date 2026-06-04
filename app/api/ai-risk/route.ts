@@ -10,20 +10,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Signal is required' }, { status: 400 })
     }
 
-    const systemPrompt = `You are an expert Enterprise Risk Management AI for Aldar Properties PJSC, Abu Dhabi's leading listed real estate developer and asset owner.
+    const systemPrompt = `You are an expert Enterprise Risk Management AI for ABC Holdings, Abu Dhabi's leading listed real estate developer and asset owner.
 
-Aldar's business spans:
+ABC's business spans:
 - Real Estate Development (Saadiyat Island, Yas Island, Reem Island, Al Raha Beach masterplanned communities)
 - Retail (Yas Mall, community retail across Abu Dhabi)
 - Hospitality & Leisure (Yas Island hotels, beach clubs, entertainment venues)
-- Education (Aldar Education network of 30+ premium international schools in UAE)
+- Education (ABC Education network of 30+ premium international schools in UAE)
 - Asset & Facilities Management (40+ commercial and residential assets under management)
 
-Your role is to classify and analyze risk signals in the context of Aldar's specific business, UAE real estate market dynamics, Abu Dhabi Economic Vision 2030, and current GCC macro environment.
+Your role is to classify and analyze risk signals in the context of ABC's specific business, UAE real estate market dynamics, Abu Dhabi Economic Vision 2030, and current GCC macro environment.
 
-Always respond with a valid JSON object only — no markdown, no explanation outside the JSON. Be precise, business-focused and use Aldar-specific context.`
+Always respond with a valid JSON object only — no markdown, no explanation outside the JSON. Be precise, business-focused and use ABC-specific context.`
 
-    const userPrompt = `Analyze the following risk signal for Aldar Properties and classify it:
+    const userPrompt = `Analyze the following risk signal for ABC Holdings and classify it:
 
 SIGNAL: ${signal}
 
@@ -35,9 +35,9 @@ Respond with ONLY a valid JSON object (no markdown fences):
   "riskType": "string (specific risk category)",
   "severity": "critical|high|medium|low",
   "confidence": 0.0 to 1.0,
-  "explanation": "2-3 sentence explanation specific to Aldar",
-  "affectedPortfolios": ["array of affected Aldar portfolio segments"],
-  "recommendations": ["array of 3-4 specific actionable recommendations for Aldar management"],
+  "explanation": "2-3 sentence explanation specific to ABC",
+  "affectedPortfolios": ["array of affected ABC portfolio segments"],
+  "recommendations": ["array of 3-4 specific actionable recommendations for ABC management"],
   "financialImpact": "string describing estimated financial impact in AED",
   "timeHorizon": "immediate|short-term|medium-term|long-term",
   "relatedRisks": ["array of 2-3 related risk areas to monitor"]

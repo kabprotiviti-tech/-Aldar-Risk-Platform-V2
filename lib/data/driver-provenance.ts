@@ -22,8 +22,8 @@ import {
   type DataPoint,
 } from '@/lib/provenance/types'
 import {
-  SRC_ALDAR_FY25_RESULTS,
-  SRC_ALDAR_Q1_2026,
+  SRC_ABC_FY25_RESULTS,
+  SRC_ABC_Q1_2026,
 } from '@/lib/provenance/sources'
 import type { DriverId } from '@/lib/engine/types'
 
@@ -35,7 +35,7 @@ export const DRIVER_BASELINE_PROVENANCE: Record<DriverId, DataPoint> = {
     '% of budget',
     'Normalized index. 100 = sanctioned budget. Pilot will calibrate to actual project cost variance from Primavera + ERP project ledger.',
   ),
-  'DRV-05': verified(0, 'days', SRC_ALDAR_FY25_RESULTS, {
+  'DRV-05': verified(0, 'days', SRC_ABC_FY25_RESULTS, {
     confidenceNote:
       'Baseline 0 days = on-schedule by definition. Live values will sync from Primavera schedule variance reports.',
   }),
@@ -73,18 +73,18 @@ export const DRIVER_BASELINE_PROVENANCE: Record<DriverId, DataPoint> = {
   'DRV-04': illustrative(
     100,
     '% of plan',
-    'Occupancy index. 100 = budget occupancy. Aldar Investment retail occupancy was 97% at FY24 (Yas Mall 99%).',
+    'Occupancy index. 100 = budget occupancy. ABC Investment retail occupancy was 97% at FY24 (Yas Mall 99%).',
   ),
   // ── KRI-based occupancy (residential / commercial) ────────────────────
   'DRV-09': placeholder(
     100,
     '% occupancy',
-    'Residential occupancy KRI baseline. Aldar Investment portfolio occupancy disclosed FY24/FY25 — pilot will set the appetite-aligned threshold from internal target.',
+    'Residential occupancy KRI baseline. ABC Investment portfolio occupancy disclosed FY24/FY25 — pilot will set the appetite-aligned threshold from internal target.',
   ),
   'DRV-10': placeholder(
     100,
     '% occupancy',
-    'Commercial occupancy KRI baseline. FY24 Aldar Investment commercial sub-segment EBITDA AED 700M with strong demand for Grade A; pilot will set threshold from operating budget.',
+    'Commercial occupancy KRI baseline. FY24 ABC Investment commercial sub-segment EBITDA AED 700M with strong demand for Grade A; pilot will set threshold from operating budget.',
   ),
   // ── Credit / market index drivers ─────────────────────────────────────
   'DRV-13': illustrative(
@@ -105,12 +105,12 @@ export const DRIVER_BASELINE_PROVENANCE: Record<DriverId, DataPoint> = {
   'DRV-16': illustrative(
     100,
     'idx',
-    'International (overseas / expat) default rate uplift index. Q1 2026: 88% of UAE sales were to overseas/expat customers (Aldar Q1 release) — pilot will calibrate this driver from segmented escrow data.',
+    'International (overseas / expat) default rate uplift index. Q1 2026: 88% of UAE sales were to overseas/expat customers (ABC Q1 release) — pilot will calibrate this driver from segmented escrow data.',
   ),
   // ── Liquidity ─────────────────────────────────────────────────────────
-  'DRV-07': verified(100, '% of plan', SRC_ALDAR_Q1_2026, {
+  'DRV-07': verified(100, '% of plan', SRC_ABC_Q1_2026, {
     confidenceNote:
-      'Liquidity index baseline. Aldar Q1 2026 backlog AED 72.1B provides 3-year revenue visibility — implied baseline cash position is strong. Pilot will tie to ERP Treasury cash + facilities.',
+      'Liquidity index baseline. ABC Q1 2026 backlog AED 72.1B provides 3-year revenue visibility — implied baseline cash position is strong. Pilot will tie to ERP Treasury cash + facilities.',
   }),
 }
 

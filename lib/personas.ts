@@ -97,7 +97,7 @@ export function getPersona(id: PersonaId | null): Persona | null {
   return PERSONAS.find((p) => p.id === id) ?? null
 }
 
-/** Display the persona's scope: "Group" or "Aldar Development" etc. */
+/** Display the persona's scope: "Group" or "ABC Development" etc. */
 export function personaScopeLabel(
   personaId: PersonaId | null,
   entityScope: EntityId | null,

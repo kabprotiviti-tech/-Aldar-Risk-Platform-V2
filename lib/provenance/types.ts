@@ -21,12 +21,12 @@ export type ReliabilityTier =
   | 'ai_hypothesis'
 
 export type SourceKind =
-  | 'annual_report'        // Aldar / subsidiary published annual report
+  | 'annual_report'        // ABC / subsidiary published annual report
   | 'adx_disclosure'       // Abu Dhabi Securities Exchange filing
   | 'central_bank'         // CBUAE rate / macro indicator
   | 'regulator'            // SCA, ADREC, RERA, etc.
   | 'standard'             // ISO 31000, COSO ERM, Basel
-  | 'client_policy'        // Aldar internal policy doc (post-contract)
+  | 'client_policy'        // ABC internal policy doc (post-contract)
   | 'manual_entry'         // User-entered (Risk Champion / ERM Lead)
   | 'sample'               // Demo / illustrative — explicitly fabricated for UX
   | 'ai_generated'         // Claude / model output

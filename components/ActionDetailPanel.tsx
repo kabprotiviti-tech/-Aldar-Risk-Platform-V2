@@ -726,7 +726,7 @@ export function ActionDetailPanel({
                 <PriorityBadge priority={action.priority} />
 
                 <div
-                  title={`Based on total Aldar portfolio value: AED ${(10_000).toLocaleString()}M`}
+                  title={`Based on total ABC portfolio value: AED ${(10_000).toLocaleString()}M`}
                   style={{
                     display: 'flex',
                     alignItems: 'center',

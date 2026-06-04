@@ -209,7 +209,7 @@ function OverallRiskView() {
         </table>
       </div>
       <div style={{ color: 'var(--text-muted)', fontSize: '0.62rem', marginTop: '8px' }}>
-        Source: Aldar Risk Register · AI Fusion Engine · Confidence: 0.87
+        Source: ABC Risk Register · AI Fusion Engine · Confidence: 0.87
       </div>
     </div>
   )
@@ -257,7 +257,7 @@ const RISK_DRIVERS: Record<string, string> = {
   'R-012': 'Three new campuses opening 2026 require 850+ enrollment for breakeven; pre-registration at 62% of target',
   'R-013': 'Any Golden Visa threshold reversal would reduce HNI investment demand — currently low probability tail risk',
   'R-014': 'Event density: LOW — 7-month demand valley until F1 GP November 2026; ~AED 2.8M RevPAR shortfall per week below 70% occupancy',
-  'R-015': 'Competitors achieving 22% cost reductions via AI-powered predictive maintenance; Aldar FM digital maturity lags leaders',
+  'R-015': 'Competitors achieving 22% cost reductions via AI-powered predictive maintenance; ABC FM digital maturity lags leaders',
 }
 
 export const CRITICAL_HIGH_RISK_COUNT = criticalHighRisks.length
@@ -380,7 +380,7 @@ function CriticalRisksView() {
         })}
       </div>
       <div style={{ color: 'var(--text-muted)', fontSize: '0.62rem', marginTop: '10px' }}>
-        Showing {criticalHighRisks.length} of {riskRegister.length} risks · Critical + High severity · Source: Aldar Risk Register · AI Fusion Engine
+        Showing {criticalHighRisks.length} of {riskRegister.length} risks · Critical + High severity · Source: ABC Risk Register · AI Fusion Engine
       </div>
     </div>
   )
@@ -1025,7 +1025,7 @@ export function KPIDrillDownPanel({ view, onClose }: KPIDrillDownPanelProps) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <Database size={10} style={{ color: 'var(--text-muted)' }} />
             <span style={{ color: 'var(--text-muted)', fontSize: '0.62rem' }}>
-              Aldar Risk Register · Oracle Fusion ERP · AI Fusion Engine · External News Classification
+              ABC Risk Register · Oracle Fusion ERP · AI Fusion Engine · External News Classification
             </span>
           </div>
           <span style={{ color: 'var(--text-muted)', fontSize: '0.62rem' }}>

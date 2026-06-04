@@ -43,11 +43,11 @@ export function ConcentrationPanel() {
 
   // ── By Entity ────────────────────────────────────────────────────────
   const byEntity: Record<EntityId, AggregateRow> = {
-    'aldar-group': { label: 'Aldar Group', color: '#C9A84C', totalAed: 0, count: 0 },
-    'aldar-development': { label: 'Aldar Development', color: '#FF6600', totalAed: 0, count: 0 },
-    'aldar-investment': { label: 'Aldar Investment', color: '#2D9EFF', totalAed: 0, count: 0 },
-    'aldar-education': { label: 'Aldar Education', color: '#22C55E', totalAed: 0, count: 0 },
-    'aldar-hospitality': { label: 'Aldar Hospitality', color: '#A855F7', totalAed: 0, count: 0 },
+    'aldar-group': { label: 'ABC Group', color: '#C9A84C', totalAed: 0, count: 0 },
+    'aldar-development': { label: 'ABC Development', color: '#FF6600', totalAed: 0, count: 0 },
+    'aldar-investment': { label: 'ABC Investment', color: '#2D9EFF', totalAed: 0, count: 0 },
+    'aldar-education': { label: 'ABC Education', color: '#22C55E', totalAed: 0, count: 0 },
+    'aldar-hospitality': { label: 'ABC Hospitality', color: '#A855F7', totalAed: 0, count: 0 },
   }
   for (const r of risks) {
     const eid = entityForRisk(r.id)

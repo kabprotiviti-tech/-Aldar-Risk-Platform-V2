@@ -21,12 +21,12 @@ import React from 'react'
 import { Info } from 'lucide-react'
 
 interface Props {
-  /** Optional context — e.g. "Aldar PMS / Yardi / SAP" — for the pilot pointer. */
+  /** Optional context — e.g. "ABC PMS / Yardi / SAP" — for the pilot pointer. */
   pilotFeeds?: string
 }
 
 export function IllustrativeDataBanner({
-  pilotFeeds = 'Aldar PMS / Yardi / SAP / escrow agents',
+  pilotFeeds = 'ABC PMS / Yardi / SAP / escrow agents',
 }: Props) {
   return (
     <div
@@ -63,12 +63,12 @@ export function IllustrativeDataBanner({
           Illustrative simulated data.
         </strong>{' '}
         AED figures, percentages, occupancy and confidence scores on this
-        page are demonstration values — they do not reflect Aldar&rsquo;s
+        page are demonstration values — they do not reflect ABC&rsquo;s
         actual operating numbers. Pilot will wire live feeds from{' '}
         {pilotFeeds}.{' '}
         <span style={{ color: 'var(--text-tertiary)' }}>
           For sourced figures, see /scenarios &ldquo;Anchored against
-          Aldar&rdquo; strip and the Risk Register exposure column.
+          ABC&rdquo; strip and the Risk Register exposure column.
         </span>
       </div>
     </div>

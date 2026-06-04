@@ -3,12 +3,12 @@
  * --------------------------------------
  * The regulatory bodies whose mandates touch a listed Abu Dhabi real
  * estate group. Each entry summarises authority, scope, and the
- * obligations Aldar must meet — plus the linked Group Appetite
+ * obligations ABC must meet — plus the linked Group Appetite
  * Statements that frame our tolerance.
  *
  * All summary text is illustrative pre-pilot — pilot will replace each
  * entry with the Compliance team's authoritative obligations register
- * and the actual Aldar-tracked deadlines.
+ * and the actual ABC-tracked deadlines.
  */
 
 export type RegulatorTier = 'federal' | 'emirate' | 'market' | 'sector'
@@ -22,7 +22,7 @@ export interface Regulator {
   tier: RegulatorTier
   /** One-paragraph mandate summary. */
   mandate: string
-  /** Key obligations Aldar carries vis-à-vis this body. */
+  /** Key obligations ABC carries vis-à-vis this body. */
   obligations: string[]
   /** Reporting cadence to this regulator. */
   cadence: string
@@ -39,7 +39,7 @@ export const REGULATORS: Regulator[] = [
     name: 'Abu Dhabi Securities Exchange',
     tier: 'market',
     mandate:
-      'Abu Dhabi listing venue. Sets continuous-disclosure, market-conduct, and listing rules for all listed issuers. Aldar (ticker: ALDAR) is required to disclose material information promptly and file periodic financial statements.',
+      'Abu Dhabi listing venue. Sets continuous-disclosure, market-conduct, and listing rules for all listed issuers. ABC (ticker: ABC) is required to disclose material information promptly and file periodic financial statements.',
     obligations: [
       'Continuous disclosure of material information',
       'Half-year and annual audited financial statements',
@@ -74,7 +74,7 @@ export const REGULATORS: Regulator[] = [
     name: 'Central Bank of the UAE',
     tier: 'federal',
     mandate:
-      'Indirectly material via banking counterparties. Sets the AML / CFT framework that Aldar must align with at customer onboarding, supervises bank counterparties holding escrow accounts, and frames the broad financial-stability environment that affects buyer financing.',
+      'Indirectly material via banking counterparties. Sets the AML / CFT framework that ABC must align with at customer onboarding, supervises bank counterparties holding escrow accounts, and frames the broad financial-stability environment that affects buyer financing.',
     obligations: [
       'AML / CFT compliance for customer onboarding (KYC, source-of-funds)',
       'Sanctions-list screening on buyers and counterparties',
@@ -107,7 +107,7 @@ export const REGULATORS: Regulator[] = [
     name: 'Dubai Land Department',
     tier: 'emirate',
     mandate:
-      'Dubai counterpart of ADREC. Material to Aldar where projects are in the Dubai emirate (joint ventures, expansions). Operates the Mollak escrow service, Oqood off-plan registration, and DLD project-handover compliance.',
+      'Dubai counterpart of ADREC. Material to ABC where projects are in the Dubai emirate (joint ventures, expansions). Operates the Mollak escrow service, Oqood off-plan registration, and DLD project-handover compliance.',
     obligations: [
       'Mollak / DLD escrow account compliance',
       'Oqood off-plan unit registration',
@@ -141,7 +141,7 @@ export const REGULATORS: Regulator[] = [
     name: 'Department of Economy & Tourism',
     tier: 'emirate',
     mandate:
-      'Hospitality regulator across Abu Dhabi (DCT) and Dubai (DET). Material to Aldar Hospitality through hotel licensing, classification, tourism levy, and guest-data privacy obligations.',
+      'Hospitality regulator across Abu Dhabi (DCT) and Dubai (DET). Material to ABC Hospitality through hotel licensing, classification, tourism levy, and guest-data privacy obligations.',
     obligations: [
       'Hotel licence and star-classification compliance',
       'Tourism levy / Tourism Dirham collection and remittance',
@@ -158,7 +158,7 @@ export const REGULATORS: Regulator[] = [
     name: 'Ministry of Education / Abu Dhabi Dept of Education & Knowledge',
     tier: 'sector',
     mandate:
-      'Federal MoE plus Abu Dhabi ADEK regulate Aldar Education schools and higher-education assets. Set curriculum standards, fee-cap windows, teacher licensing, school inspection, and student-data privacy requirements.',
+      'Federal MoE plus Abu Dhabi ADEK regulate ABC Education schools and higher-education assets. Set curriculum standards, fee-cap windows, teacher licensing, school inspection, and student-data privacy requirements.',
     obligations: [
       'School licensing and annual renewal',
       'ADEK / KHDA inspection compliance and rating maintenance',

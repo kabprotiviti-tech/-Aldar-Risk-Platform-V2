@@ -151,7 +151,7 @@ function MyDashboardContent() {
   // ── Render ──────────────────────────────────────────────────────────
   return (
     <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <IllustrativeDataBanner pilotFeeds="Aldar SSO + live ERM + Reuters/Bayut/ADREC/CBUAE/ADX feeds" />
+      <IllustrativeDataBanner pilotFeeds="ABC SSO + live ERM + Reuters/Bayut/ADREC/CBUAE/ADX feeds" />
 
       {/* ── Hero ─────────────────────────────────────────────────────── */}
       <header

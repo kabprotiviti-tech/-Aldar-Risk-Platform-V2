@@ -203,7 +203,7 @@ function ScenarioResultsSection() {
       >
         Three pre-built scenarios with three intensities each. Numbers below
         are the illustrative band targets used by the simulation engine
-        (lib/engine/scenarios.ts). Pilot calibrates these to Aldar&rsquo;s
+        (lib/engine/scenarios.ts). Pilot calibrates these to ABC&rsquo;s
         own stress-test parameters.
       </div>
       {scenarios.map((s) => (

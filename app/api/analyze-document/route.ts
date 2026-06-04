@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
 
     const truncated = content.substring(0, 50000)
 
-    const userPrompt = `You are an AI risk analyst for Aldar Properties PJSC, UAE's largest real estate developer. You identify and classify risks from corporate documents and recommend register updates.
+    const userPrompt = `You are an AI risk analyst for ABC Holdings, UAE's largest real estate developer. You identify and classify risks from corporate documents and recommend register updates.
 
 Analyze the following document and extract all risk intelligence.
 

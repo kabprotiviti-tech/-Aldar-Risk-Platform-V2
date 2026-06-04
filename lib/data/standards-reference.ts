@@ -16,7 +16,7 @@ export interface StandardClause {
   id: string
   title: string
   description: string
-  /** Aldar platform surfaces that implement this clause. */
+  /** ABC platform surfaces that implement this clause. */
   implementedBy: string[]
   status: 'live' | 'partial' | 'roadmap'
 }

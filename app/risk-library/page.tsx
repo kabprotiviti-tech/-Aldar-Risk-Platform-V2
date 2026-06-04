@@ -4,10 +4,10 @@
  * UAE Risk Library + Peer Benchmark — Module 12 (L1 + L2)
  * --------------------------------------------------------
  * Two-tab page:
- *   (L1) Risk Library — 12 sector-specific risk scenarios that Aldar's
+ *   (L1) Risk Library — 12 sector-specific risk scenarios that ABC's
  *        peer set discloses; Risk Champions can review and lift any
  *        into the Risk Register.
- *   (L2) Peer Benchmark — disclosure-depth grid comparing Aldar with
+ *   (L2) Peer Benchmark — disclosure-depth grid comparing ABC with
  *        Emaar / DAMAC / Sobha / Arabtec across 8 ERM categories.
  */
 
@@ -35,7 +35,7 @@ export default function RiskLibraryPage() {
   const [tab, setTab] = useState<Tab>('library')
   return (
     <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 18 }}>
-      <IllustrativeDataBanner pilotFeeds="Aldar Compliance + ERM peer-disclosure benchmarking from 2024/2025 annual reports" />
+      <IllustrativeDataBanner pilotFeeds="ABC Compliance + ERM peer-disclosure benchmarking from 2024/2025 annual reports" />
 
       <div
         style={{
@@ -297,7 +297,7 @@ function LibraryCard({ r }: { r: RiskLibraryEntry }) {
           lineHeight: 1.55,
         }}
       >
-        <strong style={{ color: 'var(--text-primary)' }}>Aldar relevance:</strong>{' '}
+        <strong style={{ color: 'var(--text-primary)' }}>ABC relevance:</strong>{' '}
         {r.aldarRelevance}
       </div>
 
@@ -540,7 +540,7 @@ function BenchmarkView() {
       >
         Bands are illustrative pre-pilot. Pilot will rebuild this matrix
         from the Compliance team's structured peer-disclosure benchmark
-        using actual 2024/2025 annual report content. Aldar's "Audit Trail
+        using actual 2024/2025 annual report content. ABC's "Audit Trail
         / Governance Forensics" cell is the differentiator that this
         platform delivers and that no peer currently discloses.
       </div>

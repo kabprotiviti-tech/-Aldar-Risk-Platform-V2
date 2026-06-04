@@ -13,7 +13,7 @@
  *   KRI-16 International Default Rate ......... red breach (CRO demo moment)
  *
  * IMPORTANT: every value is ILLUSTRATIVE. Pilot will replace with live
- * feeds from Aldar PMS / Yardi / SAP / escrow agents. Each entry's
+ * feeds from ABC PMS / Yardi / SAP / escrow agents. Each entry's
  * `enteredBy` is "Demo Seed" so it's traceable to the seed step.
  *
  * Loaded on first visit if no entries exist; never overwrites

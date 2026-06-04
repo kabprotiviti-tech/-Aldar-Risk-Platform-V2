@@ -501,7 +501,7 @@ export default function LandingPage() {
         <div className="landing-brand">
           <span className="landing-brand-bar" aria-hidden />
           <div className="landing-brand-text">
-            <span className="landing-brand-eyebrow">Aldar Properties · ADX: ALDAR</span>
+            <span className="landing-brand-eyebrow">ABC Holdings · ADX: ABC</span>
             <span className="landing-brand-name">Risk &amp; Control Operating System</span>
           </div>
         </div>
@@ -533,7 +533,7 @@ export default function LandingPage() {
         </h1>
         <p className="landing-hero-sub">
           An executive operating system that fuses risk registers, ICOFR controls, portfolio
-          signals and AI fusion into a single decision surface — purpose-built for Aldar
+          signals and AI fusion into a single decision surface — purpose-built for ABC
           Properties.
         </p>
         <div className="landing-hero-cta">
@@ -662,7 +662,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="landing-footer">
         <div>
-          © {new Date().getFullYear()} Aldar Properties PJSC · Abu Dhabi ·
+          © {new Date().getFullYear()} ABC Holdings · Abu Dhabi ·
           Prepared by Protiviti
         </div>
         <div className="landing-footer-right">

@@ -359,7 +359,7 @@ function PortfolioExposureView({ ctx }: { ctx: Extract<FinancialCalcContext, { t
       {/* A. Base Inputs */}
       <div>
         <SectionLabel>A — Base Inputs</SectionLabel>
-        <InputRow label="Gross Asset Value (GAV)" value={`AED ${ASSET_GAV[p].toLocaleString()}M`} sub="Aldar investment in portfolio" />
+        <InputRow label="Gross Asset Value (GAV)" value={`AED ${ASSET_GAV[p].toLocaleString()}M`} sub="ABC investment in portfolio" />
         <InputRow label="Annual Revenue Base" value={`AED ${REVENUE_BASE[p].toLocaleString()}M`} sub="Budgeted annual revenue" />
         <InputRow label="Max Exposure Base" value={`AED ${EXPOSURE_BASE[p]}M`} sub="At-risk exposure ceiling (risk score = 100)" />
         <InputRow label="Current Risk Score" value={`${ctx.riskScore} / 100`} sub="Propagation engine composite" />
@@ -576,7 +576,7 @@ function RevenueAtRiskView({ ctx }: { ctx: Extract<FinancialCalcContext, { type:
       <div>
         <SectionLabel>A — Base Inputs</SectionLabel>
         <InputRow label="Portfolio" value={PORTFOLIO_NAMES[p]} />
-        <InputRow label="Annual Revenue Base" value={`AED ${REVENUE_BASE[p].toLocaleString()}M`} sub="Aldar budgeted annual revenue" />
+        <InputRow label="Annual Revenue Base" value={`AED ${REVENUE_BASE[p].toLocaleString()}M`} sub="ABC budgeted annual revenue" />
         <InputRow label="Impact Score" value={`${ctx.impactScore} / 100`} sub="Impact engine blend (propagation 60% + keyword 40%)" />
         <InputRow label="Signal Amplified" value={ctx.amplified ? 'YES (+57% multiplier)' : 'NO (baseline rate)'} />
         <InputRow label="Risk Rate Applied" value={`${(riskPct * 100).toFixed(1)}%`} sub={ctx.amplified ? '22% ceiling (amplified)' : '14% ceiling (baseline)'} />
@@ -772,7 +772,7 @@ export function FinancialCalculationPanel({ ctx, onClose }: Props) {
           backgroundColor: 'var(--bg-secondary)',
         }}>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.62rem', lineHeight: 1.5, margin: 0 }}>
-            All calculations use the Aldar Risk Propagation Engine. Values are risk-adjusted estimates, not financial statements. For board presentations, verify against the latest management accounts.
+            All calculations use the ABC Risk Propagation Engine. Values are risk-adjusted estimates, not financial statements. For board presentations, verify against the latest management accounts.
           </p>
         </div>
       </motion.div>

@@ -20,9 +20,9 @@ import { aggregateKPIs } from '@/lib/simulated-data'
 // ─── Suggested questions ──────────────────────────────────────────────────────
 
 const SUGGESTED = [
-  { label: 'Top risks today?', icon: AlertTriangle, q: 'What are the top risks today across Aldar\'s portfolio?' },
+  { label: 'Top risks today?', icon: AlertTriangle, q: 'What are the top risks today across ABC\'s portfolio?' },
   { label: 'Most exposed BU?', icon: Building2, q: 'Which business unit is most exposed right now and why?' },
-  { label: 'Biggest external threat?', icon: TrendingUp, q: 'What is the biggest external market threat facing Aldar?' },
+  { label: 'Biggest external threat?', icon: TrendingUp, q: 'What is the biggest external market threat facing ABC?' },
   { label: 'Risk Committee focus?', icon: Zap, q: 'What should the Risk Committee prioritise in this quarter\'s review?' },
   { label: 'Hospitality position?', icon: MessageSquare, q: 'Summarise the hospitality risk position and key actions needed.' },
 ]
@@ -390,7 +390,7 @@ export function AIRiskAdvisor() {
                       }}
                     >
                       <p style={{ color: 'var(--text-secondary)', fontSize: '0.825rem', lineHeight: 1.55, margin: 0 }}>
-                        I have live access to Aldar's risk signals, internal data, and portfolio metrics. Ask me anything about the current risk position.
+                        I have live access to ABC's risk signals, internal data, and portfolio metrics. Ask me anything about the current risk position.
                       </p>
                     </div>
                   </div>

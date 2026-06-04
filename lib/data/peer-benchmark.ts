@@ -1,7 +1,7 @@
 /**
  * Peer Benchmark — UAE listed real-estate disclosure comparison
  * --------------------------------------------------------------
- * Cross-tab of Aldar vs the peer set on disclosure depth across the
+ * Cross-tab of ABC vs the peer set on disclosure depth across the
  * standard ERM categories. Each cell is a coverage band:
  *   full:    The peer's annual disclosures explicitly address this
  *            category with quantified KPIs / KRIs and named appetite.
@@ -12,7 +12,7 @@
  * All bands are illustrative pre-pilot — pilot will replace with the
  * Compliance team's structured peer-disclosure benchmark using the
  * actual 2024/2025 annual report content. Peer entities listed are the
- * standard UAE real-estate comparable set for ADX / DFM-listed Aldar.
+ * standard UAE real-estate comparable set for ADX / DFM-listed ABC.
  */
 
 export type DisclosureBand = 'full' | 'partial' | 'none'
@@ -29,8 +29,8 @@ export interface PeerProfile {
 export const PEERS: PeerProfile[] = [
   {
     id: 'aldar',
-    name: 'Aldar Properties',
-    ticker: 'ALDAR',
+    name: 'ABC Holdings',
+    ticker: 'ABC',
     exchange: 'ADX',
     positioning: 'Diversified Abu Dhabi developer + investment + education + hospitality',
   },

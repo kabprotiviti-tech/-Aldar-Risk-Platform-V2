@@ -14,7 +14,7 @@ interface MarketResult {
 // r.jina.ai converts the ADX company profile page to markdown
 async function fetchFromADX(): Promise<MarketResult> {
   const res = await fetch(
-    'https://r.jina.ai/https://www.adx.ae/main-market/company-profile/overview?symbols=ALDAR',
+    'https://r.jina.ai/https://www.adx.ae/main-market/company-profile/overview?symbols=ABC',
     {
       headers: {
         Accept: 'text/plain',
@@ -57,7 +57,7 @@ async function fetchFromTwelveData(): Promise<MarketResult> {
   const key = process.env.TWELVE_DATA_API_KEY
   if (!key) throw new Error('no key')
   const res = await fetch(
-    `https://api.twelvedata.com/quote?symbol=ALDAR&exchange=ADX&apikey=${key}`,
+    `https://api.twelvedata.com/quote?symbol=ABC&exchange=ADX&apikey=${key}`,
     { signal: AbortSignal.timeout(8000), next: { revalidate: 120 } }
   )
   if (!res.ok) throw new Error(`twelvedata: ${res.status}`)
@@ -76,7 +76,7 @@ export async function GET() {
     try {
       const { price, previousClose, change, changePercent, source } = await fn()
       return NextResponse.json({
-        symbol: 'ALDAR',
+        symbol: 'ABC',
         exchange: 'ADX',
         price: +price.toFixed(2),
         previousClose: +previousClose.toFixed(2),

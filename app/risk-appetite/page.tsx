@@ -76,7 +76,7 @@ function RiskAppetiteContent() {
   return (
     <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 18 }}>
       <IllustrativeDataBanner
-        pilotFeeds="Approved appetite framework signed off by Aldar Audit & Risk Committee."
+        pilotFeeds="Approved appetite framework signed off by ABC Audit & Risk Committee."
       />
 
       <div

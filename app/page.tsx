@@ -50,7 +50,7 @@ export default function RootRedirect() {
       >
         A
       </div>
-      <div style={{ fontWeight: 700, fontSize: 16 }}>Aldar Risk Platform</div>
+      <div style={{ fontWeight: 700, fontSize: 16 }}>ABC Risk Platform</div>
       <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
         Loading sign-in…
       </div>
@@ -67,7 +67,7 @@ export default function RootRedirect() {
         }}
       >
         Enterprise Risk Management · Risk Register · KRI engine · ARC pack ·
-        Audit Trail · UAE Regulator Map for Aldar Properties PJSC (ADX:ALDAR).
+        Audit Trail · UAE Regulator Map for ABC Holdings (ADX:ABC).
       </noscript>
     </div>
   )
