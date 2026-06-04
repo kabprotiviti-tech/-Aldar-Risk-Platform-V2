@@ -19,7 +19,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setMounted(true)
-    const stored = localStorage.getItem('aldar-theme')
+    const stored = localStorage.getItem('pros-theme')
     if (stored) {
       setCurrentTheme(stored)
     }
@@ -28,7 +28,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (mounted) {
       document.documentElement.setAttribute('data-theme', currentTheme)
-      localStorage.setItem('aldar-theme', currentTheme)
+      localStorage.setItem('pros-theme', currentTheme)
     }
   }, [currentTheme, mounted])
 

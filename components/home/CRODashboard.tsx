@@ -288,10 +288,10 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
                 fontVariantNumeric: 'tabular-nums',
               }}
             >
-              AED {totalExposureBn}
+              {totalExposureBn}
             </span>
             <span style={{ fontSize: 'clamp(14px, 1.5vw, 20px)', color: 'var(--text-tertiary)', fontWeight: 500, lineHeight: 1 }}>
-              bn
+              billion AED
             </span>
             <span
               style={{

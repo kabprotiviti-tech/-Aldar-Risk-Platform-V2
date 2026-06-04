@@ -527,12 +527,12 @@ export default function DashboardPage() {
         />
         <KPICard
           title="Financial Exposure"
-          value={liveKPIs.exposure}
-          unit="AED M"
+          value={Number((liveKPIs.exposure / 1_000_000_000).toFixed(2))}
+          unit="billion AED"
           subtitle="Gross risk-adjusted exposure"
           icon={DollarSign}
           color="var(--accent-primary)"
-          trend={`Net unhedged AED ${(BASELINE_RISK_POSTURE.netUnhedgedExposure / 1_000_000).toFixed(0)}M`}
+          trend={`Net unhedged ${(BASELINE_RISK_POSTURE.netUnhedgedExposure / 1_000_000_000).toFixed(2)} billion AED`}
           delay={2}
           onClick={() => setActiveView(activeView === 'financialExposure' ? null : 'financialExposure')}
           onViewCalc={() => setCalcCtx({ type: 'total_exposure', value: liveKPIs.exposure, portfolioScores })}

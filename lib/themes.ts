@@ -56,4 +56,4 @@ export const THEMES: Theme[] = [
   },
 ]
 
-export const DEFAULT_THEME = 'executive-dark'
+export const DEFAULT_THEME = 'executive-light'

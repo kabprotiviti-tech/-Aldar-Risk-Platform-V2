@@ -25,6 +25,19 @@ export function formatCurrencyShort(
 }
 
 /**
+ * Exposure formatter — always in billions with the full word, e.g.
+ * 2_350_000_000 → "2.35 billion AED", 323_500_000 → "0.32 billion AED".
+ * `rawAed` is the raw AED amount (NOT millions).
+ */
+export function formatExposureBn(
+  rawAed: number | null | undefined,
+  currency: Currency = 'AED',
+): string {
+  if (rawAed === null || rawAed === undefined || Number.isNaN(rawAed)) return 'Pending data'
+  return `${(rawAed / 1_000_000_000).toFixed(2)} billion ${currency}`
+}
+
+/**
  * Risk score formatter. Renders 0-100 as a 2-digit integer string.
  * Returns "—" for null / undefined to avoid the "0" credibility trap.
  */

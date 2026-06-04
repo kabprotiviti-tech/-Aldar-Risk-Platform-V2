@@ -64,7 +64,7 @@ import {
   BASELINE_RISK_POSTURE,
   safeMetric,
 } from '@/lib/data/baselineRiskPosture'
-import { formatCurrencyShort } from '@/lib/utils/formatters'
+import { formatCurrencyShort, formatExposureBn } from '@/lib/utils/formatters'
 import type { PersonaId } from '@/lib/personas'
 
 // ── Persona → owner-string filter mapping ────────────────────────────────
@@ -246,7 +246,7 @@ function MyDashboardContent() {
           />
           <HeroStat
             label="Group residual exposure"
-            value={formatCurrencyShort(headlineExposure, 'AED')}
+            value={formatExposureBn(headlineExposure, 'AED')}
             tone="neutral"
             sub={`Across ${risks.length} engine risks`}
             sparklineAnchor={headlineExposure / 1_000_000}

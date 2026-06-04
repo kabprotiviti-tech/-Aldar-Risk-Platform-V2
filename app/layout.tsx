@@ -29,13 +29,13 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" data-theme="executive-dark" suppressHydrationWarning>
+    <html lang="en" data-theme="executive-light" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                var theme = localStorage.getItem('aldar-theme') || 'executive-dark';
+                var theme = localStorage.getItem('pros-theme') || 'executive-light';
                 document.documentElement.setAttribute('data-theme', theme);
               } catch(e) {}
             `,

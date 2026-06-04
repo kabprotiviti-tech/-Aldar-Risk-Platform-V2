@@ -12,7 +12,7 @@ import { ConfidenceBadge } from '@/components/ui/Badge'
 import { AIInsightBox } from '@/components/ui/AIInsightBox'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { BASELINE_RISK_POSTURE } from '@/lib/data/baselineRiskPosture'
-import { formatCurrencyShort } from '@/lib/utils/formatters'
+import { formatCurrencyShort, formatExposureBn } from '@/lib/utils/formatters'
 import { Skeleton, SkeletonKPICard } from '@/components/ui/Skeleton'
 import { riskRegister, portfolioMetrics } from '@/lib/simulated-data'
 import { internalSnapshot } from '@/lib/internalData'
@@ -438,7 +438,7 @@ export default function ExecutiveBriefPage() {
                       },
                       {
                         label: 'Financial Exposure',
-                        value: formatCurrencyShort(
+                        value: formatExposureBn(
                           (result.keyMetrics.financialExposureAED ?? 0) > 0
                             ? result.keyMetrics.financialExposureAED * 1_000_000
                             : BASELINE_RISK_POSTURE.totalFinancialExposure,
