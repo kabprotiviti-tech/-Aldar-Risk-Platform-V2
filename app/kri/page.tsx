@@ -107,18 +107,33 @@ function KRIContent() {
           overflow: 'hidden',
         }}
       >
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+        <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', minWidth: 1180, borderCollapse: 'collapse', fontSize: 12, tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: 64 }} />{/* ID */}
+            <col style={{ width: 240 }} />{/* KRI Name */}
+            <col style={{ width: 130 }} />{/* Owner */}
+            <col style={{ width: 90 }} />{/* Frequency */}
+            <col style={{ width: 110 }} />{/* Current Value */}
+            <col style={{ width: 120 }} />{/* Latest Entry */}
+            <col style={{ width: 90 }} />{/* Status */}
+            <col style={{ width: 120 }} />{/* 6-mo Trend */}
+            <col style={{ width: 80 }} />{/* Breaches */}
+            <col style={{ width: 110 }} />{/* Thresholds */}
+            <col style={{ width: 100 }} />{/* Linked Risks */}
+            <col style={{ width: 96 }} />{/* Source */}
+          </colgroup>
           <thead>
             <tr style={{ background: 'var(--bg-primary)' }}>
               <Th>ID</Th>
               <Th>KRI Name</Th>
               <Th>Owner</Th>
               <Th>Frequency</Th>
-              <Th right>Current Value</Th>
-              <Th>Latest Entry</Th>
-              <Th>Status</Th>
+              <Th right>Driver Value</Th>
+              <Th>Latest Reading</Th>
+              <Th center>Status</Th>
               <Th>6-mo Trend</Th>
-              <Th>Breaches</Th>
+              <Th center>Breaches</Th>
               <Th>Thresholds</Th>
               <Th>Linked Risks</Th>
               <Th>Source</Th>
@@ -137,6 +152,7 @@ function KRIContent() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       <div
@@ -147,7 +163,10 @@ function KRIContent() {
           padding: '4px 0',
         }}
       >
-        Most baseline values are normalized indices (100 = budget / plan)
+        <strong style={{ color: 'var(--text-secondary)' }}>Driver Value</strong> = current
+        simulation-engine reading (normalised index, 100 = budget / plan).{' '}
+        <strong style={{ color: 'var(--text-secondary)' }}>Latest Reading</strong> = most recent
+        manual KRI entry. Most baseline values are normalized indices
         — click ⓘ on any value to see source and calibration plan. Live
         feeds from ABC PMS / Yardi / SAP are wired in pilot.
       </div>
@@ -470,7 +489,7 @@ function KRIRow({
           </button>
         )}
       </Td>
-      <Td>
+      <Td center>
         <StatusPill
           value={latest ? latest.value : null}
           thresholds={t}
@@ -484,7 +503,7 @@ function KRIRow({
           direction={kri.direction}
         />
       </Td>
-      <Td>
+      <Td center>
         <BreachCell
           totalBreaches={totalBreaches}
           recentBreach={recentBreach}
@@ -679,11 +698,11 @@ function ReliabilityChip({ tier }: { tier: keyof typeof TIER_META }) {
   )
 }
 
-function Th({ children, right }: { children: React.ReactNode; right?: boolean }) {
+function Th({ children, right, center }: { children: React.ReactNode; right?: boolean; center?: boolean }) {
   return (
     <th
       style={{
-        textAlign: right ? 'right' : 'left',
+        textAlign: center ? 'center' : right ? 'right' : 'left',
         fontSize: 10,
         fontWeight: 700,
         color: 'var(--text-tertiary)',
@@ -701,18 +720,20 @@ function Th({ children, right }: { children: React.ReactNode; right?: boolean })
 function Td({
   children,
   right,
+  center,
   mono,
   muted,
 }: {
   children: React.ReactNode
   right?: boolean
+  center?: boolean
   mono?: boolean
   muted?: boolean
 }) {
   return (
     <td
       style={{
-        textAlign: right ? 'right' : 'left',
+        textAlign: center ? 'center' : right ? 'right' : 'left',
         padding: '10px 12px',
         color: muted ? 'var(--text-secondary)' : 'var(--text-primary)',
         fontFamily: mono ? 'ui-monospace, SFMono-Regular, Menlo, monospace' : undefined,

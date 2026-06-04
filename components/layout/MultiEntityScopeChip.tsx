@@ -80,7 +80,7 @@ export function MultiEntityScopeChip() {
             borderRadius: 8,
             boxShadow: '0 16px 32px rgba(0,0,0,0.45)',
             padding: 6,
-            zIndex: 100,
+            zIndex: 1000,
           }}
         >
           <div

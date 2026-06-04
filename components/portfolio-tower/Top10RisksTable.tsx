@@ -116,7 +116,20 @@ export function Top10RisksTable() {
         </div>
       </div>
 
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+      <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', minWidth: 880, borderCollapse: 'collapse', fontSize: 12, tableLayout: 'fixed' }}>
+        <colgroup>
+          <col style={{ width: 36 }} />
+          <col style={{ width: 64 }} />
+          <col />{/* Risk — flexible */}
+          <col style={{ width: 124 }} />
+          <col style={{ width: 150 }} />
+          <col style={{ width: 78 }} />
+          <col style={{ width: 78 }} />
+          <col style={{ width: 92 }} />
+          <col style={{ width: 96 }} />
+          <col style={{ width: 60 }} />
+        </colgroup>
         <thead>
           <tr style={{ background: 'var(--bg-primary)' }}>
             <Th>#</Th>
@@ -126,9 +139,9 @@ export function Top10RisksTable() {
             <Th>Owner</Th>
             <Th right>Inherent</Th>
             <Th right>Residual</Th>
-            <Th>Rating</Th>
+            <Th center>Rating</Th>
             <Th right>Exposure</Th>
-            <Th>Δ</Th>
+            <Th center>Δ</Th>
           </tr>
         </thead>
         <tbody>
@@ -153,9 +166,9 @@ export function Top10RisksTable() {
                   ;(e.currentTarget as HTMLElement).style.background = 'transparent'
                 }}
               >
-                <Td muted>{idx + 1}</Td>
+                <Td muted center>{idx + 1}</Td>
                 <Td mono>{r.id}</Td>
-                <Td>{r.name}</Td>
+                <Td ellipsis title={r.name}>{r.name}</Td>
                 <Td>
                   {entity && (
                     <span
@@ -182,7 +195,7 @@ export function Top10RisksTable() {
                 <Td muted>{r.owner}</Td>
                 <Td right mono>{r.newInherent.toFixed(1)}</Td>
                 <Td right mono>{r.newResidual.toFixed(1)}</Td>
-                <Td>
+                <Td center>
                   <span
                     style={{
                       display: 'inline-block',
@@ -201,7 +214,7 @@ export function Top10RisksTable() {
                   </span>
                 </Td>
                 <Td right mono>{r.exposureAedMn.toFixed(0)} mn</Td>
-                <Td>
+                <Td center>
                   {Math.abs(trend) < 0.1 ? (
                     <Minus size={11} style={{ color: 'var(--text-tertiary)' }} />
                   ) : trend > 0 ? (
@@ -221,6 +234,7 @@ export function Top10RisksTable() {
           })}
         </tbody>
       </table>
+      </div>
       <div
         style={{
           padding: '6px 14px',
@@ -268,11 +282,11 @@ function SortButton({
   )
 }
 
-function Th({ children, right }: { children: React.ReactNode; right?: boolean }) {
+function Th({ children, right, center }: { children: React.ReactNode; right?: boolean; center?: boolean }) {
   return (
     <th
       style={{
-        textAlign: right ? 'right' : 'left',
+        textAlign: center ? 'center' : right ? 'right' : 'left',
         fontSize: 9,
         fontWeight: 700,
         color: 'var(--text-tertiary)',
@@ -290,23 +304,32 @@ function Th({ children, right }: { children: React.ReactNode; right?: boolean })
 function Td({
   children,
   right,
+  center,
   mono,
   muted,
+  ellipsis,
+  title,
 }: {
   children: React.ReactNode
   right?: boolean
+  center?: boolean
   mono?: boolean
   muted?: boolean
+  ellipsis?: boolean
+  title?: string
 }) {
   return (
     <td
+      title={title}
       style={{
-        textAlign: right ? 'right' : 'left',
+        textAlign: center ? 'center' : right ? 'right' : 'left',
         padding: '8px 10px',
         color: muted ? 'var(--text-secondary)' : 'var(--text-primary)',
         fontFamily: mono ? 'ui-monospace, SFMono-Regular, Menlo, monospace' : undefined,
         fontVariantNumeric: 'tabular-nums',
         whiteSpace: 'nowrap',
+        overflow: ellipsis ? 'hidden' : undefined,
+        textOverflow: ellipsis ? 'ellipsis' : undefined,
       }}
     >
       {children}

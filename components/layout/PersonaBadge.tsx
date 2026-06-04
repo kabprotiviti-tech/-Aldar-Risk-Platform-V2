@@ -154,7 +154,7 @@ export function PersonaBadge() {
             borderRadius: 8,
             boxShadow: '0 16px 32px rgba(0,0,0,0.45)',
             padding: 8,
-            zIndex: 100,
+            zIndex: 1000,
           }}
         >
           {/* Identity header */}

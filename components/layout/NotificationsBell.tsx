@@ -157,7 +157,7 @@ export function NotificationsBell() {
             border: '1px solid var(--border-color)',
             borderRadius: 10,
             boxShadow: 'var(--shadow-lg, 0 24px 60px rgba(0,0,0,0.55))',
-            zIndex: 100,
+            zIndex: 1000,
             display: 'flex',
             flexDirection: 'column',
           }}

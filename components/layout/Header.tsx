@@ -196,7 +196,7 @@ export function Header() {
           borderBottom: '1px solid var(--border-color)',
           position: 'sticky',
           top: 0,
-          zIndex: 30,
+          zIndex: 200,
           width: '100%',
           overflow: 'visible',
         }}
