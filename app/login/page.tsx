@@ -57,7 +57,7 @@ export default function LoginPage() {
   const router = useRouter()
   const { login, isAuthenticated, persona, logout } = usePersona()
   const [step, setStep] = useState<Step>('credentials')
-  const [email, setEmail] = useState('cro@aldar.com')
+  const [email, setEmail] = useState('risk.head@protiviti.com')
   const [password, setPassword] = useState('demo-pass-1234')
   const [selectedPersona, setSelectedPersona] = useState<Persona | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -218,7 +218,7 @@ function BrandPane() {
           height: 460,
           borderRadius: '50%',
           background:
-            'radial-gradient(circle, rgba(255,102,0,0.42) 0%, rgba(255,102,0,0) 60%)',
+            'radial-gradient(circle, rgba(228,0,43,0.42) 0%, rgba(228,0,43,0) 60%)',
           filter: 'blur(40px)',
           animation: 'pulse-slow 7s ease-in-out infinite',
         }}
@@ -256,11 +256,11 @@ function BrandPane() {
             width: 44,
             height: 44,
             borderRadius: 10,
-            background: 'linear-gradient(135deg, #FF6600 0%, #FF8C00 100%)',
+            background: 'linear-gradient(135deg, #E4002B 0%, #B8001F 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 8px 24px rgba(255,102,0,0.45)',
+            boxShadow: '0 8px 24px rgba(228,0,43,0.45)',
           }}
         >
           <Shield size={22} color="#fff" />
@@ -275,7 +275,7 @@ function BrandPane() {
               color: 'rgba(255,255,255,0.55)',
             }}
           >
-            ABC Holdings · ADX:ABC
+            Protiviti · Demo tenant: ABC Holdings
           </div>
           <div style={{ fontSize: 16, fontWeight: 700 }}>PROS — Protiviti Risk Operating System</div>
         </div>
@@ -534,7 +534,7 @@ function CredentialsStep({
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="firstname.lastname@aldar.com"
+          placeholder="firstname.lastname@protiviti.com"
           style={inputStyle}
           autoFocus
         />

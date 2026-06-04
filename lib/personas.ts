@@ -52,7 +52,7 @@ export const PERSONAS: Persona[] = [
     title: 'Risk Head',
     subtitle: 'Consumes consolidated risk synthesis · Prepares ARC pack',
     line: '2nd line',
-    landing: '/home',
+    landing: '/my-dashboard',
     requiresSubsidiary: false,
     validSubsidiaries: [],
     killerQuestion:
@@ -63,7 +63,7 @@ export const PERSONAS: Persona[] = [
     title: 'Risk Champion',
     subtitle: 'Owns + maintains subsidiary register · Enters KRI values',
     line: '1st line',
-    landing: '/home',
+    landing: '/my-dashboard',
     requiresSubsidiary: true,
     validSubsidiaries: SUBSIDIARY_IDS,
     killerQuestion: "What's overdue from me and what's escalating?",
@@ -73,7 +73,7 @@ export const PERSONAS: Persona[] = [
     title: 'Subsidiary CEO',
     subtitle: 'Accountable for subsidiary risk profile · Sign-off on appetite breach',
     line: '1st line',
-    landing: '/home',
+    landing: '/my-dashboard',
     requiresSubsidiary: true,
     validSubsidiaries: SUBSIDIARY_IDS,
     killerQuestion:
@@ -84,7 +84,7 @@ export const PERSONAS: Persona[] = [
     title: 'ARC Chair',
     subtitle: 'Board oversight · Quarterly pack · Independent NED',
     line: 'governing',
-    landing: '/home',
+    landing: '/my-dashboard',
     requiresSubsidiary: false,
     validSubsidiaries: [],
     killerQuestion:

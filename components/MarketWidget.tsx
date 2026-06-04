@@ -31,9 +31,14 @@ export function MarketWidget() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/api/market-data')
+        // 5s timeout so a slow/dropped network never leaves the widget
+        // (or the header) waiting indefinitely.
+        const ctrl = new AbortController()
+        const t = setTimeout(() => ctrl.abort(), 5000)
+        const res = await fetch('/api/market-data', { signal: ctrl.signal })
+        clearTimeout(t)
         setData(await res.json())
-      } catch { /* silent */ }
+      } catch { /* silent — falls back to "Unavailable" */ }
     }
     load()
     const id = setInterval(load, 120_000) // refresh every 2 min
