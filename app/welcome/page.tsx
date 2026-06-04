@@ -502,7 +502,7 @@ export default function LandingPage() {
           <span className="landing-brand-bar" aria-hidden />
           <div className="landing-brand-text">
             <span className="landing-brand-eyebrow">ABC Holdings · ADX: ABC</span>
-            <span className="landing-brand-name">Risk &amp; Control Operating System</span>
+            <span className="landing-brand-name">PROS — Protiviti Risk Operating System</span>
           </div>
         </div>
 

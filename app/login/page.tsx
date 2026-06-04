@@ -277,7 +277,7 @@ function BrandPane() {
           >
             ABC Holdings · ADX:ABC
           </div>
-          <div style={{ fontSize: 16, fontWeight: 700 }}>Risk &amp; Control Operating System</div>
+          <div style={{ fontSize: 16, fontWeight: 700 }}>PROS — Protiviti Risk Operating System</div>
         </div>
       </div>
 

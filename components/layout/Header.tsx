@@ -265,7 +265,7 @@ export function Header() {
                   textOverflow: 'ellipsis',
                 }}
               >
-                Risk &amp; Control Operating System
+                PROS — Protiviti Risk Operating System
               </h1>
             </div>
           </div>

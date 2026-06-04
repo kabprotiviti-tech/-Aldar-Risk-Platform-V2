@@ -18,9 +18,9 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'ABC Risk & Control Operating System',
-  description: 'Enterprise AI-powered risk and control operating system for ABC Holdings — Abu Dhabi',
-  keywords: ['risk management', 'internal controls', 'ICOFR', 'ABC Holdings', 'Abu Dhabi', 'real estate', 'enterprise risk'],
+  title: 'PROS — Protiviti Risk Operating System',
+  description: 'PROS — Protiviti Risk Operating System. AI-enabled enterprise risk and control platform for diversified holding companies.',
+  keywords: ['PROS', 'Protiviti', 'risk management', 'internal controls', 'ICOFR', 'ERM', 'enterprise risk', 'GRC'],
 }
 
 export default function RootLayout({
