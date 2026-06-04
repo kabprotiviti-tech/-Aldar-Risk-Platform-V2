@@ -37,7 +37,7 @@ import {
   Crown,
   ChevronRight,
 } from 'lucide-react'
-import { SimulationProvider } from '@/lib/context/SimulationContext'
+import { SimulationProvider, useSimulation } from '@/lib/context/SimulationContext'
 import { RiskDraftProvider, useRiskDrafts } from '@/lib/context/RiskDraftContext'
 import {
   MitigationActionsProvider,
@@ -79,6 +79,9 @@ function MyDashboardContent() {
   const { persona, session } = usePersona()
   const personaId = persona?.id ?? 'group-cro'
 
+  // Engine is the single source of truth — same source the /home (Risk Head)
+  // dashboard reads. This keeps both screens reconciled.
+  const { risks } = useSimulation()
   const { drafts } = useRiskDrafts()
   const { actions, isOverdue } = useMitigationActions()
   const { entries: _entries, latestFor } = useKRIEntries()
@@ -133,10 +136,22 @@ function MyDashboardContent() {
     return { g, a, r }
   }, [myKRIs, thresholdsFor, latestFor])
 
-  // ── Headline metrics (with baseline-fallback to defend against zero) ─
-  const headlineRiskScore = safeMetric(undefined, BASELINE_RISK_POSTURE.overallRiskScore)
-  const headlineExposure = safeMetric(undefined, BASELINE_RISK_POSTURE.totalFinancialExposure)
-  const headlineCriticalHigh = safeMetric(undefined, BASELINE_RISK_POSTURE.totalCriticalAndHighRisks)
+  // ── Headline metrics — derived from the live engine so this screen
+  //    reconciles with the /home (Risk Head) dashboard. Baseline is only a
+  //    zero-defense fallback when the engine hasn't hydrated.
+  const _engineExposureMn = risks.reduce((s, r) => s + r.exposureAedMn, 0)
+  const _engineCritical = risks.filter((r) => r.ratingTo === 'Critical').length
+  const _engineHigh = risks.filter((r) => r.ratingTo === 'High').length
+  const _engineCriticalHigh = _engineCritical + _engineHigh
+
+  // Residual exposure in raw AED (engine value is in millions).
+  const headlineExposure = safeMetric(_engineExposureMn * 1_000_000, BASELINE_RISK_POSTURE.totalFinancialExposure)
+  const headlineCriticalHigh = safeMetric(_engineCriticalHigh, BASELINE_RISK_POSTURE.totalCriticalAndHighRisks)
+  const criticalCount = safeMetric(_engineCritical, BASELINE_RISK_POSTURE.criticalRiskCount)
+  const highCount = safeMetric(_engineHigh, BASELINE_RISK_POSTURE.highRiskCount)
+  // Overall risk score is an illustrative composite (not an engine output);
+  // /home carries no score so there is no contradiction.
+  const headlineRiskScore = BASELINE_RISK_POSTURE.overallRiskScore
 
   // ── Render ──────────────────────────────────────────────────────────
   return (
@@ -230,15 +245,15 @@ function MyDashboardContent() {
             label="Critical + High"
             value={String(headlineCriticalHigh)}
             tone={headlineCriticalHigh > 8 ? 'danger' : headlineCriticalHigh > 4 ? 'warning' : 'good'}
-            sub={`${BASELINE_RISK_POSTURE.criticalRiskCount} critical · ${BASELINE_RISK_POSTURE.highRiskCount} high`}
+            sub={`${criticalCount} critical · ${highCount} high`}
             sparklineAnchor={headlineCriticalHigh}
             sparklineSeed={23}
           />
           <HeroStat
-            label="Gross exposure"
+            label="Group residual exposure"
             value={formatCurrencyShort(headlineExposure, 'AED')}
             tone="neutral"
-            sub={`Net unhedged ${formatCurrencyShort(BASELINE_RISK_POSTURE.netUnhedgedExposure, 'AED')}`}
+            sub={`Across ${risks.length} engine risks`}
             sparklineAnchor={headlineExposure / 1_000_000}
             sparklineSeed={37}
           />
