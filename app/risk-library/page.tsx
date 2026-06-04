@@ -59,7 +59,7 @@ export default function RiskLibraryPage() {
             }}
           >
             <BookOpen size={20} style={{ color: 'var(--accent-primary)' }} />
-            UAE Risk Library &amp; Peer Benchmark
+            UAE Risk Library
           </h1>
           <p
             style={{
@@ -70,32 +70,18 @@ export default function RiskLibraryPage() {
               lineHeight: 1.55,
             }}
           >
-            A curated library of 12 risk scenarios common to UAE listed
-            real-estate, plus a peer disclosure-depth benchmark across 8
-            ERM categories. Use the library as a starter pack for new
-            registers; use the benchmark to position Aldar's disclosure
-            posture against the comparable set.
+            A curated library of risk scenarios common to UAE listed
+            real-estate. Use the library as a starter pack for new
+            subsidiary registers.
           </p>
         </div>
         <StatusBadge
           tier="MVP"
-          note={`${RISK_LIBRARY.length} library entries · ${PEERS.length} peers`}
+          note={`${RISK_LIBRARY.length} library entries`}
         />
       </div>
 
-      {/* Tab strip */}
-      <div style={{ display: 'flex', gap: 6, borderBottom: '1px solid var(--border-color)' }}>
-        <TabBtn active={tab === 'library'} onClick={() => setTab('library')}>
-          <BookOpen size={12} />
-          Risk Library
-        </TabBtn>
-        <TabBtn active={tab === 'benchmark'} onClick={() => setTab('benchmark')}>
-          <BarChart3 size={12} />
-          Peer Benchmark
-        </TabBtn>
-      </div>
-
-      {tab === 'library' ? <LibraryView /> : <BenchmarkView />}
+      <LibraryView />
     </div>
   )
 }

@@ -136,21 +136,16 @@ function MyDashboardContent() {
     return { g, a, r }
   }, [myKRIs, thresholdsFor, latestFor])
 
-  // ── Headline metrics — derived from the live engine so this screen
-  //    reconciles with the /home (Risk Head) dashboard. Baseline is only a
-  //    zero-defense fallback when the engine hasn't hydrated.
+  // ── Headline metrics — single source of truth.
+  //   • Residual exposure: engine-derived (matches /home's residual figure).
+  //   • Score / critical+high / AI alerts: BASELINE_RISK_POSTURE composite —
+  //     IDENTICAL to the /dashboard headline so the same KPI never shows two
+  //     different numbers across screens.
   const _engineExposureMn = risks.reduce((s, r) => s + r.exposureAedMn, 0)
-  const _engineCritical = risks.filter((r) => r.ratingTo === 'Critical').length
-  const _engineHigh = risks.filter((r) => r.ratingTo === 'High').length
-  const _engineCriticalHigh = _engineCritical + _engineHigh
-
-  // Residual exposure in raw AED (engine value is in millions).
   const headlineExposure = safeMetric(_engineExposureMn * 1_000_000, BASELINE_RISK_POSTURE.totalFinancialExposure)
-  const headlineCriticalHigh = safeMetric(_engineCriticalHigh, BASELINE_RISK_POSTURE.totalCriticalAndHighRisks)
-  const criticalCount = safeMetric(_engineCritical, BASELINE_RISK_POSTURE.criticalRiskCount)
-  const highCount = safeMetric(_engineHigh, BASELINE_RISK_POSTURE.highRiskCount)
-  // Overall risk score is an illustrative composite (not an engine output);
-  // /home carries no score so there is no contradiction.
+  const headlineCriticalHigh = BASELINE_RISK_POSTURE.totalCriticalAndHighRisks
+  const criticalCount = BASELINE_RISK_POSTURE.criticalRiskCount
+  const highCount = BASELINE_RISK_POSTURE.highRiskCount
   const headlineRiskScore = BASELINE_RISK_POSTURE.overallRiskScore
 
   // ── Render ──────────────────────────────────────────────────────────
@@ -235,7 +230,7 @@ function MyDashboardContent() {
         >
           <HeroStat
             label="Group risk score"
-            value={String(headlineRiskScore)}
+            value={`${headlineRiskScore} / 100`}
             tone={headlineRiskScore >= 75 ? 'danger' : headlineRiskScore >= 60 ? 'warning' : 'good'}
             sub={`Trend ${BASELINE_RISK_POSTURE.riskScoreTrend > 0 ? '+' : ''}${BASELINE_RISK_POSTURE.riskScoreTrend} MoM`}
             sparklineAnchor={headlineRiskScore}

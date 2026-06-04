@@ -26,7 +26,7 @@ import { BASELINE_RISK_POSTURE } from '@/lib/data/baselineRiskPosture'
 import { Sparkline, baselineSeries } from '@/components/ui/Sparkline'
 import { LiveRiskSignals } from '@/components/dashboard/LiveRiskSignals'
 import { AIFusionPanel } from '@/components/dashboard/AIFusionPanel'
-import { KPIDrillDownPanel, AI_ALERT_COUNT, type KPIView } from '@/components/KPIDrillDownPanel'
+import { KPIDrillDownPanel, type KPIView } from '@/components/KPIDrillDownPanel'
 import { FinancialCalculationPanel, ViewCalcButton, type FinancialCalcContext } from '@/components/FinancialCalculationPanel'
 import { TopActionsPanel } from '@/components/TopActionsPanel'
 import { ActionDetailPanel } from '@/components/ActionDetailPanel'
@@ -35,7 +35,6 @@ import { type Action } from '@/lib/actionEngine'
 import Link from 'next/link'
 import { controlSummary } from '@/lib/controlData'
 import {
-  aggregateKPIs,
   kpiData,
   portfolioMetrics,
   portfolioNames,
@@ -443,11 +442,10 @@ function RiskTrendChart() {
 export default function DashboardPage() {
   const [lastUpdated, setLastUpdated] = useState(0)
   const [liveKPIs, setLiveKPIs] = useState({
-    // Batch 1 credibility: never let the headline tiles fall to 0 if the
-    // engine briefly hands back empty aggregates. Baseline figures defend
-    // the executive view until live feeds replace them at pilot.
-    riskScore: aggregateKPIs.totalRiskScore || BASELINE_RISK_POSTURE.overallRiskScore,
-    exposure: aggregateKPIs.totalFinancialExposure || BASELINE_RISK_POSTURE.totalFinancialExposure,
+    // Single source of truth — BASELINE_RISK_POSTURE — so the score and
+    // exposure here match every other dashboard exactly (no more 62 vs 72).
+    riskScore: BASELINE_RISK_POSTURE.overallRiskScore,
+    exposure: BASELINE_RISK_POSTURE.totalFinancialExposure,
   })
   const [alertsRefreshing, setAlertsRefreshing] = useState(false)
   const [activeView, setActiveView] = useState<KPIView | null>(null)
@@ -462,14 +460,11 @@ export default function DashboardPage() {
     facilities:    PROPAGATED_METRICS.facilities.riskScore,
   }
 
-  // Live updates for risk score + last-updated ticker only — alerts are static
+  // Last-updated ticker only. Risk score stays stable (no random jitter) so
+  // it always matches the other dashboards.
   useEffect(() => {
     const interval = setInterval(() => {
       setLastUpdated((s) => s + 5)
-      setLiveKPIs((prev) => ({
-        ...prev,
-        riskScore: aggregateKPIs.totalRiskScore + (Math.floor(Math.random() * 3) - 1),
-      }))
     }, 5000)
     return () => clearInterval(interval)
   }, [])
@@ -510,21 +505,22 @@ export default function DashboardPage() {
         <KPICard
           title="Overall Risk Score"
           value={liveKPIs.riskScore}
+          unit="/ 100"
           subtitle="Composite across all portfolios"
           icon={AlertTriangle}
           color="var(--risk-high)"
-          trend="↑ +4 pts MTD"
+          trend={`Trend ${BASELINE_RISK_POSTURE.riskScoreTrend > 0 ? '+' : ''}${BASELINE_RISK_POSTURE.riskScoreTrend} MoM`}
           delay={0}
           onClick={() => setActiveView(activeView === 'overallRisk' ? null : 'overallRisk')}
           sparkSeed={11}
         />
         <KPICard
           title="Critical & High Risks"
-          value={aggregateKPIs.highRisks + aggregateKPIs.criticalRisks}
+          value={BASELINE_RISK_POSTURE.totalCriticalAndHighRisks}
           subtitle="Requiring management action"
           icon={Zap}
           color="var(--risk-critical)"
-          trend={`${aggregateKPIs.highRisks} High · ${aggregateKPIs.criticalRisks} Critical`}
+          trend={`${BASELINE_RISK_POSTURE.criticalRiskCount} Critical · ${BASELINE_RISK_POSTURE.highRiskCount} High`}
           delay={1}
           onClick={() => setActiveView(activeView === 'criticalRisks' ? null : 'criticalRisks')}
           sparkSeed={23}
@@ -536,7 +532,7 @@ export default function DashboardPage() {
           subtitle="Gross risk-adjusted exposure"
           icon={DollarSign}
           color="var(--accent-primary)"
-          trend="AED 2.35Bn total"
+          trend={`Net unhedged AED ${(BASELINE_RISK_POSTURE.netUnhedgedExposure / 1_000_000).toFixed(0)}M`}
           delay={2}
           onClick={() => setActiveView(activeView === 'financialExposure' ? null : 'financialExposure')}
           onViewCalc={() => setCalcCtx({ type: 'total_exposure', value: liveKPIs.exposure, portfolioScores })}
@@ -544,11 +540,11 @@ export default function DashboardPage() {
         />
         <KPICard
           title="AI Alerts Today"
-          value={AI_ALERT_COUNT}
+          value={BASELINE_RISK_POSTURE.aiAlertsToday}
           subtitle="New signals detected"
           icon={TrendingUp}
           color="var(--chart-2)"
-          trend="10 external · 11 internal · 5 AI"
+          trend={`${BASELINE_RISK_POSTURE.activeExternalSignals} external · ${BASELINE_RISK_POSTURE.activeControlWeaknesses} controls`}
           delay={3}
           onClick={() => setActiveView(activeView === 'aiAlerts' ? null : 'aiAlerts')}
           onRefresh={refreshAlerts}
