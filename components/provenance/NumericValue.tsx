@@ -36,7 +36,7 @@ interface NumericValueProps {
 const TIER_DOT: Record<ReliabilityTier, { color: string; label: string }> = {
   verified: { color: '#22C55E', label: 'Verified' },
   illustrative: { color: '#F5C518', label: 'Illustrative / Sample' },
-  placeholder: { color: '#FF8C00', label: 'Placeholder — calibration pending' },
+  placeholder: { color: '#B8001F', label: 'Placeholder — calibration pending' },
   ai_hypothesis: { color: '#A855F7', label: 'AI Hypothesis — pending approval' },
 }
 

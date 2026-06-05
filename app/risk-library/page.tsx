@@ -216,7 +216,7 @@ function LibraryView() {
 function LibraryCard({ r }: { r: RiskLibraryEntry }) {
   const meta = CATEGORY_META[r.category]
   const lkColor =
-    r.likelihood === 'high' ? '#FF3B3B' : r.likelihood === 'medium' ? '#FF8C00' : '#22C55E'
+    r.likelihood === 'high' ? '#FF3B3B' : r.likelihood === 'medium' ? '#B8001F' : '#22C55E'
   return (
     <article
       style={{

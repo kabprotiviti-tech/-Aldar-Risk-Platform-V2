@@ -204,7 +204,7 @@ function Content() {
       <Section
         title={isLine1 ? 'My Risk Draft Submissions' : 'Risk Drafts in Flight'}
         subtitle={`${myDrafts.length} draft${myDrafts.length === 1 ? '' : 's'} ${isLine1 ? 'authored by you' : 'across the platform'}`}
-        accent="#FF6600"
+        accent="#E4002B"
         icon={<Pencil size={14} />}
         cta={<Link href="/risk-register" style={ctaSmall}>Open register →</Link>}
       >

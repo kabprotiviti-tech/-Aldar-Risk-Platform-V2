@@ -44,7 +44,7 @@ export function ConcentrationPanel() {
   // ── By Entity ────────────────────────────────────────────────────────
   const byEntity: Record<EntityId, AggregateRow> = {
     'aldar-group': { label: 'ABC Group', color: '#C9A84C', totalAed: 0, count: 0 },
-    'aldar-development': { label: 'ABC Development', color: '#FF6600', totalAed: 0, count: 0 },
+    'aldar-development': { label: 'ABC Development', color: '#E4002B', totalAed: 0, count: 0 },
     'aldar-investment': { label: 'ABC Investment', color: '#2D9EFF', totalAed: 0, count: 0 },
     'aldar-education': { label: 'ABC Education', color: '#22C55E', totalAed: 0, count: 0 },
     'aldar-hospitality': { label: 'ABC Hospitality', color: '#A855F7', totalAed: 0, count: 0 },
@@ -60,7 +60,7 @@ export function ConcentrationPanel() {
 
   // ── By Category ──────────────────────────────────────────────────────
   const categoryColors: Record<string, string> = {
-    'Project/Construction': '#FF6600',
+    'Project/Construction': '#E4002B',
     'Financial': '#2D9EFF',
     'Operational': '#22C55E',
     'Strategic': '#A855F7',

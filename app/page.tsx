@@ -39,13 +39,13 @@ export default function RootRedirect() {
           width: 56,
           height: 56,
           borderRadius: 12,
-          background: 'linear-gradient(135deg, #FF6600 0%, #FF8C00 100%)',
+          background: 'linear-gradient(135deg, #E4002B 0%, #B8001F 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           fontSize: 24,
           fontWeight: 700,
-          boxShadow: '0 10px 28px rgba(255,102,0,0.45)',
+          boxShadow: '0 10px 28px rgba(228,0,43,0.45)',
         }}
       >
         A

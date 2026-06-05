@@ -35,7 +35,7 @@ const PERSONA_ICONS: Record<PersonaId, LucideIcon> = {
 }
 
 const PERSONA_ACCENT: Record<PersonaId, string> = {
-  'group-cro': '#FF6600',
+  'group-cro': '#E4002B',
   'risk-champion': '#2D9EFF',
   'subsidiary-ceo': '#A855F7',
   'arc-chair': '#F5C518',

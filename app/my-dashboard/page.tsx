@@ -270,7 +270,7 @@ function MyDashboardContent() {
           icon={<Pencil size={14} />}
           label={seeAll ? 'Drafts in flight' : 'My Drafts'}
           value={myDrafts.length}
-          accent="#FF6600"
+          accent="#E4002B"
           href="/risk-register"
         />
         <KPITile

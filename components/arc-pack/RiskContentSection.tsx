@@ -23,7 +23,7 @@ import type { RiskState, Rating } from '@/lib/engine/types'
 function ratingColor(r: Rating): string {
   switch (r) {
     case 'Critical': return '#FF3B3B'
-    case 'High': return '#FF8C00'
+    case 'High': return '#B8001F'
     case 'Medium': return '#F5C518'
     case 'Low':
     default: return '#22C55E'

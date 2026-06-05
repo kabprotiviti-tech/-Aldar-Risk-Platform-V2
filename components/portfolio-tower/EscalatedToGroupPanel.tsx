@@ -24,7 +24,7 @@ import {
 const STATUS_META: Record<EscalationStatus, { label: string; color: string; bg: string; border: string }> = {
   pending: {
     label: 'Pending',
-    color: '#FF8C00',
+    color: '#B8001F',
     bg: 'rgba(255,140,0,0.18)',
     border: 'rgba(255,140,0,0.55)',
   },
@@ -52,7 +52,7 @@ export function EscalatedToGroupPanel() {
       style={{
         background: 'var(--bg-secondary)',
         border: '1px solid var(--border-color)',
-        borderLeft: `3px solid ${pendingCount > 0 ? '#FF8C00' : 'var(--accent-primary)'}`,
+        borderLeft: `3px solid ${pendingCount > 0 ? '#B8001F' : 'var(--accent-primary)'}`,
         borderRadius: 8,
         padding: 14,
         display: 'flex',

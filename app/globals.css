@@ -16,16 +16,16 @@
   --text-secondary: #A8B4CC;
   --text-tertiary: #7F8CA3;
   --text-muted: #5A6A84;
-  --accent-primary: #C9A84C;
-  --accent-secondary: #E8C96A;
-  --accent-glow: rgba(201, 168, 76, 0.25);
-  --on-accent: #0A0E1A;
+  --accent-primary: #E4002B;
+  --accent-secondary: #FF294E;
+  --accent-glow: rgba(228, 0, 43, 0.25);
+  --on-accent: #FFFFFF;
   --on-risk-critical: #FFFFFF;
   --on-risk-high: #FFFFFF;
   --on-risk-medium: #0A0E1A;
   --on-risk-low: #0A0E1A;
   --border-color: rgba(255,255,255,0.07);
-  --border-accent: rgba(201, 168, 76, 0.4);
+  --border-accent: rgba(228, 0, 43, 0.4);
   --risk-critical: #FF3B3B;
   --risk-high: #FF8C00;
   --risk-medium: #F5C518;
@@ -52,32 +52,37 @@
 
 /* ---- EXECUTIVE LIGHT ---- */
 [data-theme="executive-light"] {
-  --bg-primary: #F4F7FB;
+  /* Warm paper, near-monochrome, single Protiviti-red accent (Batch 2). */
+  --bg-primary: #FAFAF8;
   --bg-secondary: #FFFFFF;
   --bg-card: #FFFFFF;
-  --bg-hover: #EEF2FA;
-  --text-primary: #0A1628;
-  --text-secondary: #3A4A6A;
-  --text-muted: #7A8AAA;
-  --accent-primary: #0A3D7A;
-  --accent-secondary: #1A5FA8;
-  --accent-glow: rgba(10, 61, 122, 0.15);
+  --bg-hover: #F4F4F1;
+  --text-primary: #1A1A1A;
+  --text-secondary: #5A5A5A;
+  --text-muted: #9A9A95;
+  --text-tertiary: #9A9A95;
+  --accent-primary: #E4002B;
+  --accent-secondary: #B8001F;
+  --accent-glow: rgba(228, 0, 43, 0.12);
   --on-accent: #FFFFFF;
   --on-risk-critical: #FFFFFF;
   --on-risk-high: #FFFFFF;
-  --on-risk-medium: #FFFFFF;
+  --on-risk-medium: #1A1A1A;
   --on-risk-low: #FFFFFF;
-  --border-color: rgba(10,22,40,0.1);
-  --border-accent: rgba(10, 61, 122, 0.35);
-  --risk-critical: #DC2626;
-  --risk-high: #EA580C;
-  --risk-medium: #CA8A04;
-  --risk-low: #16A34A;
-  --chart-1: #0A3D7A;
-  --chart-2: #7C3AED;
-  --chart-3: #0891B2;
-  --chart-4: #16A34A;
-  --chart-5: #DC2626;
+  --border-color: #E7E7E2;
+  --border-accent: rgba(228, 0, 43, 0.30);
+  --risk-critical: #B42318;
+  --risk-high: #B54708;
+  --risk-medium: #B54708;
+  --risk-low: #067647;
+  --shadow-sm: 0 1px 2px rgba(16,24,40,0.04);
+  --shadow-md: 0 1px 3px rgba(16,24,40,0.06), 0 1px 2px rgba(16,24,40,0.04);
+  --shadow-lg: 0 12px 32px rgba(16,24,40,0.10);
+  --chart-1: #E4002B;
+  --chart-2: #5A5A5A;
+  --chart-3: #9A9A95;
+  --chart-4: #067647;
+  --chart-5: #B42318;
 }
 
 /* ---- BLOOMBERG ---- */

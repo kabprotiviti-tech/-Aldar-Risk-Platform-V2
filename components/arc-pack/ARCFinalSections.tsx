@@ -295,7 +295,7 @@ function ScenarioResultsSection() {
                         it.label === 'Severe'
                           ? '#FF3B3B'
                           : it.label === 'Moderate'
-                            ? '#FF8C00'
+                            ? '#B8001F'
                             : '#F5C518',
                       letterSpacing: 0.5,
                       textTransform: 'uppercase',
@@ -373,7 +373,7 @@ function MitigationActionsSection() {
               marginBottom: 12,
             }}
           >
-            <CountChip label="Open" count={open.length} color="#FF8C00" />
+            <CountChip label="Open" count={open.length} color="#B8001F" />
             <CountChip label="Overdue" count={overdue.length} color="#FF3B3B" />
           </div>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
@@ -402,7 +402,7 @@ function MitigationActionsSection() {
                           background: od
                             ? 'rgba(255,59,59,0.18)'
                             : 'rgba(255,140,0,0.18)',
-                          color: od ? '#FF3B3B' : '#FF8C00',
+                          color: od ? '#FF3B3B' : '#B8001F',
                           border: `1px solid ${od ? 'rgba(255,59,59,0.55)' : 'rgba(255,140,0,0.55)'}`,
                           padding: '1px 6px',
                           borderRadius: 3,

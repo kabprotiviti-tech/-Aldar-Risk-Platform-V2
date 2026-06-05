@@ -226,7 +226,7 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
       <section
         style={{
           background:
-            'linear-gradient(135deg, rgba(255,102,0,0.06) 0%, rgba(45,158,255,0.04) 100%), var(--bg-secondary)',
+            'linear-gradient(135deg, rgba(228,0,43,0.06) 0%, rgba(45,158,255,0.04) 100%), var(--bg-secondary)',
           border: '1px solid var(--border-color)',
           borderRadius: 12,
           padding: '22px 24px',
@@ -248,7 +248,7 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
             transition: 'background 120ms ease-out',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(255,102,0,0.04)'
+            e.currentTarget.style.background = 'rgba(228,0,43,0.04)'
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background = 'transparent'
@@ -770,7 +770,7 @@ function HeroStat({
         transition: 'background 120ms ease-out',
       }}
       onMouseEnter={(e) => {
-        if (href) e.currentTarget.style.background = 'rgba(255,102,0,0.05)'
+        if (href) e.currentTarget.style.background = 'rgba(228,0,43,0.05)'
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.background = 'transparent'

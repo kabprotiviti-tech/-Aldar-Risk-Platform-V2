@@ -286,28 +286,9 @@ export function Header() {
               justifyContent: 'flex-end',
             }}
           >
-            {/* Hidden on mobile — shown tablet+ */}
-            <div className="hidden sm:flex items-center" style={{ gap: '8px', flexShrink: 0 }}>
-              <LiveBadge />
-              <ClockWidget />
-            </div>
-            <div className="hidden md:flex items-center" style={{ gap: '8px', flexShrink: 0 }}>
-              <MarketWidget />
-              <ConfidenceWidget />
-            </div>
-
-            {/* Subtle divider between status cluster and theme */}
-            <span
-              aria-hidden
-              className="hidden md:inline-block"
-              style={{
-                width: '1px',
-                height: '20px',
-                backgroundColor: 'var(--border-color)',
-                opacity: 0.6,
-                flexShrink: 0,
-              }}
-            />
+            {/* Batch 2: removed the LIVE pill, clock, ADX market widget and
+                confidence pill from the chrome — a calm executive masthead,
+                not a trading toolbar. Freshness/market live near their data. */}
 
             {/* Cmd-K / Ctrl-K command palette trigger */}
             <CommandPaletteButton />

@@ -291,9 +291,9 @@ function RegulatorCard({ r, accent }: { r: Regulator; accent: string }) {
                 key={id}
                 href="/risk-appetite"
                 style={{
-                  background: 'rgba(255,102,0,0.14)',
+                  background: 'rgba(228,0,43,0.14)',
                   color: 'var(--accent-primary)',
-                  border: '1px solid rgba(255,102,0,0.4)',
+                  border: '1px solid rgba(228,0,43,0.4)',
                   padding: '1px 6px',
                   borderRadius: 3,
                   fontSize: 9,

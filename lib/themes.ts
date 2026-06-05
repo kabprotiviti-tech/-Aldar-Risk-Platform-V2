@@ -5,54 +5,22 @@ export interface Theme {
   preview: string[] // 3 hex colors for swatch
 }
 
+// Batch 2: one opinionated point of view — Executive Light (default) +
+// Executive Dark. The novelty themes (Bloomberg, ESG Green, Risk Heat,
+// Strategy Gold, Minimal Black, Corporate Blue) are retired from the
+// selector; their CSS remains in globals.css but is no longer offered.
 export const THEMES: Theme[] = [
-  {
-    id: 'executive-dark',
-    name: 'Executive Dark',
-    description: 'Premium dark with gold accents — default executive view',
-    preview: ['#0A0E1A', '#141B2D', '#C9A84C'],
-  },
   {
     id: 'executive-light',
     name: 'Executive Light',
-    description: 'Clean white with navy — boardroom presentation mode',
-    preview: ['#F4F7FB', '#FFFFFF', '#0A3D7A'],
+    description: 'Warm paper, near-monochrome, Protiviti-red accent — boardroom default',
+    preview: ['#FAFAF8', '#FFFFFF', '#E4002B'],
   },
   {
-    id: 'bloomberg',
-    name: 'Bloomberg Terminal',
-    description: 'Dark charcoal with orange — market data terminal feel',
-    preview: ['#0D0D0D', '#1A1A1A', '#FF6600'],
-  },
-  {
-    id: 'esg-green',
-    name: 'ESG Green',
-    description: 'Deep green palette — sustainability & ESG reporting',
-    preview: ['#051209', '#0D2214', '#00E676'],
-  },
-  {
-    id: 'risk-heat',
-    name: 'Risk Heat',
-    description: 'Red-toned dark — critical risk monitoring mode',
-    preview: ['#110808', '#1F1111', '#FF4444'],
-  },
-  {
-    id: 'strategy-gold',
-    name: 'Strategy Gold',
-    description: 'Deep black with gold — strategic planning sessions',
-    preview: ['#0C0A00', '#1A1500', '#FFD600'],
-  },
-  {
-    id: 'minimal-black',
-    name: 'Minimal Black',
-    description: 'Pure black with white — maximum contrast, minimal distraction',
-    preview: ['#000000', '#111111', '#FFFFFF'],
-  },
-  {
-    id: 'corporate-blue',
-    name: 'Corporate Blue',
-    description: 'Deep navy with electric blue — corporate technology feel',
-    preview: ['#020B18', '#071A2E', '#2D9EFF'],
+    id: 'executive-dark',
+    name: 'Executive Dark',
+    description: 'Premium dark with Protiviti-red accent',
+    preview: ['#0A0E1A', '#141B2D', '#E4002B'],
   },
 ]
 

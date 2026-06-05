@@ -102,12 +102,12 @@ function Inner() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 10 }}>
         <KPI label="Risks in Scope" value={risks.length} accent="#22C55E" sparkSeed={3} />
-        <KPI label="Open Findings" value={openFindings.length} accent="#FF6600" sub="mitigation actions" sparkSeed={17} />
+        <KPI label="Open Findings" value={openFindings.length} accent="#E4002B" sub="mitigation actions" sparkSeed={17} />
         <KPI label="Total Audit Events" value={events.length} accent="#2D9EFF" sub="this browser session" sparkSeed={31} />
         <KPI label="3LoD Roles" value={THREE_LINES.reduce((s, l) => s + l.roles.length, 0)} accent="#A855F7" sparkSeed={47} />
       </div>
 
-      <Section title="Assurance Coverage Gap (proxy)" subtitle="Risks with widest gap between inherent score and control count" accent="#FF6600" icon={<Search size={14} />} cta={<Link href="/risk-register" style={ctaSmall}>Open register →</Link>}>
+      <Section title="Assurance Coverage Gap (proxy)" subtitle="Risks with widest gap between inherent score and control count" accent="#E4002B" icon={<Search size={14} />} cta={<Link href="/risk-register" style={ctaSmall}>Open register →</Link>}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {ranked.slice(0, 6).map((r) => (
             <Link key={r.id} href={`/risk-register?focus=${r.id}`} style={rowLinkStyle}>

@@ -49,7 +49,7 @@ const CATEGORY_META: Record<
   review: { label: 'Review', color: '#2D9EFF', bg: 'rgba(45,158,255,0.20)', border: 'rgba(45,158,255,0.55)' },
   training: { label: 'Training', color: '#22C55E', bg: 'rgba(34,197,94,0.20)', border: 'rgba(34,197,94,0.55)' },
   monitoring: { label: 'Monitoring', color: '#F5C518', bg: 'rgba(245,197,24,0.20)', border: 'rgba(245,197,24,0.55)' },
-  reporting: { label: 'Reporting', color: '#FF6600', bg: 'rgba(255,102,0,0.20)', border: 'rgba(255,102,0,0.55)' },
+  reporting: { label: 'Reporting', color: '#E4002B', bg: 'rgba(228,0,43,0.20)', border: 'rgba(228,0,43,0.55)' },
 }
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -212,9 +212,9 @@ export function ERMAnnualPlan() {
                           <span
                             style={{
                               marginLeft: 6,
-                              background: 'rgba(255,102,0,0.16)',
+                              background: 'rgba(228,0,43,0.16)',
                               color: 'var(--accent-primary)',
-                              border: '1px solid rgba(255,102,0,0.4)',
+                              border: '1px solid rgba(228,0,43,0.4)',
                               padding: '1px 5px',
                               borderRadius: 3,
                               fontSize: 8,

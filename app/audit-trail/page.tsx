@@ -28,7 +28,7 @@ const CATEGORY_META: Record<
   AuditCategory,
   { label: string; color: string }
 > = {
-  risk: { label: 'Risk', color: '#FF6600' },
+  risk: { label: 'Risk', color: '#E4002B' },
   mitigation: { label: 'Mitigation', color: '#22C55E' },
   kri_entry: { label: 'KRI Entry', color: '#2D9EFF' },
   kri_threshold: { label: 'KRI Threshold', color: '#F5C518' },

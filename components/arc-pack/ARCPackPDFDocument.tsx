@@ -39,9 +39,9 @@ const COLORS = {
   text: '#111827',
   muted: '#6b7280',
   faint: '#e5e7eb',
-  accent: '#FF6600',
+  accent: '#E4002B',
   critical: '#FF3B3B',
-  high: '#FF8C00',
+  high: '#B8001F',
   medium: '#F5C518',
   low: '#22C55E',
 }

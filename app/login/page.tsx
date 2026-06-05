@@ -45,7 +45,7 @@ const PERSONA_ICONS: Record<PersonaId, LucideIcon> = {
 }
 
 const PERSONA_ACCENT: Record<PersonaId, string> = {
-  'group-cro': '#FF6600',
+  'group-cro': '#E4002B',
   'risk-champion': '#2D9EFF',
   'subsidiary-ceo': '#A855F7',
   'arc-chair': '#F5C518',
@@ -362,7 +362,7 @@ function BrandPane() {
 function Pitch({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'rgba(255,255,255,0.78)' }}>
-      <span style={{ color: '#FF8C00', display: 'inline-flex' }}>{icon}</span>
+      <span style={{ color: '#B8001F', display: 'inline-flex' }}>{icon}</span>
       {text}
     </div>
   )
@@ -569,7 +569,7 @@ function CredentialsStep({
         type="submit"
         style={{
           marginTop: 2,
-          background: 'linear-gradient(135deg, #FF6600 0%, #FF8C00 100%)',
+          background: 'linear-gradient(135deg, #E4002B 0%, #B8001F 100%)',
           color: 'var(--on-accent)',
           border: 'none',
           padding: '12px 18px',
@@ -583,7 +583,7 @@ function CredentialsStep({
           alignItems: 'center',
           justifyContent: 'center',
           gap: 8,
-          boxShadow: '0 10px 24px rgba(255,102,0,0.35)',
+          boxShadow: '0 10px 24px rgba(228,0,43,0.35)',
         }}
       >
         Continue
