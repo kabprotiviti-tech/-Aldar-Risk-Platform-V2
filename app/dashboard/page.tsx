@@ -500,58 +500,9 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* KPI Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard
-          title="Overall Risk Score"
-          value={liveKPIs.riskScore}
-          unit="/ 100"
-          subtitle="Composite across all portfolios"
-          icon={AlertTriangle}
-          color="var(--risk-high)"
-          trend={`Trend ${BASELINE_RISK_POSTURE.riskScoreTrend > 0 ? '+' : ''}${BASELINE_RISK_POSTURE.riskScoreTrend} MoM`}
-          delay={0}
-          onClick={() => setActiveView(activeView === 'overallRisk' ? null : 'overallRisk')}
-          sparkSeed={11}
-        />
-        <KPICard
-          title="Critical & High Risks"
-          value={BASELINE_RISK_POSTURE.totalCriticalAndHighRisks}
-          subtitle="Requiring management action"
-          icon={Zap}
-          color="var(--risk-critical)"
-          trend={`${BASELINE_RISK_POSTURE.criticalRiskCount} Critical · ${BASELINE_RISK_POSTURE.highRiskCount} High`}
-          delay={1}
-          onClick={() => setActiveView(activeView === 'criticalRisks' ? null : 'criticalRisks')}
-          sparkSeed={23}
-        />
-        <KPICard
-          title="Financial Exposure"
-          value={Number((liveKPIs.exposure / 1_000_000_000).toFixed(2))}
-          unit="billion AED"
-          subtitle="Gross risk-adjusted exposure"
-          icon={DollarSign}
-          color="var(--accent-primary)"
-          trend={`Net unhedged ${(BASELINE_RISK_POSTURE.netUnhedgedExposure / 1_000_000_000).toFixed(2)} billion AED`}
-          delay={2}
-          onClick={() => setActiveView(activeView === 'financialExposure' ? null : 'financialExposure')}
-          onViewCalc={() => setCalcCtx({ type: 'total_exposure', value: liveKPIs.exposure, portfolioScores })}
-          sparkSeed={37}
-        />
-        <KPICard
-          title="AI Alerts Today"
-          value={BASELINE_RISK_POSTURE.aiAlertsToday}
-          subtitle="New signals detected"
-          icon={TrendingUp}
-          color="var(--chart-2)"
-          trend={`${BASELINE_RISK_POSTURE.activeExternalSignals} external · ${BASELINE_RISK_POSTURE.activeControlWeaknesses} controls`}
-          delay={3}
-          onClick={() => setActiveView(activeView === 'aiAlerts' ? null : 'aiAlerts')}
-          onRefresh={refreshAlerts}
-          refreshing={alertsRefreshing}
-          sparkSeed={41}
-        />
-      </div>
+      {/* KPI scorecard removed (Batch 1): the four headline KPIs live ONCE on
+          My Dashboard. External Intel leads with what CHANGED — signals, news
+          and decision intelligence — not a repeat of the same scorecard. */}
 
       {/* KPI Drill-Down Panel (modal overlay) */}
       <AnimatePresence>

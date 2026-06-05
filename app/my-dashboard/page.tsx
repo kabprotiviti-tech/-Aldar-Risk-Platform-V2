@@ -137,12 +137,10 @@ function MyDashboardContent() {
   }, [myKRIs, thresholdsFor, latestFor])
 
   // ── Headline metrics — single source of truth.
-  //   • Residual exposure: engine-derived (matches /home's residual figure).
-  //   • Score / critical+high / AI alerts: BASELINE_RISK_POSTURE composite —
-  //     IDENTICAL to the /dashboard headline so the same KPI never shows two
-  //     different numbers across screens.
-  const _engineExposureMn = risks.reduce((s, r) => s + r.exposureAedMn, 0)
-  const headlineExposure = safeMetric(_engineExposureMn * 1_000_000, BASELINE_RISK_POSTURE.totalFinancialExposure)
+  //   ONE canonical number set across every screen (Batch 1) — exposure,
+  //   score, critical+high, AI alerts all come from BASELINE_RISK_POSTURE so
+  //   the same KPI never shows two different numbers anywhere.
+  const headlineExposure = BASELINE_RISK_POSTURE.totalFinancialExposure
   const headlineCriticalHigh = BASELINE_RISK_POSTURE.totalCriticalAndHighRisks
   const criticalCount = BASELINE_RISK_POSTURE.criticalRiskCount
   const highCount = BASELINE_RISK_POSTURE.highRiskCount
@@ -198,9 +196,7 @@ function MyDashboardContent() {
                 lineHeight: 1.2,
               }}
             >
-              {persona
-                ? `Good morning, ${session.displayName?.split('@')[0] ?? persona.title}.`
-                : 'My Dashboard'}
+              {persona ? `Good morning, ${persona.title}.` : 'My Dashboard'}
             </h1>
             {persona && (
               <p
@@ -212,7 +208,6 @@ function MyDashboardContent() {
                   lineHeight: 1.5,
                 }}
               >
-                <span style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>Killer question:</span>{' '}
                 {persona.killerQuestion}
               </p>
             )}
@@ -245,10 +240,10 @@ function MyDashboardContent() {
             sparklineSeed={23}
           />
           <HeroStat
-            label="Group residual exposure"
+            label="Group risk-adjusted exposure"
             value={formatExposureBn(headlineExposure, 'AED')}
             tone="neutral"
-            sub={`Across ${risks.length} engine risks`}
+            sub={`Net unhedged ${formatExposureBn(BASELINE_RISK_POSTURE.netUnhedgedExposure, 'AED')}`}
             sparklineAnchor={headlineExposure / 1_000_000}
             sparklineSeed={37}
           />

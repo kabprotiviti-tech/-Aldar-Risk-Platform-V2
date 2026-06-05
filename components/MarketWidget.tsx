@@ -55,14 +55,13 @@ export function MarketWidget() {
     )
   }
 
-  // Unavailable
+  // No live quote — show a calm dash, never a red "unavailable" error.
   if (data.status === 'unavailable' || !data.price) {
     return (
-      <div title="ADX market data temporarily unavailable" style={pill}>
-        <WifiOff size={11} style={{ color: 'var(--text-muted)' }} />
-        <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
+      <div title="ABC · ADX — market quote not available right now" style={pill}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, lineHeight: 1.2 }}>
           <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', letterSpacing: '0.04em' }}>ABC · ADX</span>
-          <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Unavailable</span>
+          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>—</span>
         </div>
       </div>
     )

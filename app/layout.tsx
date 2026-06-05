@@ -9,7 +9,6 @@ import { AuditTrailProvider } from '@/lib/context/AuditTrailContext'
 import { PersonaProvider } from '@/lib/context/PersonaContext'
 import { MultiEntityScopeProvider } from '@/lib/context/MultiEntityScopeContext'
 import { AppChrome } from '@/components/layout/AppChrome'
-import { EnvironmentBanner } from '@/components/provenance/EnvironmentBanner'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -49,7 +48,8 @@ export default function RootLayout({
               <MultiEntityScopeProvider>
                 <UploadedDocumentProvider>
                   <DerivedRisksProvider>
-                    <EnvironmentBanner env="demo" />
+                    {/* Top "V0.5 MVP / pre-contract POC" strip removed (Batch 1) —
+                        version + provenance now live in the footer / data chip. */}
                     <AppChrome>{children}</AppChrome>
                   </DerivedRisksProvider>
                 </UploadedDocumentProvider>

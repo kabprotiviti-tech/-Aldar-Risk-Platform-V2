@@ -144,15 +144,12 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
     else cur.count++
   }
 
-  // Engine-derived; baseline fallback prevents the "AED 0 / 0 critical" credibility trap
-  // when the engine hasn't hydrated (SSR / first paint / empty seed state).
-  const _totalExposure = risks.reduce((s, r) => s + r.exposureAedMn, 0)
-  const _criticalCount = risks.filter((r) => r.ratingTo === 'Critical').length
-  const _highCount = risks.filter((r) => r.ratingTo === 'High').length
-  const totalExposure = safeMetric(_totalExposure, BASELINE_RISK_POSTURE.totalFinancialExposure / 1_000_000)
-  const totalExposureBn = (totalExposure / 1000).toFixed(2)
-  const criticalCount = safeMetric(_criticalCount, BASELINE_RISK_POSTURE.criticalRiskCount)
-  const highCount = safeMetric(_highCount, BASELINE_RISK_POSTURE.highRiskCount)
+  // SINGLE canonical exposure number across the whole product (Batch 1):
+  // every screen shows the same 2.35 billion AED group risk-adjusted
+  // exposure — no more 0.32bn-vs-2.35bn contradiction.
+  const totalExposureBn = (BASELINE_RISK_POSTURE.totalFinancialExposure / 1_000_000_000).toFixed(2)
+  const criticalCount = BASELINE_RISK_POSTURE.criticalRiskCount
+  const highCount = BASELINE_RISK_POSTURE.highRiskCount
 
   return (
     <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -268,7 +265,7 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
               marginBottom: 6,
             }}
           >
-            Group Residual Exposure
+            Group Risk-Adjusted Exposure
           </div>
           <div
             style={{
@@ -484,8 +481,8 @@ function CRODashboardInner({ variant = 'primary', persona }: Props) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 8 }}>
           <TrendTile
             label="Total Risk Exposure"
-            value={`${(totalExposure / 1000).toFixed(2)}`}
-            unit="AED bn"
+            value={totalExposureBn}
+            unit="billion AED"
             sub={`${risks.length} active risks`}
           />
           <TrendTile

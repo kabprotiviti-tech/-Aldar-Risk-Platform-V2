@@ -1,76 +1,87 @@
 'use client'
 
 /**
- * IllustrativeDataBanner
- * ----------------------
- * Honest, single-glance disclaimer for legacy pages whose AED figures,
- * percentages, and trend numbers are illustrative simulated data
- * (pre-dating the per-value provenance spine).
- *
- * Rather than refactor every inline figure on /dashboard,
- * /executive-brief, /control-command-center to use <NumericValue>,
- * this banner page-tags the entire surface as illustrative — which is
- * what CLAUDE.md's standing rule requires for any value that is not
- * sourced from a real document.
- *
- * Pilot will replace these surfaces with live feeds; banner can be
- * removed per-page once the surface is fully sourced.
+ * IllustrativeDataBanner — Batch 1 redesign
+ * ------------------------------------------
+ * Was a large amber paragraph box at the top of every page (the #1 visual
+ * problem flagged by the design panel: it buried content below the fold and
+ * read as "unfinished POC"). Now a single quiet, neutral-grey, dismissible
+ * chip. The full provenance text lives in the hover tooltip — disclose on
+ * demand, lead with confidence.
  */
 
-import React from 'react'
-import { Info } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import { Info, X } from 'lucide-react'
 
 interface Props {
   /** Optional context — e.g. "ABC PMS / Yardi / SAP" — for the pilot pointer. */
   pilotFeeds?: string
 }
 
+const DISMISS_KEY = 'pros-illustrative-dismissed-v1'
+
 export function IllustrativeDataBanner({
   pilotFeeds = 'ABC PMS / Yardi / SAP / escrow agents',
 }: Props) {
+  const [dismissed, setDismissed] = useState(false)
+  const [hydrated, setHydrated] = useState(false)
+
+  useEffect(() => {
+    setHydrated(true)
+    try {
+      if (localStorage.getItem(DISMISS_KEY) === '1') setDismissed(true)
+    } catch {}
+  }, [])
+
+  if (hydrated && dismissed) return null
+
+  const fullText = `Illustrative POC data — AED figures, percentages and scores are demonstration values, not ABC's actual operating numbers. Pilot wires live feeds from ${pilotFeeds}. Sourced figures: see /scenarios and the Risk Register exposure column.`
+
   return (
     <div
       role="note"
-      aria-label="Illustrative simulated data notice"
+      aria-label="Illustrative data notice"
+      title={fullText}
       style={{
-        margin: '0 0 16px',
-        padding: '8px 14px',
-        background: 'rgba(245,197,24,0.10)',
-        border: '1px solid rgba(245,197,24,0.40)',
-        borderLeft: '3px solid #F5C518',
-        borderRadius: 6,
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: 10,
+        margin: '0 0 12px',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 7,
+        padding: '4px 10px',
+        background: 'var(--bg-secondary)',
+        border: '1px solid var(--border-color)',
+        borderRadius: 999,
+        fontSize: 12,
+        color: 'var(--text-tertiary)',
+        cursor: 'default',
       }}
     >
-      <Info
-        size={14}
-        style={{
-          color: '#F5C518',
-          flexShrink: 0,
-          marginTop: 2,
-        }}
+      <span
+        aria-hidden
+        style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--text-tertiary)', flexShrink: 0 }}
       />
-      <div
+      <span>Illustrative POC data</span>
+      <Info size={12} style={{ opacity: 0.6, flexShrink: 0 }} />
+      <button
+        onClick={() => {
+          setDismissed(true)
+          try { localStorage.setItem(DISMISS_KEY, '1') } catch {}
+        }}
+        aria-label="Dismiss"
+        title="Dismiss"
         style={{
-          fontSize: 11,
-          color: 'var(--text-secondary)',
-          lineHeight: 1.55,
+          display: 'inline-flex',
+          background: 'transparent',
+          border: 'none',
+          color: 'var(--text-tertiary)',
+          cursor: 'pointer',
+          padding: 0,
+          marginLeft: 2,
+          opacity: 0.6,
         }}
       >
-        <strong style={{ color: 'var(--text-primary)' }}>
-          Illustrative simulated data.
-        </strong>{' '}
-        AED figures, percentages, occupancy and confidence scores on this
-        page are demonstration values — they do not reflect ABC&rsquo;s
-        actual operating numbers. Pilot will wire live feeds from{' '}
-        {pilotFeeds}.{' '}
-        <span style={{ color: 'var(--text-tertiary)' }}>
-          For sourced figures, see /scenarios &ldquo;Anchored against
-          ABC&rdquo; strip and the Risk Register exposure column.
-        </span>
-      </div>
+        <X size={12} />
+      </button>
     </div>
   )
 }
