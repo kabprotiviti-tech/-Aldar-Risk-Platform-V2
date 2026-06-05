@@ -282,6 +282,10 @@ body {
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Batch 3: tabular-lining numerals everywhere so every figure aligns and
+     reads as engineered — KPIs, tables, heatmap pills, sparkline labels. */
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.005em;
   min-height: 100vh;
 }
 

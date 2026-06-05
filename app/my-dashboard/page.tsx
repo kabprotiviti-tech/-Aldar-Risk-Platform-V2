@@ -305,14 +305,14 @@ function MyDashboardContent() {
             style={{
               background: 'var(--bg-secondary)',
               border: '1px solid var(--border-color)',
-              borderTop: '3px solid #22C55E',
-              borderRadius: 8,
-              padding: '12px 14px',
+              borderRadius: 10,
+              padding: '14px 16px',
               display: 'flex',
               flexDirection: 'column',
               gap: 6,
               cursor: 'pointer',
               color: 'var(--text-primary)',
+              boxShadow: 'var(--shadow-sm)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#22C55E' }}>
@@ -351,7 +351,7 @@ function MyDashboardContent() {
           }
         >
           {myDrafts.length === 0 ? (
-            <Empty>{seeAll ? 'No drafts in flight.' : 'No drafts yet. Use /risk-register to add a new draft risk.'}</Empty>
+            <Empty>{seeAll ? 'No drafts in flight — the register is current.' : 'No drafts awaiting you — your register is up to date.'}</Empty>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {myDrafts.slice(0, 6).map((d) => (
@@ -380,7 +380,7 @@ function MyDashboardContent() {
           }
         >
           {openActions.length === 0 ? (
-            <Empty>No mitigation actions in scope.</Empty>
+            <Empty>All mitigations on track — nothing open or overdue.</Empty>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {openActions.slice(0, 6).map((a) => {
@@ -658,20 +658,20 @@ function KPITile({
       style={{
         background: 'var(--bg-secondary)',
         border: '1px solid var(--border-color)',
-        borderTop: `3px solid ${accent}`,
-        borderRadius: 8,
-        padding: '12px 14px',
+        borderRadius: 10,
+        padding: '14px 16px',
         display: 'flex',
         flexDirection: 'column',
-        gap: 4,
+        gap: 6,
         cursor: href ? 'pointer' : 'default',
         textDecoration: 'none',
         color: 'inherit',
+        boxShadow: 'var(--shadow-sm)',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: accent }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-tertiary)' }}>
         {icon}
-        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase' }}>
+        <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase' }}>
           {label}
         </span>
       </div>
@@ -749,20 +749,34 @@ function Section({
 }
 
 function Empty({ children }: { children: React.ReactNode }) {
+  // Calm "all clear" state — signals control, not a load failure (Batch 3).
   return (
     <div
       style={{
-        padding: 16,
-        textAlign: 'center',
-        color: 'var(--text-tertiary)',
-        fontStyle: 'italic',
-        fontSize: 11,
+        padding: '18px 16px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        color: 'var(--text-secondary)',
+        fontSize: 12,
         background: 'var(--bg-primary)',
-        border: '1px dashed var(--border-color)',
-        borderRadius: 6,
+        border: '1px solid var(--border-color)',
+        borderRadius: 8,
       }}
     >
-      {children}
+      <span
+        aria-hidden
+        style={{
+          width: 16, height: 16, borderRadius: '50%',
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(6,118,71,0.12)', color: '#067647', flexShrink: 0,
+          fontSize: 11, fontWeight: 700,
+        }}
+      >
+        ✓
+      </span>
+      <span>{children}</span>
     </div>
   )
 }
