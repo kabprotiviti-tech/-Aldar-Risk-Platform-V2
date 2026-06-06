@@ -11,6 +11,7 @@ import { MobileNav } from './MobileNav'
 // import { AIRiskAdvisor } from '@/components/AIRiskAdvisor'
 import { RiskMemoryChat } from '@/components/RiskMemoryChat'
 import { StealthToggle } from './StealthToggle'
+import { StoryNextButton } from './StoryNextButton'
 import { CommandPaletteProvider } from './CommandPalette'
 import { usePersona } from '@/lib/context/PersonaContext'
 
@@ -102,6 +103,7 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
         </div>
         <MobileNav />
         <RiskMemoryChat />
+        <StoryNextButton />
         <StealthToggle />
       </AuthGuard>
     </CommandPaletteProvider>

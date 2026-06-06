@@ -39,7 +39,9 @@ import {
   Search,
   Telescope,
   Activity,
+  Radio,
   ClipboardList,
+  ArrowRight,
   Settings,
   type LucideIcon,
 } from 'lucide-react'
@@ -70,187 +72,52 @@ const ALL: PersonaId[] = [
   'arc-chair',
 ]
 
+// ─── Narrative spine (Batch 4) ──────────────────────────────────────────
+// The sidebar reads like a story, not a sitemap. Seven ordered beats take
+// a leader from "what is our posture" to "what goes to the Board".
+// The STORY_SPINE array (href order) also powers the persistent "Next →".
+export const STORY_SPINE: { href: string; label: string }[] = [
+  { href: '/my-dashboard', label: 'Posture' },
+  { href: '/dashboard', label: 'External triggers' },
+  { href: '/risk-register', label: 'Challenge' },
+  { href: '/portfolio-tower', label: 'Concentration' },
+  { href: '/scenarios', label: 'Stress & decide' },
+  { href: '/respond/approvals', label: 'Govern' },
+  { href: '/arc-pack', label: 'Board pack' },
+]
+
 const NAV_GROUPS: NavGroup[] = [
   {
-    id: 'home',
-    label: 'Home',
-    icon: LayoutDashboard,
-    items: [
-      {
-        href: '/my-dashboard',
-        label: 'My Dashboard',
-        icon: UserCircle2,
-        description: 'Personal "My Day" view',
-        personas: ALL,
-      },
-    ],
-  },
-  {
-    id: 'identify',
-    label: 'Identify',
-    icon: Search,
-    items: [
-      {
-        href: '/risk-register',
-        label: 'Risk Register',
-        icon: ListChecks,
-        description: 'Cause-Event-Impact register',
-        personas: ALL,
-      },
-      {
-        href: '/risk-library',
-        label: 'Risk Library',
-        icon: BookOpen,
-        description: 'UAE risks + peer benchmark',
-        personas: ['group-cro', 'risk-champion', 'subsidiary-ceo'],
-      },
-    ],
-  },
-  {
-    id: 'assess',
-    label: 'Assess',
-    icon: Telescope,
-    items: [
-      {
-        href: '/portfolio-tower',
-        label: 'Portfolio Tower',
-        icon: Network,
-        description: 'Group + Subsidiaries',
-        personas: ['group-cro', 'subsidiary-ceo', 'arc-chair'],
-      },
-      {
-        href: '/scenarios',
-        label: 'Scenarios',
-        icon: FlaskConical,
-        description: 'Stress test simulation',
-        personas: ['group-cro', 'risk-champion', 'subsidiary-ceo'],
-      },
-    ],
-  },
-  {
-    id: 'monitor',
-    label: 'Monitor',
+    id: 'story',
+    label: 'Risk Story',
     icon: Activity,
     items: [
-      {
-        href: '/dashboard',
-        label: 'External Intel',
-        icon: LayoutDashboard,
-        description: 'News + decision intelligence',
-        personas: ALL,
-      },
-      {
-        href: '/control-command-center',
-        label: 'Control Center',
-        icon: Gauge,
-        description: 'ICOFR control catalog',
-        personas: ['group-cro', 'arc-chair', 'risk-champion'],
-      },
-      {
-        href: '/kri',
-        label: 'KRIs',
-        icon: Gauge,
-        description: 'Key Risk Indicators',
-        personas: ALL,
-      },
-      {
-        href: '/audit-trail',
-        label: 'Audit Trail',
-        icon: ShieldCheck,
-        description: 'Append-only event log',
-        personas: ['group-cro', 'arc-chair', 'subsidiary-ceo'],
-      },
-      {
-        href: '/documents',
-        label: 'Documents',
-        icon: FileText,
-        description: 'Document Intelligence',
-        personas: ['group-cro', 'risk-champion'],
-      },
+      { href: '/my-dashboard', label: '1 · Posture', icon: UserCircle2, description: 'Where do we stand right now?', personas: ALL },
+      { href: '/dashboard', label: '2 · External triggers', icon: Radio, description: 'What changed in the outside world?', personas: ALL },
+      { href: '/risk-register', label: '3 · Challenge', icon: ListChecks, description: 'AI challenges the register; human approves', personas: ALL },
+      { href: '/portfolio-tower', label: '4 · Concentration', icon: Network, description: 'Where does the exposure concentrate?', personas: ['group-cro', 'subsidiary-ceo', 'arc-chair'] },
+      { href: '/scenarios', label: '5 · Stress & decide', icon: FlaskConical, description: 'What does it cost — and what must we decide?', personas: ['group-cro', 'risk-champion', 'subsidiary-ceo'] },
+      { href: '/respond/approvals', label: '6 · Govern', icon: ClipboardList, description: 'Route the decision for sign-off', personas: ALL },
+      { href: '/arc-pack', label: '7 · Board pack', icon: FileBarChart, description: 'The board-ready pack, written live', personas: ['group-cro', 'arc-chair', 'subsidiary-ceo'] },
     ],
   },
   {
-    id: 'respond',
-    label: 'Respond',
-    icon: Settings,
+    id: 'depth',
+    label: 'Depth on demand',
+    icon: Search,
     items: [
-      {
-        href: '/respond/approvals',
-        label: 'Approvals',
-        icon: ClipboardList,
-        description: 'Approvals queue · all routings',
-        personas: ALL,
-      },
-    ],
-  },
-  {
-    id: 'report',
-    label: 'Report',
-    icon: FileBarChart,
-    items: [
-      {
-        href: '/arc-pack',
-        label: 'ARC Pack',
-        icon: FileBarChart,
-        description: 'Board-ready PDF report',
-        personas: ['group-cro', 'arc-chair', 'subsidiary-ceo'],
-      },
-      {
-        href: '/executive-brief',
-        label: 'Executive Brief',
-        icon: FileBarChart,
-        description: 'CEO + Board summary',
-        personas: ['group-cro', 'arc-chair', 'subsidiary-ceo'],
-      },
-    ],
-  },
-  {
-    id: 'governance',
-    label: 'Governance',
-    icon: ShieldHalf,
-    items: [
-      {
-        href: '/risk-appetite',
-        label: 'Risk Appetite',
-        icon: ShieldQuestion,
-        description: 'Appetite statements',
-        personas: ALL,
-      },
-      {
-        href: '/three-lines-of-defense',
-        label: '3 Lines of Defense',
-        icon: ShieldHalf,
-        description: 'Operating model',
-        personas: ALL,
-      },
-      {
-        href: '/policy-and-procedure',
-        label: 'Policy & Procedure',
-        icon: BookMarked,
-        description: 'Policy register · status · review cycle',
-        personas: ALL,
-      },
-      {
-        href: '/regulator-map',
-        label: 'Regulator Map',
-        icon: Landmark,
-        description: 'UAE regulatory bodies',
-        personas: ['group-cro', 'arc-chair'],
-      },
-      {
-        href: '/standards-reference',
-        label: 'Standards Ref',
-        icon: BookMarked,
-        description: 'ISO 31000 + COSO ERM',
-        personas: ['group-cro', 'arc-chair'],
-      },
-      {
-        href: '/bcm',
-        label: 'BCM',
-        icon: LifeBuoy,
-        description: 'Business Continuity · Phase 4 roadmap',
-        personas: ['group-cro', 'arc-chair'],
-      },
+      { href: '/kri', label: 'KRIs', icon: Gauge, description: 'Key Risk Indicators', personas: ALL },
+      { href: '/risk-appetite', label: 'Risk Appetite', icon: ShieldQuestion, description: 'Appetite statements', personas: ALL },
+      { href: '/control-command-center', label: 'Control Center', icon: Gauge, description: 'ICOFR control catalogue', personas: ['group-cro', 'arc-chair', 'risk-champion'] },
+      { href: '/risk-library', label: 'Risk Library', icon: BookOpen, description: 'UAE risk starter library', personas: ['group-cro', 'risk-champion', 'subsidiary-ceo'] },
+      { href: '/executive-brief', label: 'Executive Brief', icon: FileBarChart, description: 'AI board summary', personas: ['group-cro', 'arc-chair', 'subsidiary-ceo'] },
+      { href: '/documents', label: 'Documents', icon: FileText, description: 'AI document intelligence', personas: ['group-cro', 'risk-champion'] },
+      { href: '/audit-trail', label: 'Audit Trail', icon: ShieldCheck, description: 'Append-only event log', personas: ['group-cro', 'arc-chair', 'subsidiary-ceo'] },
+      { href: '/policy-and-procedure', label: 'Policy & Procedure', icon: BookMarked, description: 'Policy register', personas: ALL },
+      { href: '/regulator-map', label: 'Regulator Map', icon: Landmark, description: 'UAE regulatory bodies', personas: ['group-cro', 'arc-chair'] },
+      { href: '/three-lines-of-defense', label: '3 Lines of Defense', icon: ShieldHalf, description: 'Operating model', personas: ALL },
+      { href: '/standards-reference', label: 'Standards Ref', icon: BookMarked, description: 'ISO 31000 + COSO ERM', personas: ['group-cro', 'arc-chair'] },
+      { href: '/bcm', label: 'BCM', icon: LifeBuoy, description: 'Business Continuity', personas: ['group-cro', 'arc-chair'] },
     ],
   },
 ]
@@ -306,7 +173,10 @@ export function Sidebar() {
     // Active route's group always opens, even if user collapsed it earlier.
     if (hasActiveItem) return true
     const saved = groupOpen[groupId]
-    return saved === undefined ? true : saved
+    // The narrative spine ("story") leads; "Depth on demand" starts folded so
+    // the eye lands on the 7-beat story, not the 12-item reference shelf.
+    if (saved === undefined) return groupId !== 'depth'
+    return saved
   }
 
   // Auto-collapse on tablet/mobile, but respect explicit user toggle.
