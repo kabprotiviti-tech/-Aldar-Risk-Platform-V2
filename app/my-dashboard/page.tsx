@@ -145,31 +145,95 @@ function MyDashboardContent() {
   const criticalCount = BASELINE_RISK_POSTURE.criticalRiskCount
   const highCount = BASELINE_RISK_POSTURE.highRiskCount
   const headlineRiskScore = BASELINE_RISK_POSTURE.overallRiskScore
+  const scoreTrend = BASELINE_RISK_POSTURE.riskScoreTrend
+  const scoreBand = scoreBandFor(headlineRiskScore)
+
+  // ── "What needs your attention" — the single focal list (Batch 5).
+  //   Synthesised from live posture + the user's own open work, ordered by
+  //   severity. This is the one thing a leader reads first; everything else
+  //   on the page is demoted below it.
+  const attentionItems = useMemo<AttentionItem[]>(() => {
+    const items: AttentionItem[] = []
+    if (criticalCount > 0)
+      items.push({
+        sev: 'critical',
+        text: `${criticalCount} critical risk${criticalCount === 1 ? '' : 's'} above appetite`,
+        meta: 'Board-level — needs a decision',
+        href: '/risk-register',
+        cta: 'Review register',
+      })
+    if (myActionsOverdue > 0)
+      items.push({
+        sev: 'high',
+        text: `${myActionsOverdue} mitigation action${myActionsOverdue === 1 ? '' : 's'} overdue`,
+        meta: 'Past committed due date',
+        href: '/risk-register',
+        cta: 'Open actions',
+      })
+    if (kriStatus.r > 0)
+      items.push({
+        sev: 'high',
+        text: `${kriStatus.r} KRI${kriStatus.r === 1 ? '' : 's'} breached threshold`,
+        meta: 'Red — outside tolerance',
+        href: '/kri',
+        cta: 'Open KRIs',
+      })
+    if (BASELINE_RISK_POSTURE.activeControlWeaknesses > 0)
+      items.push({
+        sev: 'medium',
+        text: `${BASELINE_RISK_POSTURE.activeControlWeaknesses} control weaknesses open`,
+        meta: 'ICOFR remediation in flight',
+        href: '/control-command-center',
+        cta: 'Control centre',
+      })
+    if (BASELINE_RISK_POSTURE.activeExternalSignals > 0)
+      items.push({
+        sev: 'medium',
+        text: `${BASELINE_RISK_POSTURE.activeExternalSignals} external signals tracking`,
+        meta: 'Macro / regulatory / sector',
+        href: '/dashboard',
+        cta: 'External intel',
+      })
+    const rank = { critical: 0, high: 1, medium: 2 }
+    return items.sort((a, b) => rank[a.sev] - rank[b.sev]).slice(0, 5)
+  }, [criticalCount, myActionsOverdue, kriStatus.r])
+
+  const trendWord =
+    scoreTrend < 0
+      ? `down ${Math.abs(scoreTrend)} this month`
+      : scoreTrend > 0
+        ? `up ${scoreTrend} this month`
+        : 'flat this month'
 
   // ── Render ──────────────────────────────────────────────────────────
   return (
     <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 16 }}>
       <IllustrativeDataBanner pilotFeeds="ABC SSO + live ERM + Reuters/Bayut/ADREC/CBUAE/ADX feeds" />
 
-      {/* ── Hero ─────────────────────────────────────────────────────── */}
+      {/* ── Executive-brief hero (Batch 5) ──────────────────────────────
+          One screen, one focus: greeting + standfirst on the left, ONE
+          dominant Group Risk Score dial on the right, the focal "what needs
+          your attention" list underneath, then a quiet secondary KPI row.
+          Everything else (drafts, KRIs, signals, audit) sits below the fold. */}
       <header
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: 14,
+          gap: 16,
           padding: '8px 0 4px',
         }}
       >
         <div
           style={{
             display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            gap: 16,
             flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 24,
           }}
         >
-          <div style={{ minWidth: 0, flex: 1 }}>
+          {/* LEFT — greeting + standfirst */}
+          <div style={{ flex: '1 1 360px', minWidth: 0 }}>
             <div
               style={{
                 fontSize: 10,
@@ -201,142 +265,167 @@ function MyDashboardContent() {
             {persona && (
               <p
                 style={{
-                  fontSize: 13,
+                  fontSize: 14,
                   color: 'var(--text-secondary)',
-                  margin: '6px 0 0',
-                  maxWidth: 720,
-                  lineHeight: 1.5,
+                  margin: '8px 0 0',
+                  maxWidth: 560,
+                  lineHeight: 1.55,
                 }}
               >
-                {persona.killerQuestion}
+                {criticalCount} critical and {highCount} high risks are live across
+                ABC Holdings. Group score {headlineRiskScore}/100, {trendWord}.{' '}
+                {attentionItems.length > 0
+                  ? "Here's what needs you today."
+                  : 'Nothing critical needs you right now.'}
               </p>
             )}
           </div>
-          <StatusBadge tier="MVP" note={persona ? `Bound to login · ${persona.title}` : 'No persona'} />
+
+          {/* RIGHT — the one dominant number */}
+          <RiskScoreDial
+            score={headlineRiskScore}
+            band={scoreBand}
+            trendWord={trendWord}
+            improving={scoreTrend < 0}
+          />
         </div>
 
-        {/* Hero KPI strip — unified internal + market */}
-        <div
+        {/* ── What needs your attention — the single focal list ─────────── */}
+        <section
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: 10,
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 12,
+            padding: 16,
+            boxShadow: 'var(--shadow-sm)',
           }}
-        >
-          <HeroStat
-            label="Group risk score"
-            value={`${headlineRiskScore} / 100`}
-            tone={headlineRiskScore >= 75 ? 'danger' : headlineRiskScore >= 60 ? 'warning' : 'good'}
-            sub={`Trend ${BASELINE_RISK_POSTURE.riskScoreTrend > 0 ? '+' : ''}${BASELINE_RISK_POSTURE.riskScoreTrend} MoM`}
-            sparklineAnchor={headlineRiskScore}
-            sparklineSeed={11}
-          />
-          <HeroStat
-            label="Critical + High"
-            value={String(headlineCriticalHigh)}
-            tone={headlineCriticalHigh > 8 ? 'danger' : headlineCriticalHigh > 4 ? 'warning' : 'good'}
-            sub={`${criticalCount} critical · ${highCount} high`}
-            sparklineAnchor={headlineCriticalHigh}
-            sparklineSeed={23}
-          />
-          <HeroStat
-            label="Group risk-adjusted exposure"
-            value={formatExposureBn(headlineExposure, 'AED')}
-            tone="neutral"
-            sub={`Net unhedged ${formatExposureBn(BASELINE_RISK_POSTURE.netUnhedgedExposure, 'AED')}`}
-            sparklineAnchor={headlineExposure / 1_000_000}
-            sparklineSeed={37}
-          />
-          <HeroStat
-            label="AI alerts today"
-            value={String(BASELINE_RISK_POSTURE.aiAlertsToday)}
-            tone={BASELINE_RISK_POSTURE.aiAlertsToday > 5 ? 'warning' : 'good'}
-            sub={`${BASELINE_RISK_POSTURE.activeExternalSignals} external · ${BASELINE_RISK_POSTURE.activeControlWeaknesses} controls`}
-            sparklineAnchor={BASELINE_RISK_POSTURE.aiAlertsToday}
-            sparklineSeed={41}
-          />
-        </div>
-      </header>
-
-      {/* ── My-Day KPI tiles ──────────────────────────────────────────── */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: 10,
-        }}
-      >
-        <KPITile
-          icon={<Pencil size={14} />}
-          label={seeAll ? 'Drafts in flight' : 'My Drafts'}
-          value={myDrafts.length}
-          accent="#E4002B"
-          href="/risk-register"
-        />
-        <KPITile
-          icon={<Activity size={14} />}
-          label={seeAll ? 'Open mitigations' : 'My Open Actions'}
-          value={openActions.length}
-          accent="#2D9EFF"
-          subline={myActionsOverdue > 0 ? `${myActionsOverdue} overdue` : 'on track'}
-          sublineColor={myActionsOverdue > 0 ? '#FF3B3B' : '#22C55E'}
-        />
-        <KPITile
-          icon={<AlertCircle size={14} />}
-          label={seeAll ? 'KRIs monitored' : 'My KRIs'}
-          value={myKRIs.length}
-          accent="#A855F7"
-          href="/kri"
-          subline={
-            kriStatus.r > 0
-              ? `${kriStatus.r} red · ${kriStatus.a} amber`
-              : kriStatus.a > 0
-                ? `${kriStatus.a} amber · ${kriStatus.g} green`
-                : `${kriStatus.g} green`
-          }
-          sublineColor={kriStatus.r > 0 ? '#FF3B3B' : kriStatus.a > 0 ? '#F5C518' : '#22C55E'}
-        />
-        <Link
-          href="/portfolio-tower"
-          style={{ textDecoration: 'none' }}
-          title="ERM annual plan — drill into Portfolio Tower"
         >
           <div
             style={{
-              background: 'var(--bg-secondary)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 10,
-              padding: '14px 16px',
               display: 'flex',
-              flexDirection: 'column',
-              gap: 6,
-              cursor: 'pointer',
-              color: 'var(--text-primary)',
-              boxShadow: 'var(--shadow-sm)',
+              alignItems: 'center',
+              gap: 8,
+              marginBottom: 12,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#22C55E' }}>
-              <Inbox size={14} />
-              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase' }}>
+            <AlertCircle size={15} style={{ color: 'var(--accent-primary)' }} />
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 700,
+                color: 'var(--text-primary)',
+                letterSpacing: '-0.005em',
+              }}
+            >
+              What needs your attention
+            </span>
+            <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+              {attentionItems.length} item{attentionItems.length === 1 ? '' : 's'}, most severe first
+            </span>
+          </div>
+
+          {attentionItems.length === 0 ? (
+            <Empty>Nothing critical needs you right now — posture is stable and within appetite.</Empty>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {attentionItems.map((it, i) => (
+                <AttentionRow key={i} item={it} />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* ── Secondary KPI row — quiet supporting figures ──────────────── */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+            gap: 10,
+          }}
+        >
+          <MiniStat
+            label="Critical + High"
+            value={String(headlineCriticalHigh)}
+            sub={`${criticalCount} critical · ${highCount} high`}
+            href="/risk-register"
+          />
+          <MiniStat
+            label="Group exposure"
+            value={formatExposureBn(headlineExposure, 'AED')}
+            sub={`Net unhedged ${formatExposureBn(BASELINE_RISK_POSTURE.netUnhedgedExposure, 'AED')}`}
+            href="/portfolio-tower"
+          />
+          <MiniStat
+            label={seeAll ? 'Open mitigations' : 'My open actions'}
+            value={String(openActions.length)}
+            sub={myActionsOverdue > 0 ? `${myActionsOverdue} overdue` : 'all on track'}
+            subTone={myActionsOverdue > 0 ? 'danger' : 'good'}
+            href="/risk-register"
+          />
+          {/* ERM Annual Plan retained per earlier request — compact 3-bucket */}
+          <Link
+            href="/portfolio-tower"
+            style={{ textDecoration: 'none' }}
+            title="ERM annual plan — drill into Portfolio Tower"
+          >
+            <div
+              style={{
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 10,
+                padding: '12px 14px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6,
+                cursor: 'pointer',
+                color: 'var(--text-primary)',
+                boxShadow: 'var(--shadow-sm)',
+              }}
+            >
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>
                 ERM Annual Plan
               </span>
+              <div style={{ display: 'flex', gap: 14, alignItems: 'baseline' }}>
+                <div>
+                  <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>8</div>
+                  <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>Planned</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 20, fontWeight: 700, color: '#B42318', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>2</div>
+                  <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>Overdue</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 20, fontWeight: 700, color: '#067647', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>14</div>
+                  <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>Completed</div>
+                </div>
+              </div>
             </div>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'baseline' }}>
-              <div>
-                <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--accent-primary)', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>8</div>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 700, letterSpacing: 0.4, textTransform: 'uppercase' }}>Planned</div>
-              </div>
-              <div>
-                <div style={{ fontSize: 22, fontWeight: 700, color: '#FF3B3B', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>2</div>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 700, letterSpacing: 0.4, textTransform: 'uppercase' }}>Overdue</div>
-              </div>
-              <div>
-                <div style={{ fontSize: 22, fontWeight: 700, color: '#22C55E', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>14</div>
-                <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 700, letterSpacing: 0.4, textTransform: 'uppercase' }}>Completed</div>
-              </div>
-            </div>
-          </div>
-        </Link>
+          </Link>
+        </div>
+      </header>
+
+      {/* ── Below the fold: supporting detail & evidence ──────────────── */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          margin: '6px 0 2px',
+        }}
+      >
+        <span
+          style={{
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: 0.8,
+            textTransform: 'uppercase',
+            color: 'var(--text-tertiary)',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          Detail &amp; evidence
+        </span>
+        <span style={{ flex: 1, height: 1, background: 'var(--border-color)' }} />
       </div>
 
       {/* ── 2-up: Drafts + Actions ────────────────────────────────────── */}
@@ -545,6 +634,270 @@ function sameDay(a: Date, b: Date): boolean {
     a.getFullYear() === b.getFullYear() &&
     a.getMonth() === b.getMonth() &&
     a.getDate() === b.getDate()
+  )
+}
+
+// ── Executive-brief primitives (Batch 5) ────────────────────────────────
+
+type Severity = 'critical' | 'high' | 'medium'
+
+interface AttentionItem {
+  sev: Severity
+  text: string
+  meta: string
+  href: string
+  cta: string
+}
+
+const SEV_COLOR: Record<Severity, string> = {
+  critical: '#B42318',
+  high: '#B54708',
+  medium: '#5A5A5A',
+}
+
+const SEV_LABEL: Record<Severity, string> = {
+  critical: 'Critical',
+  high: 'High',
+  medium: 'Watch',
+}
+
+interface ScoreBand {
+  label: string
+  color: string
+}
+
+function scoreBandFor(score: number): ScoreBand {
+  if (score >= 75) return { label: 'Elevated', color: '#B42318' }
+  if (score >= 60) return { label: 'Heightened', color: '#B54708' }
+  return { label: 'Within appetite', color: '#067647' }
+}
+
+function RiskScoreDial({
+  score,
+  band,
+  trendWord,
+  improving,
+}: {
+  score: number
+  band: ScoreBand
+  trendWord: string
+  improving: boolean
+}) {
+  const pct = Math.max(0, Math.min(100, score))
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0 }}>
+      <div
+        role="img"
+        aria-label={`Group risk score ${score} out of 100 — ${band.label}`}
+        style={{
+          position: 'relative',
+          width: 124,
+          height: 124,
+          borderRadius: '50%',
+          background: `conic-gradient(${band.color} ${pct * 3.6}deg, var(--border-color) 0deg)`,
+          flexShrink: 0,
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            inset: 11,
+            borderRadius: '50%',
+            background: 'var(--bg-secondary)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: 'inset 0 0 0 1px var(--border-color)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 38,
+              fontWeight: 700,
+              color: band.color,
+              lineHeight: 1,
+              fontVariantNumeric: 'tabular-nums',
+            }}
+          >
+            {score}
+          </div>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 }}>
+            out of 100
+          </div>
+        </div>
+      </div>
+      <div style={{ minWidth: 0 }}>
+        <div
+          style={{
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: 0.6,
+            textTransform: 'uppercase',
+            color: 'var(--text-tertiary)',
+          }}
+        >
+          Group Risk Score
+        </div>
+        <div
+          style={{
+            fontSize: 15,
+            fontWeight: 700,
+            color: band.color,
+            margin: '3px 0 4px',
+          }}
+        >
+          {band.label}
+        </div>
+        <div
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            color: improving ? '#067647' : 'var(--text-secondary)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 4,
+          }}
+        >
+          <span aria-hidden>{improving ? '▼' : '▲'}</span>
+          {trendWord}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function AttentionRow({ item }: { item: AttentionItem }) {
+  const color = SEV_COLOR[item.sev]
+  return (
+    <Link
+      href={item.href}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '10px 12px',
+        background: 'var(--bg-primary)',
+        border: '1px solid var(--border-color)',
+        borderLeft: `3px solid ${color}`,
+        borderRadius: 8,
+        textDecoration: 'none',
+        color: 'inherit',
+        transition: 'background 0.15s ease',
+      }}
+      onMouseEnter={(e) => {
+        ;(e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'
+      }}
+      onMouseLeave={(e) => {
+        ;(e.currentTarget as HTMLElement).style.background = 'var(--bg-primary)'
+      }}
+    >
+      <span
+        style={{
+          fontSize: 9,
+          fontWeight: 700,
+          letterSpacing: 0.4,
+          textTransform: 'uppercase',
+          color,
+          background: `${color}14`,
+          border: `1px solid ${color}44`,
+          borderRadius: 4,
+          padding: '2px 7px',
+          flexShrink: 0,
+          minWidth: 58,
+          textAlign: 'center',
+        }}
+      >
+        {SEV_LABEL[item.sev]}
+      </span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
+          {item.text}
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 1 }}>
+          {item.meta}
+        </div>
+      </div>
+      <span
+        style={{
+          fontSize: 11,
+          fontWeight: 700,
+          color: 'var(--accent-primary)',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 2,
+          flexShrink: 0,
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {item.cta}
+        <ChevronRight size={13} />
+      </span>
+    </Link>
+  )
+}
+
+function MiniStat({
+  label,
+  value,
+  sub,
+  subTone,
+  href,
+}: {
+  label: string
+  value: string
+  sub?: string
+  subTone?: 'good' | 'danger'
+  href?: string
+}) {
+  const subColor =
+    subTone === 'danger' ? '#B42318' : subTone === 'good' ? '#067647' : 'var(--text-tertiary)'
+  const inner = (
+    <div
+      style={{
+        background: 'var(--bg-secondary)',
+        border: '1px solid var(--border-color)',
+        borderRadius: 10,
+        padding: '12px 14px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 4,
+        boxShadow: 'var(--shadow-sm)',
+        cursor: href ? 'pointer' : 'default',
+        height: '100%',
+      }}
+    >
+      <div
+        style={{
+          fontSize: 10,
+          fontWeight: 700,
+          letterSpacing: 0.5,
+          textTransform: 'uppercase',
+          color: 'var(--text-tertiary)',
+        }}
+      >
+        {label}
+      </div>
+      <div
+        style={{
+          fontSize: 22,
+          fontWeight: 700,
+          color: 'var(--text-primary)',
+          lineHeight: 1.1,
+          fontVariantNumeric: 'tabular-nums',
+        }}
+      >
+        {value}
+      </div>
+      {sub && <div style={{ fontSize: 10, fontWeight: 600, color: subColor }}>{sub}</div>}
+    </div>
+  )
+  return href ? (
+    <Link href={href} style={{ textDecoration: 'none', color: 'inherit' }}>
+      {inner}
+    </Link>
+  ) : (
+    inner
   )
 }
 
