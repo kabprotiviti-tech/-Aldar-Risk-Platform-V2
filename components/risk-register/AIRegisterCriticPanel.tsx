@@ -15,7 +15,7 @@
  */
 
 import React, { useState } from 'react'
-import { Sparkles, ChevronDown, ChevronRight, Loader2, AlertTriangle } from 'lucide-react'
+import { ShieldCheck, ChevronDown, ChevronRight, Loader2, AlertTriangle, Check, X } from 'lucide-react'
 
 interface CriticResponse {
   missing_risks: Array<{
@@ -77,7 +77,7 @@ export function AIRegisterCriticPanel() {
       style={{
         background: 'var(--bg-secondary)',
         border: '1px solid var(--border-color)',
-        borderLeft: '3px solid #A855F7',
+        borderLeft: '3px solid var(--accent-primary)',
         borderRadius: 8,
         padding: 12,
         display: 'flex',
@@ -95,22 +95,39 @@ export function AIRegisterCriticPanel() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Sparkles size={16} style={{ color: '#A855F7' }} />
+          <ShieldCheck size={16} style={{ color: 'var(--accent-primary)' }} />
           <div>
             <div
               style={{
                 fontSize: 11,
                 fontWeight: 700,
-                color: '#A855F7',
+                color: 'var(--accent-primary)',
                 textTransform: 'uppercase',
                 letterSpacing: 1,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
               }}
             >
-              AI Register Critic
+              Governed AI · Register Critic
+              <span
+                style={{
+                  fontSize: 9,
+                  fontWeight: 700,
+                  color: 'var(--text-tertiary)',
+                  background: 'var(--bg-primary)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 3,
+                  padding: '1px 6px',
+                  letterSpacing: 0.4,
+                }}
+              >
+                Human-in-the-loop
+              </span>
             </div>
             <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>
-              Second-line gap analysis. AI suggestions appear as Hypotheses
-              awaiting your acceptance — none auto-promote to the register.
+              The single AI thread for the register. Every suggestion is a Hypothesis
+              you Accept or Dismiss — nothing auto-promotes, every decision is yours.
             </div>
           </div>
         </div>
@@ -122,7 +139,7 @@ export function AIRegisterCriticPanel() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: 6,
-              background: '#A855F7',
+              background: 'var(--accent-primary)',
               color: '#fff',
               border: 'none',
               padding: '7px 14px',
@@ -135,7 +152,7 @@ export function AIRegisterCriticPanel() {
               opacity: loading ? 0.7 : 1,
             }}
           >
-            {loading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+            {loading ? <Loader2 size={12} className="animate-spin" /> : <ShieldCheck size={12} />}
             {loading ? 'Analysing…' : data ? 'Re-run' : 'Run Critic'}
           </button>
           {data && (
@@ -303,6 +320,8 @@ function Row({ label, text, highlight }: { label: string; text: string; highligh
   )
 }
 
+type Decision = 'pending' | 'accepted' | 'dismissed'
+
 function FindingCard({
   title,
   meta,
@@ -314,16 +333,25 @@ function FindingCard({
   body: string
   rationale: string
 }) {
+  // The governed thread made real: each AI Hypothesis is a human decision.
+  const [decision, setDecision] = useState<Decision>('pending')
+
+  const accentColor =
+    decision === 'accepted' ? '#067647' : decision === 'dismissed' ? 'var(--text-tertiary)' : 'var(--accent-primary)'
+
   return (
     <div
       style={{
         padding: 10,
         background: 'var(--bg-primary)',
         border: '1px solid var(--border-color)',
+        borderLeft: `3px solid ${accentColor}`,
         borderRadius: 6,
         display: 'flex',
         flexDirection: 'column',
         gap: 6,
+        opacity: decision === 'dismissed' ? 0.6 : 1,
+        transition: 'opacity 0.2s ease, border-color 0.2s ease',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -340,9 +368,14 @@ function FindingCard({
         </span>
         <span
           style={{
-            background: 'rgba(168,85,247,0.18)',
-            color: '#A855F7',
-            border: '1px solid rgba(168,85,247,0.45)',
+            background:
+              decision === 'accepted'
+                ? 'rgba(6,118,71,0.12)'
+                : decision === 'dismissed'
+                  ? 'var(--bg-secondary)'
+                  : 'var(--accent-glow)',
+            color: accentColor,
+            border: `1px solid ${decision === 'pending' ? 'var(--border-accent)' : accentColor + '66'}`,
             padding: '1px 6px',
             borderRadius: 3,
             fontSize: 9,
@@ -352,7 +385,11 @@ function FindingCard({
             marginLeft: 'auto',
           }}
         >
-          AI Hypothesis · pending review
+          {decision === 'accepted'
+            ? 'Accepted — queued for register'
+            : decision === 'dismissed'
+              ? 'Dismissed by reviewer'
+              : 'AI Hypothesis · pending review'}
         </span>
       </div>
       <div style={{ fontSize: 11, color: 'var(--text-primary)', lineHeight: 1.5 }}>
@@ -361,6 +398,56 @@ function FindingCard({
       <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontStyle: 'italic', lineHeight: 1.5 }}>
         {rationale}
       </div>
+
+      {/* Human decision — the governed step. Never auto-promotes. */}
+      <div style={{ display: 'flex', gap: 8, marginTop: 2 }}>
+        {decision === 'pending' ? (
+          <>
+            <button onClick={() => setDecision('accepted')} style={decisionBtn('accept')}>
+              <Check size={12} /> Accept
+            </button>
+            <button onClick={() => setDecision('dismissed')} style={decisionBtn('dismiss')}>
+              <X size={12} /> Dismiss
+            </button>
+          </>
+        ) : (
+          <button onClick={() => setDecision('pending')} style={decisionBtn('undo')}>
+            Undo decision
+          </button>
+        )}
+      </div>
     </div>
   )
+}
+
+function decisionBtn(kind: 'accept' | 'dismiss' | 'undo'): React.CSSProperties {
+  const base: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 4,
+    padding: '4px 10px',
+    borderRadius: 5,
+    fontSize: 10,
+    fontWeight: 700,
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
+    cursor: 'pointer',
+  }
+  if (kind === 'accept')
+    return { ...base, background: '#067647', color: '#fff', border: '1px solid #067647' }
+  if (kind === 'dismiss')
+    return {
+      ...base,
+      background: 'transparent',
+      color: 'var(--text-secondary)',
+      border: '1px solid var(--border-color)',
+    }
+  return {
+    ...base,
+    background: 'transparent',
+    color: 'var(--text-tertiary)',
+    border: '1px solid var(--border-color)',
+    textTransform: 'none',
+    letterSpacing: 0,
+  }
 }

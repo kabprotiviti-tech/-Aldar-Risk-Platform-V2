@@ -20,6 +20,7 @@ import { FinancialCalculationPanel, ViewCalcButton, type FinancialCalcContext } 
 import { scenarioTemplates, portfolioNames, type Portfolio } from '@/lib/simulated-data'
 import { ScenarioEngine } from '@/components/ScenarioEngine'
 import { CostOfInactionPanel } from '@/components/scenarios/CostOfInactionPanel'
+import { ExposureClimax } from '@/components/scenarios/ExposureClimax'
 import { SimulationWorkbench } from '@/components/simulation/SimulationWorkbench'
 import { BaselineComparisonPanel } from '@/components/scenarios/BaselineComparisonPanel'
 
@@ -298,6 +299,13 @@ export default function ScenariosPage() {
 
   return (
     <div className="space-y-6">
+
+      {/* ══════════════════════════════════════════════════════════════════
+          CLIMAX — the one animated number (Batch 6). Baseline → severe
+          stress → 12-month cost of inaction, then the decision punchline.
+          Mounted first so "Stress & decide" opens on the stakes, not a grid.
+          ══════════════════════════════════════════════════════════════════ */}
+      <ExposureClimax />
 
       {/* ══════════════════════════════════════════════════════════════════
           INTELLIGENCE WORKBENCH — new real-time stress-test layer.
