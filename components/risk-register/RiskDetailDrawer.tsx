@@ -461,8 +461,8 @@ export function RiskDetailDrawer({ risk, onClose }: Props) {
               borderTop: '1px solid var(--border-color)',
             }}
           >
-            Status workflow auto-promotion / Heatmap / AI Register Critic ship
-            in subsequent patches (C5-C7).
+            Linked KRIs, controls and mitigation actions are consolidated into
+            this single record — the register is the one place a risk lives.
           </div>
         </div>
       </aside>

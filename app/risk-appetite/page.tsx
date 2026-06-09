@@ -34,6 +34,7 @@ import { usePersona } from '@/lib/context/PersonaContext'
 import { can } from '@/lib/rbac/policy'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
+import { ConsolidationBanner } from '@/components/provenance/ConsolidationBanner'
 import { Modal } from '@/components/ui/Modal'
 
 const CATEGORY_ORDER: AppetiteCategory[] = [
@@ -77,6 +78,12 @@ function RiskAppetiteContent() {
     <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 18 }}>
       <IllustrativeDataBanner
         pilotFeeds="Approved appetite framework signed off by ABC Audit & Risk Committee."
+      />
+
+      <ConsolidationBanner
+        message="Appetite is read alongside exposure in the Portfolio Tower — each portfolio shows its concentration against the tolerance set here. This screen remains the canonical place to edit the statements."
+        href="/portfolio-tower"
+        linkLabel="Open Portfolio Tower"
       />
 
       <div
