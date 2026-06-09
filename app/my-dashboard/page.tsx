@@ -29,9 +29,6 @@ import React, { useMemo } from 'react'
 import Link from 'next/link'
 import {
   AlertCircle,
-  Activity,
-  Inbox,
-  Pencil,
   Plus,
   ShieldCheck,
   Crown,
@@ -55,16 +52,11 @@ import { useAuditTrail } from '@/lib/context/AuditTrailContext'
 import { usePersona } from '@/lib/context/PersonaContext'
 import { KRI_DEFINITIONS } from '@/lib/data/kri-definitions'
 import { computeKRIStatus, STATUS_META } from '@/lib/data/kri-status'
-import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { ExternalIntelligenceFeed } from '@/components/home/ExternalIntelligenceFeed'
 import { TrustFooter } from '@/components/provenance/TrustFooter'
-import { Sparkline, baselineSeries } from '@/components/ui/Sparkline'
-import {
-  BASELINE_RISK_POSTURE,
-  safeMetric,
-} from '@/lib/data/baselineRiskPosture'
-import { formatCurrencyShort, formatExposureBn } from '@/lib/utils/formatters'
+import { BASELINE_RISK_POSTURE } from '@/lib/data/baselineRiskPosture'
+import { formatExposureBn } from '@/lib/utils/formatters'
 import type { PersonaId } from '@/lib/personas'
 
 // ── Persona → owner-string filter mapping ────────────────────────────────
@@ -899,154 +891,6 @@ function MiniStat({
   ) : (
     inner
   )
-}
-
-function HeroStat({
-  label,
-  value,
-  sub,
-  tone,
-  sparklineSeed,
-  sparklineAnchor,
-}: {
-  label: string
-  value: string
-  sub?: string
-  tone: 'good' | 'warning' | 'danger' | 'neutral'
-  /** Seed for the synthetic baseline series — keeps the line stable across renders. */
-  sparklineSeed?: number
-  /** Anchor value for the sparkline (typically the same number that's displayed). */
-  sparklineAnchor?: number
-}) {
-  const toneColor =
-    tone === 'good' ? '#22C55E'
-    : tone === 'warning' ? '#F5C518'
-    : tone === 'danger' ? '#FF3B3B'
-    : 'var(--accent-primary)'
-
-  const series =
-    typeof sparklineAnchor === 'number'
-      ? baselineSeries(sparklineAnchor, 12, sparklineSeed ?? 7)
-      : null
-
-  return (
-    <div
-      style={{
-        background: 'var(--bg-secondary)',
-        border: '1px solid var(--border-color)',
-        borderRadius: 8,
-        padding: '12px 14px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 4,
-        minHeight: 92,
-      }}
-    >
-      <div
-        style={{
-          fontSize: 10,
-          fontWeight: 700,
-          letterSpacing: 0.5,
-          textTransform: 'uppercase',
-          color: 'var(--text-tertiary)',
-        }}
-      >
-        {label}
-      </div>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'baseline',
-          justifyContent: 'space-between',
-          gap: 8,
-        }}
-      >
-        <div
-          style={{
-            fontSize: 22,
-            fontWeight: 700,
-            color: toneColor,
-            lineHeight: 1.1,
-            fontVariantNumeric: 'tabular-nums',
-          }}
-        >
-          {value}
-        </div>
-        {series && (
-          <Sparkline
-            values={series}
-            width={64}
-            height={22}
-            color={toneColor}
-            ariaLabel={`${label} trend`}
-          />
-        )}
-      </div>
-      {sub && (
-        <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{sub}</div>
-      )}
-    </div>
-  )
-}
-
-function KPITile({
-  icon,
-  label,
-  value,
-  accent,
-  href,
-  subline,
-  sublineColor,
-}: {
-  icon: React.ReactNode
-  label: string
-  value: number
-  accent: string
-  href?: string
-  subline?: string
-  sublineColor?: string
-}) {
-  const inner = (
-    <div
-      style={{
-        background: 'var(--bg-secondary)',
-        border: '1px solid var(--border-color)',
-        borderRadius: 10,
-        padding: '14px 16px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 6,
-        cursor: href ? 'pointer' : 'default',
-        textDecoration: 'none',
-        color: 'inherit',
-        boxShadow: 'var(--shadow-sm)',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-tertiary)' }}>
-        {icon}
-        <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase' }}>
-          {label}
-        </span>
-      </div>
-      <div
-        style={{
-          fontSize: 26,
-          fontWeight: 700,
-          color: 'var(--text-primary)',
-          lineHeight: 1.1,
-          fontVariantNumeric: 'tabular-nums',
-        }}
-      >
-        {value}
-      </div>
-      {subline && (
-        <div style={{ fontSize: 10, fontWeight: 600, color: sublineColor || 'var(--text-tertiary)' }}>
-          {subline}
-        </div>
-      )}
-    </div>
-  )
-  return href ? <Link href={href} style={{ textDecoration: 'none' }}>{inner}</Link> : inner
 }
 
 function Section({
