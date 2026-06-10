@@ -252,7 +252,7 @@ function MyDashboardContent() {
                 lineHeight: 1.2,
               }}
             >
-              {persona ? `Good morning, ${persona.title}.` : 'My Dashboard'}
+              {persona ? 'Risk posture' : 'My Dashboard'}
             </h1>
             {persona && (
               <p
