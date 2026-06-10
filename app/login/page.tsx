@@ -207,7 +207,9 @@ function BrandPane() {
       }}
       className="hidden md:flex"
     >
-      {/* Animated gradient orbs */}
+      {/* Static gradient orbs — the infinite pulse-animation on these large
+          blurred layers forced a full-viewport re-rasterise every frame and
+          froze the page on low-GPU corporate laptops. Now painted once. */}
       <div
         aria-hidden
         style={{
@@ -218,9 +220,8 @@ function BrandPane() {
           height: 460,
           borderRadius: '50%',
           background:
-            'radial-gradient(circle, rgba(228,0,43,0.42) 0%, rgba(228,0,43,0) 60%)',
-          filter: 'blur(40px)',
-          animation: 'pulse-slow 7s ease-in-out infinite',
+            'radial-gradient(circle, rgba(228,0,43,0.35) 0%, rgba(228,0,43,0) 60%)',
+          filter: 'blur(32px)',
         }}
       />
       <div
@@ -233,9 +234,8 @@ function BrandPane() {
           height: 540,
           borderRadius: '50%',
           background:
-            'radial-gradient(circle, rgba(45,158,255,0.28) 0%, rgba(45,158,255,0) 60%)',
-          filter: 'blur(50px)',
-          animation: 'pulse-slow 9s ease-in-out infinite 2s',
+            'radial-gradient(circle, rgba(45,158,255,0.22) 0%, rgba(45,158,255,0) 60%)',
+          filter: 'blur(32px)',
         }}
       />
       <div
