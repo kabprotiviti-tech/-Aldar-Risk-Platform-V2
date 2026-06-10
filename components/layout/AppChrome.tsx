@@ -11,7 +11,8 @@ import { MobileNav } from './MobileNav'
 // import { AIRiskAdvisor } from '@/components/AIRiskAdvisor'
 import { RiskMemoryChat } from '@/components/RiskMemoryChat'
 import { StealthToggle } from './StealthToggle'
-import { StoryNextButton } from './StoryNextButton'
+import { StoryThread } from './StoryThread'
+import { StoryRail } from './StoryRail'
 import { CommandPaletteProvider } from './CommandPalette'
 import { usePersona } from '@/lib/context/PersonaContext'
 
@@ -98,12 +99,15 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
           <Sidebar />
           <div className="layout-content-area">
             <Header />
+            {/* Story Thread — persistent ledger on spine screens (Batch C) */}
+            <StoryThread />
             <main className="layout-main-content">{children}</main>
           </div>
         </div>
         <MobileNav />
         <RiskMemoryChat />
-        <StoryNextButton />
+        {/* Story Rail — 7-node wayfinding + causal handoff (replaces the FAB) */}
+        <StoryRail />
         <StealthToggle />
       </AuthGuard>
     </CommandPaletteProvider>

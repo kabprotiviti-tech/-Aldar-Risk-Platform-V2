@@ -76,15 +76,30 @@ const ALL: PersonaId[] = [
 // The sidebar reads like a story, not a sitemap. Seven ordered beats take
 // a leader from "what is our posture" to "what goes to the Board".
 // The STORY_SPINE array (href order) also powers the persistent "Next →".
-export const STORY_SPINE: { href: string; label: string }[] = [
-  { href: '/my-dashboard', label: 'Dashboard' },
-  { href: '/dashboard', label: 'External Intelligence' },
-  { href: '/risk-register', label: 'Risk Register' },
-  { href: '/portfolio-tower', label: 'Portfolio Summary' },
-  { href: '/scenarios', label: 'Scenario Analysis' },
-  { href: '/respond/approvals', label: 'Approvals' },
-  { href: '/arc-pack', label: 'Board Pack' },
+export interface SpineBeat {
+  href: string
+  label: string
+  /** One causal sentence handed to the NEXT beat — the connective tissue. */
+  handoff: string
+}
+
+export const STORY_SPINE: SpineBeat[] = [
+  { href: '/my-dashboard', label: 'Dashboard', handoff: '3 external signals moved the score — see what changed.' },
+  { href: '/dashboard', label: 'External Intelligence', handoff: '2 signals map to your top-10 risks — open the register.' },
+  { href: '/risk-register', label: 'Risk Register', handoff: 'These 9 Critical/High concentrate in 2 entities — see where.' },
+  { href: '/portfolio-tower', label: 'Portfolio Summary', handoff: 'Stress that concentration — what does doing nothing cost?' },
+  { href: '/scenarios', label: 'Scenario Analysis', handoff: 'One decision needs sign-off — route it for approval.' },
+  { href: '/respond/approvals', label: 'Approvals', handoff: 'It’s decided — the board pack is ready to assemble.' },
+  { href: '/arc-pack', label: 'Board Pack', handoff: 'That’s the loop — restart the story from posture.' },
 ]
+
+/** The golden-thread risk that travels every beat (Batch C). */
+export const GOLDEN_THREAD = {
+  riskId: 'R-007',
+  kri: 'KRI-13',
+  name: 'Domestic buyer-default risk',
+  decision: 'FX hedge top-up + GMP freeze',
+}
 
 const NAV_GROUPS: NavGroup[] = [
   {
