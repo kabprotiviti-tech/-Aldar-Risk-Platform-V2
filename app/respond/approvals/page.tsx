@@ -212,7 +212,7 @@ function Content() {
           <Empty>
             {isLine1
               ? 'You haven\'t submitted any drafts yet. Use /risk-register → Add Risk.'
-              : 'No drafts in flight.'}
+              : 'No draft risks awaiting review.'}
           </Empty>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>

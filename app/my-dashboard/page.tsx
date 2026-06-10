@@ -174,7 +174,7 @@ function MyDashboardContent() {
       items.push({
         sev: 'medium',
         text: `${BASELINE_RISK_POSTURE.activeControlWeaknesses} control weaknesses open`,
-        meta: 'ICOFR remediation in flight',
+        meta: 'ICOFR remediation underway',
         href: '/control-command-center',
         cta: 'Control centre',
       })
@@ -423,7 +423,7 @@ function MyDashboardContent() {
       {/* ── 2-up: Drafts + Actions ────────────────────────────────────── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: 12 }}>
         <Section
-          title={seeAll ? 'Drafts In Flight' : 'My Drafts'}
+          title={seeAll ? 'Draft Risks Awaiting Review' : 'My Drafts'}
           subtitle={`${myDrafts.length} draft risk${myDrafts.length === 1 ? '' : 's'}${seeAll ? ' across the group' : ' authored by you'}`}
           cta={
             <Link href="/risk-register" style={ctaStyle}>
@@ -432,7 +432,7 @@ function MyDashboardContent() {
           }
         >
           {myDrafts.length === 0 ? (
-            <Empty>{seeAll ? 'No drafts in flight — the register is current.' : 'No drafts awaiting you — your register is up to date.'}</Empty>
+            <Empty>{seeAll ? 'No draft risks awaiting review — the register is current.' : 'No drafts awaiting you — your register is up to date.'}</Empty>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {myDrafts.slice(0, 6).map((d) => (
