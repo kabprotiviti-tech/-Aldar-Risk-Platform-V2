@@ -21,8 +21,10 @@ export type DataStatus = 'ready' | 'loading' | 'pending-validation' | 'stale'
 
 export interface BaselineRiskPosture {
   // Headline
-  overallRiskScore: number          // 0-100, weighted residual
-  riskScoreTrend: number            // delta vs prior period, +/-
+  overallRiskScore: number          // 0-100, weighted residual (higher = worse)
+  overallRiskScorePrior: number     // prior-period reading (for the 68→72 delta)
+  overallRiskScoreAppetiteCeiling: number  // board-set ceiling the score must stay under
+  riskScoreTrend: number            // delta vs prior period, +/- (positive = worsening)
   // Distribution
   criticalRiskCount: number
   highRiskCount: number
@@ -35,6 +37,7 @@ export interface BaselineRiskPosture {
   exposureCurrency: 'AED' | 'SAR' | 'USD'
   hedgedExposure: number
   netUnhedgedExposure: number
+  netUnhedgedAppetiteCeiling: number // board appetite limit on net-unhedged exposure
   // Signals + alerts
   aiAlertsToday: number
   activeExternalSignals: number
@@ -59,9 +62,12 @@ export interface BaselineRiskPosture {
  * Tuned to be internally consistent (counts sum, exposure ~2-3% of GAV).
  */
 export const BASELINE_RISK_POSTURE: BaselineRiskPosture = {
-  // Headline
+  // Headline — score 72 is 12 over the board ceiling of 60, and it WORSENED
+  // (68 → 72) since last quarter. That gap + direction is the opening tension.
   overallRiskScore: 72,
-  riskScoreTrend: -3,            // improving by 3 pts
+  overallRiskScorePrior: 68,
+  overallRiskScoreAppetiteCeiling: 60,
+  riskScoreTrend: 4,             // worsened by 4 pts (72 − 68)
 
   // Distribution — 18 active risks
   criticalRiskCount: 2,
@@ -71,11 +77,13 @@ export const BASELINE_RISK_POSTURE: BaselineRiskPosture = {
   totalCriticalAndHighRisks: 9,
   totalRisks: 18,
 
-  // Financial — AED 2.35Bn gross, AED 1.45Bn hedged, AED 900M net
+  // Financial — AED 2.35Bn gross, AED 1.45Bn hedged, AED 900M net unhedged
+  // against a board appetite ceiling of AED 600M (so 1.5× / 50% over limit).
   totalFinancialExposure: 2_350_000_000,
   exposureCurrency: 'AED',
   hedgedExposure: 1_450_000_000,
   netUnhedgedExposure: 900_000_000,
+  netUnhedgedAppetiteCeiling: 600_000_000,
 
   // Signals + alerts
   aiAlertsToday: 6,

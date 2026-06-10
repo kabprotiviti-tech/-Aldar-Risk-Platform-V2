@@ -77,33 +77,33 @@ const ALL: PersonaId[] = [
 // a leader from "what is our posture" to "what goes to the Board".
 // The STORY_SPINE array (href order) also powers the persistent "Next →".
 export const STORY_SPINE: { href: string; label: string }[] = [
-  { href: '/my-dashboard', label: 'Posture' },
-  { href: '/dashboard', label: 'External triggers' },
-  { href: '/risk-register', label: 'Challenge' },
-  { href: '/portfolio-tower', label: 'Concentration' },
-  { href: '/scenarios', label: 'Stress & decide' },
-  { href: '/respond/approvals', label: 'Govern' },
-  { href: '/arc-pack', label: 'Board pack' },
+  { href: '/my-dashboard', label: 'Dashboard' },
+  { href: '/dashboard', label: 'External Intelligence' },
+  { href: '/risk-register', label: 'Risk Register' },
+  { href: '/portfolio-tower', label: 'Portfolio Summary' },
+  { href: '/scenarios', label: 'Scenario Analysis' },
+  { href: '/respond/approvals', label: 'Approvals' },
+  { href: '/arc-pack', label: 'Board Pack' },
 ]
 
 const NAV_GROUPS: NavGroup[] = [
   {
     id: 'story',
-    label: 'Risk Story',
+    label: 'Risk Ops',
     icon: Activity,
     items: [
-      { href: '/my-dashboard', label: '1 · Posture', icon: UserCircle2, description: 'Where do we stand right now?', personas: ALL },
-      { href: '/dashboard', label: '2 · External triggers', icon: Radio, description: 'What changed in the outside world?', personas: ALL },
-      { href: '/risk-register', label: '3 · Challenge', icon: ListChecks, description: 'AI challenges the register; human approves', personas: ALL },
-      { href: '/portfolio-tower', label: '4 · Concentration', icon: Network, description: 'Where does the exposure concentrate?', personas: ['group-cro', 'subsidiary-ceo', 'arc-chair'] },
-      { href: '/scenarios', label: '5 · Stress & decide', icon: FlaskConical, description: 'What does it cost — and what must we decide?', personas: ['group-cro', 'risk-champion', 'subsidiary-ceo'] },
-      { href: '/respond/approvals', label: '6 · Govern', icon: ClipboardList, description: 'Route the decision for sign-off', personas: ALL },
-      { href: '/arc-pack', label: '7 · Board pack', icon: FileBarChart, description: 'The board-ready pack, written live', personas: ['group-cro', 'arc-chair', 'subsidiary-ceo'] },
+      { href: '/my-dashboard', label: '1 · Dashboard', icon: UserCircle2, description: 'Where do we stand right now?', personas: ALL },
+      { href: '/dashboard', label: '2 · External Intelligence', icon: Radio, description: 'What changed in the outside world?', personas: ALL },
+      { href: '/risk-register', label: '3 · Risk Register', icon: ListChecks, description: 'AI challenges the register; human approves', personas: ALL },
+      { href: '/portfolio-tower', label: '4 · Portfolio Summary', icon: Network, description: 'Where does the exposure concentrate?', personas: ['group-cro', 'subsidiary-ceo', 'arc-chair'] },
+      { href: '/scenarios', label: '5 · Scenario Analysis', icon: FlaskConical, description: 'What does it cost — and what must we decide?', personas: ['group-cro', 'risk-champion', 'subsidiary-ceo'] },
+      { href: '/respond/approvals', label: '6 · Approvals', icon: ClipboardList, description: 'Route the decision for sign-off', personas: ALL },
+      { href: '/arc-pack', label: '7 · Board Pack', icon: FileBarChart, description: 'The board-ready pack, written live', personas: ['group-cro', 'arc-chair', 'subsidiary-ceo'] },
     ],
   },
   {
     id: 'depth',
-    label: 'Depth on demand',
+    label: 'Detailed Review Section',
     icon: Search,
     items: [
       { href: '/kri', label: 'KRIs', icon: Gauge, description: 'Key Risk Indicators', personas: ALL },
