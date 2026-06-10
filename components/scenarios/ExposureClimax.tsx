@@ -1,323 +1,264 @@
 'use client'
 
 /**
- * ExposureClimax — Batch 6 (Climax mechanics)
- * -------------------------------------------
- * The emotional peak of the demo. ONE number, animated through three
- * acts so a board can *feel* the stakes rather than read a table:
+ * ExposureClimax — Batch B (Kill the toy, win the climax)
+ * ------------------------------------------------------
+ * The panel's verdict on the old version was blunt: a count-up animation that
+ * animated *value, not meaning* — "earthwork, pathetic". Boards trust numbers
+ * that hold still. So this is now a STATIC, presenter-stepped Exposure Bridge:
  *
- *   1. Baseline      — where ABC Holdings stands today.
- *   2. Under stress  — the same book at severe combined-scenario intensity.
- *   3. Cost of inaction — what it compounds to over 12 months if nobody acts.
+ *   Baseline → Under stress → If we do nothing (12-mo cost of inaction)
  *
- * The figure counts up between acts and the colour walks green → amber →
- * red. It closes on the decision line: acting now is cheap; doing nothing
- * is not. All three numbers derive from BASELINE_RISK_POSTURE so they
- * reconcile with every other screen.
+ * All three AED figures are set whole and permanently visible. The board
+ * appetite ceiling is one dashed line drawn across all three. The presenter
+ * advances acts with a click; the ONLY motion is a ≤250ms emphasis fade (the
+ * active bar brightens, the others dim) — no counting, no auto-play, no glow.
+ * The decision punchline renders once, permanently. The same static render is
+ * what prints into the ARC Pack stress exhibit.
+ *
+ * Numbers derive from BASELINE_RISK_POSTURE so they reconcile everywhere.
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { animate } from 'framer-motion'
-import { Play, RotateCcw, ChevronRight, ShieldCheck } from 'lucide-react'
+import React, { useState } from 'react'
+import { ChevronRight, ShieldCheck } from 'lucide-react'
 import { BASELINE_RISK_POSTURE } from '@/lib/data/baselineRiskPosture'
-import { formatExposureBn } from '@/lib/utils/formatters'
 
-const NET_UNHEDGED = BASELINE_RISK_POSTURE.netUnhedgedExposure // 0.90bn AED
+const NET = BASELINE_RISK_POSTURE.netUnhedgedExposure // 0.90bn
+const CEILING = BASELINE_RISK_POSTURE.netUnhedgedAppetiteCeiling // 0.60bn
 
-interface Stage {
+interface Act {
   key: string
   label: string
+  sub: string
   value: number
   color: string
   caption: string
 }
 
-// Multipliers are illustrative and applied to the canonical net-unhedged
-// exposure so the climax stays reconciled with the rest of the platform.
-const STAGES: Stage[] = [
+const ACTS: Act[] = [
   {
     key: 'baseline',
-    label: 'Baseline net-unhedged exposure',
-    value: NET_UNHEDGED,
-    color: '#067647',
-    caption: 'Where ABC Holdings stands today — hedged book, business as usual.',
+    label: 'Baseline',
+    sub: 'Today',
+    value: NET,
+    color: '#B54708',
+    caption: 'Net unhedged exposure today — already over the board appetite ceiling.',
   },
   {
     key: 'stressed',
-    label: 'Under severe combined stress',
-    value: NET_UNHEDGED * 1.7,
-    color: '#B54708',
-    caption: 'Suez disruption + rate shock + overseas-buyer default, modelled at severe intensity.',
+    label: 'Under stress',
+    sub: 'Severe shock',
+    value: NET * 1.7,
+    color: '#C2410C',
+    caption: 'Suez disruption + rate shock + overseas-buyer default, at severe intensity.',
   },
   {
     key: 'inaction',
-    label: '12-month cost of inaction',
-    value: NET_UNHEDGED * 2.41,
-    color: '#B42318',
-    caption: 'If no mitigating action is taken, the gap compounds across four quarters.',
+    label: 'If we do nothing',
+    sub: '12-month',
+    value: NET * 2.41,
+    color: '#9F1B1F',
+    caption: 'Unmitigated, the gap compounds across four quarters.',
   },
 ]
 
-const AVOIDED = STAGES[2].value - STAGES[0].value // ~1.27bn
-const COST_TO_ACT_LABEL = 'AED 35M' // board capex uplift (illustrative)
+const AVOIDED = ACTS[2].value - ACTS[0].value // ~1.27bn
+const COST_TO_ACT = 'AED 35M'
+
+function aed(n: number): string {
+  const v = Math.abs(n)
+  if (v >= 1e9) return `AED ${(n / 1e9).toFixed(2)}Bn`
+  return `AED ${Math.round(n / 1e6)}M`
+}
+
+const CHART_H = 200
+const MAX = ACTS[2].value * 1.12
 
 export function ExposureClimax() {
-  const [stage, setStage] = useState(0)
-  const [display, setDisplay] = useState(STAGES[0].value)
-  const prevValue = useRef(STAGES[0].value)
-  const timers = useRef<ReturnType<typeof setTimeout>[]>([])
+  const [active, setActive] = useState(2) // land on the climax; presenter steps back to tell it
 
-  // Animate the headline figure from the previous act's value to the new one.
-  useEffect(() => {
-    const controls = animate(prevValue.current, STAGES[stage].value, {
-      duration: 1.1,
-      ease: [0.16, 1, 0.3, 1],
-      onUpdate: (v) => setDisplay(v),
-      onComplete: () => {
-        prevValue.current = STAGES[stage].value
-      },
-    })
-    return () => controls.stop()
-  }, [stage])
-
-  const clearTimers = () => {
-    timers.current.forEach(clearTimeout)
-    timers.current = []
-  }
-
-  const play = useCallback(() => {
-    clearTimers()
-    prevValue.current = STAGES[0].value
-    setDisplay(STAGES[0].value)
-    setStage(0)
-    timers.current.push(setTimeout(() => setStage(1), 1500))
-    timers.current.push(setTimeout(() => setStage(2), 3300))
-  }, [])
-
-  // Auto-play once on mount so the page lands on motion, not a static table.
-  useEffect(() => {
-    const t = setTimeout(play, 350)
-    return () => {
-      clearTimeout(t)
-      clearTimers()
-    }
-  }, [play])
-
-  const current = STAGES[stage]
+  const current = ACTS[active]
 
   return (
     <section
       style={{
-        position: 'relative',
         background: 'var(--bg-secondary)',
         border: '1px solid var(--border-color)',
         borderLeft: `4px solid ${current.color}`,
         borderRadius: 14,
         padding: 24,
-        overflow: 'hidden',
-        transition: 'border-color 0.6s ease',
         boxShadow: 'var(--shadow-md)',
       }}
     >
-      {/* faint colour wash that deepens as the stakes rise */}
-      <div
-        aria-hidden
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: `radial-gradient(120% 140% at 0% 0%, ${current.color}14 0%, transparent 55%)`,
-          transition: 'background 0.6s ease',
-          pointerEvents: 'none',
-        }}
-      />
+      <style>{`
+        @media (prefers-reduced-motion: reduce) {
+          .xb-bar, .xb-col { transition: none !important; }
+        }
+      `}</style>
 
-      <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 18 }}>
-        {/* header row */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: 1,
-              textTransform: 'uppercase',
-              color: 'var(--accent-primary)',
-            }}
-          >
+      {/* header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--accent-primary)' }}>
             The number that matters
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button onClick={play} style={btnStyle(true)}>
-              <Play size={13} /> Replay
-            </button>
-            <span
-              style={{
-                fontSize: 9,
-                fontWeight: 700,
-                color: '#B54708',
-                background: 'rgba(181,71,8,0.10)',
-                border: '1px solid rgba(181,71,8,0.35)',
-                padding: '3px 8px',
-                borderRadius: 4,
-                letterSpacing: 0.5,
-                textTransform: 'uppercase',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Illustrative · pre-pilot
-            </span>
-          </div>
-        </div>
-
-        {/* the figure */}
-        <div>
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: 0.6,
-              textTransform: 'uppercase',
-              color: 'var(--text-tertiary)',
-              marginBottom: 4,
-              transition: 'color 0.4s ease',
-            }}
-          >
-            {current.label}
-          </div>
-          <div
-            style={{
-              fontSize: 'clamp(40px, 7vw, 72px)',
-              fontWeight: 700,
-              lineHeight: 1,
-              letterSpacing: '-0.03em',
-              color: current.color,
-              fontVariantNumeric: 'tabular-nums',
-              transition: 'color 0.5s ease',
-            }}
-          >
-            {formatExposureBn(display, 'AED')}
-          </div>
-          <div
-            style={{
-              fontSize: 13,
-              color: 'var(--text-secondary)',
-              marginTop: 8,
-              maxWidth: 620,
-              lineHeight: 1.5,
-              minHeight: 38,
-            }}
-          >
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4, maxWidth: 560, lineHeight: 1.5 }}>
             {current.caption}
           </div>
         </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button onClick={() => setActive((a) => Math.max(0, a - 1))} disabled={active === 0} style={stepBtn(active === 0)}>
+            ‹ Prev
+          </button>
+          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', fontVariantNumeric: 'tabular-nums', minWidth: 34, textAlign: 'center' }}>
+            {active + 1}/3
+          </span>
+          <button onClick={() => setActive((a) => Math.min(ACTS.length - 1, a + 1))} disabled={active === ACTS.length - 1} style={stepBtn(active === ACTS.length - 1)}>
+            Next ›
+          </button>
+          <span
+            style={{
+              fontSize: 9, fontWeight: 700, color: '#B54708', background: 'rgba(181,71,8,0.10)',
+              border: '1px solid rgba(181,71,8,0.35)', padding: '3px 8px', borderRadius: 4,
+              letterSpacing: 0.5, textTransform: 'uppercase', whiteSpace: 'nowrap',
+            }}
+          >
+            Illustrative
+          </span>
+        </div>
+      </div>
 
-        {/* three-act stepper */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
-          {STAGES.map((s, i) => {
-            const active = i === stage
-            const past = i < stage
+      {/* bridge chart — bars + appetite line share ONE baseline (chart bottom);
+          x-labels sit in a separate row beneath so nothing shifts the scale. */}
+      <div style={{ marginBottom: 8 }}>
+        {/* chart box: value labels overflow above; bars bottom-align to baseline */}
+        <div style={{ position: 'relative', height: CHART_H, paddingTop: 36, overflow: 'visible' }}>
+          {/* appetite ceiling line — measured from the same baseline as bars */}
+          <div
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: (CEILING / MAX) * CHART_H,
+              borderTop: '1.5px dashed var(--text-tertiary)',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              pointerEvents: 'none',
+            }}
+          >
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', background: 'var(--bg-secondary)', padding: '0 6px', transform: 'translateY(-50%)' }}>
+              Board appetite {aed(CEILING)}
+            </span>
+          </div>
+
+          {/* bars */}
+          <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, top: 36, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', gap: 8 }}>
+            {ACTS.map((a, i) => {
+              const h = (a.value / MAX) * CHART_H
+              const isActive = i === active
+              const delta = i > 0 ? a.value - ACTS[i - 1].value : null
+              return (
+                <div
+                  key={a.key}
+                  className="xb-col"
+                  onClick={() => setActive(i)}
+                  style={{ flex: 1, maxWidth: 150, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', cursor: 'pointer' }}
+                >
+                  <div style={{ fontSize: isActive ? 22 : 18, fontWeight: 700, color: a.color, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1, transition: 'font-size 0.2s ease' }}>
+                    {aed(a.value)}
+                  </div>
+                  {delta !== null && (
+                    <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', margin: '2px 0' }}>
+                      +{aed(delta)}
+                    </div>
+                  )}
+                  <div
+                    className="xb-bar"
+                    style={{
+                      width: '70%',
+                      maxWidth: 96,
+                      height: Math.max(2, h),
+                      marginTop: 6,
+                      background: a.color,
+                      opacity: isActive ? 1 : 0.55,
+                      borderRadius: '6px 6px 0 0',
+                      transition: 'opacity 0.25s ease',
+                    }}
+                  />
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* x-labels row — aligned to the same columns */}
+        <div style={{ display: 'flex', justifyContent: 'space-around', gap: 8, marginTop: 8 }}>
+          {ACTS.map((a, i) => {
+            const isActive = i === active
             return (
-              <button
-                key={s.key}
-                onClick={() => {
-                  clearTimers()
-                  setStage(i)
-                }}
-                style={{
-                  textAlign: 'left',
-                  background: active ? `${s.color}12` : 'var(--bg-primary)',
-                  border: `1px solid ${active ? s.color + '66' : 'var(--border-color)'}`,
-                  borderTop: `3px solid ${active || past ? s.color : 'var(--border-color)'}`,
-                  borderRadius: 8,
-                  padding: '10px 12px',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  opacity: active || past ? 1 : 0.6,
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 9,
-                    fontWeight: 700,
-                    letterSpacing: 0.5,
-                    textTransform: 'uppercase',
-                    color: active ? s.color : 'var(--text-tertiary)',
-                    marginBottom: 3,
-                  }}
-                >
-                  Act {i + 1}
+              <div key={a.key} onClick={() => setActive(i)} style={{ flex: 1, maxWidth: 150, textAlign: 'center', cursor: 'pointer' }}>
+                <div style={{ fontSize: 12, fontWeight: isActive ? 700 : 600, color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+                  {a.label}
                 </div>
-                <div
-                  style={{
-                    fontSize: 16,
-                    fontWeight: 700,
-                    color: active ? s.color : 'var(--text-secondary)',
-                    fontVariantNumeric: 'tabular-nums',
-                  }}
-                >
-                  {formatExposureBn(s.value, 'AED')}
+                <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>
+                  {a.sub}
                 </div>
-                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>
-                  {s.key === 'baseline' ? 'Today' : s.key === 'stressed' ? 'Severe shock' : 'Do nothing, 12 mo'}
-                </div>
-              </button>
+              </div>
             )
           })}
         </div>
+      </div>
 
-        {/* decision punchline — only once the climax is reached */}
-        {stage === 2 && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 14,
-              padding: '14px 16px',
-              borderRadius: 10,
-              background: 'rgba(6,118,71,0.07)',
-              border: '1px solid rgba(6,118,71,0.28)',
-              flexWrap: 'wrap',
-            }}
-          >
-            <ShieldCheck size={20} style={{ color: '#067647', flexShrink: 0 }} />
-            <div style={{ flex: 1, minWidth: 220 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
-                Acting now costs {COST_TO_ACT_LABEL} — and avoids {formatExposureBn(AVOIDED, 'AED')} of deterioration.
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
-                The recommended response plan below routes that decision for board sign-off.
-              </div>
-            </div>
-            <a
-              href="/respond/approvals"
-              style={{
-                ...btnStyle(true),
-                background: '#067647',
-                borderColor: '#067647',
-                textDecoration: 'none',
-              }}
-            >
-              Route the decision <ChevronRight size={14} />
-            </a>
+      {/* decision punchline — permanent */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 14,
+          padding: '14px 16px',
+          borderRadius: 10,
+          background: 'var(--bg-sunken, var(--bg-primary))',
+          border: '1px solid var(--border-color)',
+          borderLeft: '3px solid #067647',
+          flexWrap: 'wrap',
+        }}
+      >
+        <ShieldCheck size={20} style={{ color: '#067647', flexShrink: 0 }} />
+        <div style={{ flex: 1, minWidth: 240 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
+            Acting now costs {COST_TO_ACT} — and avoids {aed(AVOIDED)} of deterioration.
           </div>
-        )}
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
+            The recommended response plan below routes that decision for board sign-off.
+          </div>
+        </div>
+        <a
+          href="/respond/approvals"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8,
+            fontSize: 12, fontWeight: 700, textDecoration: 'none', background: '#067647', color: '#fff', whiteSpace: 'nowrap',
+          }}
+        >
+          Route the decision <ChevronRight size={14} />
+        </a>
       </div>
     </section>
   )
 }
 
-function btnStyle(filled: boolean): React.CSSProperties {
+function stepBtn(disabled: boolean): React.CSSProperties {
   return {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: 6,
-    padding: '7px 13px',
-    borderRadius: 8,
+    padding: '6px 11px',
+    borderRadius: 7,
     fontSize: 12,
     fontWeight: 700,
-    cursor: 'pointer',
+    cursor: disabled ? 'default' : 'pointer',
+    border: '1px solid var(--border-color)',
+    background: 'var(--bg-primary)',
+    color: disabled ? 'var(--text-tertiary)' : 'var(--text-secondary)',
+    opacity: disabled ? 0.5 : 1,
     whiteSpace: 'nowrap',
-    border: `1px solid ${filled ? 'var(--accent-primary)' : 'var(--border-color)'}`,
-    background: filled ? 'var(--accent-primary)' : 'var(--bg-primary)',
-    color: filled ? '#fff' : 'var(--text-secondary)',
   }
 }

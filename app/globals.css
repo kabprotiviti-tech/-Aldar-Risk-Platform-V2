@@ -1454,6 +1454,17 @@ body {
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
+  /* Batch B — one motion standard: honour the OS setting everywhere. Any
+     animation/transition collapses to near-instant so nothing loops or
+     pulses for users who asked for stillness. */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
   .landing-mesh,
   .landing-hero-gradient,
   .landing-ticker-marquee,
