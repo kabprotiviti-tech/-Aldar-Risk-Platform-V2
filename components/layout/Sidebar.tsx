@@ -130,6 +130,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: '/executive-brief', label: 'Executive Brief', icon: FileBarChart, description: 'AI board summary', personas: ['group-cro', 'arc-chair', 'subsidiary-ceo'] },
       { href: '/documents', label: 'Documents', icon: FileText, description: 'Document intelligence', personas: ['group-cro', 'risk-champion'] },
       { href: '/audit-trail', label: 'Audit Trail', icon: ShieldCheck, description: 'Append-only event log', personas: ['group-cro', 'arc-chair', 'subsidiary-ceo'] },
+      { href: '/governance-records', label: 'Governance Records', icon: ClipboardList, description: 'Incidents · acceptances · lessons', personas: ALL },
       { href: '/policy-and-procedure', label: 'Policy & Procedure', icon: BookMarked, description: 'Policy register', personas: ALL },
       { href: '/regulator-map', label: 'Regulator Map', icon: Landmark, description: 'UAE regulatory bodies', personas: ['group-cro', 'arc-chair'] },
       { href: '/three-lines-of-defense', label: '3 Lines of Defense', icon: ShieldHalf, description: 'Governance operating model', personas: ALL },
