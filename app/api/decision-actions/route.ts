@@ -157,7 +157,10 @@ export async function POST(req: NextRequest) {
 
     const message = await anthropic.messages.create({
       model: CLAUDE_MODEL,
-      max_tokens: 2200,
+      // 5 rich actions (owner, why-it-matters, steps, portfolio impacts, both
+      // consequences) need real room — 2200 truncated the JSON and broke the
+      // parse, which surfaced as the "AI over capacity" fallback.
+      max_tokens: 6000,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: userPrompt }],
     })
