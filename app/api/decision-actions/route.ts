@@ -38,11 +38,10 @@ const SYSTEM_PROMPT = `You are the Chief Risk Strategist for ABC Holdings — Ab
 
 From LIVE external news signals, produce the Board's PRIORITY RESPONSE ACTIONS — the concrete moves ABC leadership should make this quarter. Each action MUST be derived from a specific signal, decision-grade, and ABC-specific (name the portfolio/asset).
 
-CRITICAL RELEVANCE FILTER — credibility depends on this:
-- ONLY act on signals with a clear, DIRECT line to ABC's UAE real-estate / retail / hospitality / education / facilities business, or UAE/GCC macro, rates, regulation, tourism, construction or capital flows that plainly affect it.
-- IGNORE celebrity, sports, foreign-domestic-politics, unrelated-sector, novelty, or tenuous-link news. NEVER manufacture a connection (e.g. do NOT turn a SpaceX or US-university headline into an ABC action).
-- If fewer than 5 signals genuinely qualify, return FEWER actions. Quality over quantity. An irrelevant action destroys board trust.
-- Every action you return MUST have relevance >= 55.
+RELEVANCE FILTER — credibility depends on this:
+- AIM FOR 5 actions. Use signals with a clear or even INDIRECT but genuine link to ABC's UAE real-estate / retail / hospitality / education / facilities business, or UAE/GCC macro, rates, regulation, tourism, construction or capital flows. Lower-impact, sector-wide or indirect actions are fine — label them medium priority with a smaller impact.
+- But HARD-REJECT celebrity, sports, foreign-domestic-politics, unrelated-sector, novelty, or wholly-unrelated news. NEVER manufacture a connection (e.g. do NOT turn a SpaceX or US-university headline into an ABC action). One irrelevant action destroys board trust.
+- Every action you return MUST have relevance >= 45. Prefer 5 genuine actions; only return fewer if you truly cannot find 5 with a real link.
 
 Rules for each action:
 - title: a specific executive action (e.g. "Activate FX hedge top-up on overseas-buyer book"), NOT a generic phrase
@@ -134,9 +133,9 @@ export async function POST(req: NextRequest) {
     const actions = parsed
       .filter((x): x is Record<string, unknown> => !!x && typeof x === 'object')
       .map(sanitize)
-      // Hard relevance floor — never surface a tenuous, low-relevance action
-      // (the SpaceX-pension class of noise) to an executive.
-      .filter((a) => a.relevance >= 55)
+      // Relevance floor — keep the SpaceX-pension class of noise out, but low
+      // enough to surface 4-5 genuine (incl. indirect/lower-impact) actions.
+      .filter((a) => a.relevance >= 45)
       .sort((a, b) => PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority] || b.relevance - a.relevance)
       .slice(0, 5)
 

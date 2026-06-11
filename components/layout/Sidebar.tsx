@@ -117,12 +117,8 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    // Batch D — subtract the surface. The reference shelf was 12 standalone
-    // screens; most now live inside the spine (KRIs in the register drawer,
-    // appetite on the Portfolio Summary, Exec Brief in the Board Pack, etc.).
-    // Only the four genuine reference/evidence destinations stay in the nav;
-    // every other route still resolves by URL and the command palette — it's
-    // just off the demo's main surface.
+    // Full reference / governance shelf. These sit below the 7-beat spine so
+    // the demo leads with the story, but every screen is one click away.
     id: 'depth',
     label: 'Detailed Review Section',
     icon: Search,
@@ -130,7 +126,15 @@ const NAV_GROUPS: NavGroup[] = [
       { href: '/kri', label: 'KRIs', icon: Gauge, description: 'Key Risk Indicators', personas: ALL },
       { href: '/risk-appetite', label: 'Risk Appetite', icon: ShieldQuestion, description: 'Appetite statements', personas: ALL },
       { href: '/control-command-center', label: 'Control Center', icon: Gauge, description: 'ICOFR control catalogue', personas: ['group-cro', 'arc-chair', 'risk-champion'] },
+      { href: '/risk-library', label: 'Risk Library', icon: BookOpen, description: 'UAE risk starter library', personas: ['group-cro', 'risk-champion', 'subsidiary-ceo'] },
+      { href: '/executive-brief', label: 'Executive Brief', icon: FileBarChart, description: 'AI board summary', personas: ['group-cro', 'arc-chair', 'subsidiary-ceo'] },
+      { href: '/documents', label: 'Documents', icon: FileText, description: 'Document intelligence', personas: ['group-cro', 'risk-champion'] },
       { href: '/audit-trail', label: 'Audit Trail', icon: ShieldCheck, description: 'Append-only event log', personas: ['group-cro', 'arc-chair', 'subsidiary-ceo'] },
+      { href: '/policy-and-procedure', label: 'Policy & Procedure', icon: BookMarked, description: 'Policy register', personas: ALL },
+      { href: '/regulator-map', label: 'Regulator Map', icon: Landmark, description: 'UAE regulatory bodies', personas: ['group-cro', 'arc-chair'] },
+      { href: '/three-lines-of-defense', label: '3 Lines of Defense', icon: ShieldHalf, description: 'Governance operating model', personas: ALL },
+      { href: '/standards-reference', label: 'Standards Ref', icon: BookMarked, description: 'ISO 31000 + COSO ERM', personas: ['group-cro', 'arc-chair'] },
+      { href: '/bcm', label: 'BCM', icon: LifeBuoy, description: 'Business Continuity', personas: ['group-cro', 'arc-chair'] },
     ],
   },
 ]
