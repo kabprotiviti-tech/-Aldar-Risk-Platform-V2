@@ -7,7 +7,7 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import { ChevronRight, Zap, Clock, User, Brain, Radio, X } from 'lucide-react'
+import { ChevronRight, Zap, Clock, User, Brain, Radio, X, ExternalLink } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardBody } from '@/components/ui/Card'
 import {
   TOP_ACTIONS,
@@ -80,6 +80,12 @@ const PORTFOLIO_LABEL: Record<string, string> = {
 // AI call fails — the panel shows the curated TOP_ACTIONS so the demo is never
 // empty or broken. 90s cadence keeps API cost sane.
 
+interface PortfolioImpact {
+  portfolio: string
+  level: 'high' | 'medium' | 'low'
+  note: string
+}
+
 interface DecisionAction {
   title: string
   portfolio: string
@@ -87,11 +93,16 @@ interface DecisionAction {
   dueInDays: number
   impactAedM: number
   aiConfidence: number // 0-100
+  owner?: string
   rationale: string
   whyItMatters?: string
   steps?: string[]
+  portfolioImpacts?: PortfolioImpact[]
+  ifActed?: string
+  ifIgnored?: string
   signalHeadline: string
   signalSource?: string
+  signalUrl?: string
   relevance: number // 0-100
 }
 
@@ -110,7 +121,9 @@ function useDecisionActions() {
         const nr = await fetch('/api/news', { cache: 'no-store' })
         if (!nr.ok) { if (alive) setSource('fallback'); return }
         const nd = await nr.json()
-        const items: Array<{ headline: string; source: string }> = (nd.items || []).slice(0, 18)
+        const items: Array<{ headline: string; source: string; url?: string }> = (nd.items || [])
+          .slice(0, 18)
+          .map((it: { headline: string; source: string; url?: string }) => ({ headline: it.headline, source: it.source, url: it.url }))
         if (items.length === 0) { if (alive) setSource('fallback'); return }
 
         // Generate the actions from the live signals. 55s abort < the route's
@@ -542,15 +555,34 @@ function AIActionDetailPanel({ action, onClose }: { action: DecisionAction | nul
             <DetailStat label="AI confidence" value={`${action.aiConfidence}%`} />
           </div>
 
-          {/* Triggered by signal */}
+          {/* Assign / escalate to */}
+          {action.owner && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 8 }}>
+              <User size={14} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>Assign / escalate to</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{action.owner}</div>
+              </div>
+              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-primary)', border: '1px solid var(--border-accent)', borderRadius: 6, padding: '4px 10px', whiteSpace: 'nowrap' }}>
+                Escalate →
+              </span>
+            </div>
+          )}
+
+          {/* Triggered by signal — with the source link */}
           <DetailSection title="Triggered by external signal">
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: 10, background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderLeft: '3px solid var(--accent-primary)', borderRadius: 6 }}>
               <Radio size={13} style={{ color: 'var(--accent-primary)', flexShrink: 0, marginTop: 2 }} />
-              <div style={{ minWidth: 0 }}>
+              <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600, lineHeight: 1.4 }}>{action.signalHeadline}</div>
                 <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 3 }}>
                   {action.signalSource ? `${action.signalSource} · ` : ''}relevance to {action.portfolio === 'cross-portfolio' ? 'the group' : action.portfolio} {action.relevance}%
                 </div>
+                {action.signalUrl && (
+                  <a href={action.signalUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 6, fontSize: 11, fontWeight: 700, color: 'var(--accent-primary)', textDecoration: 'none' }}>
+                    Read the source <ExternalLink size={11} />
+                  </a>
+                )}
               </div>
             </div>
           </DetailSection>
@@ -561,6 +593,44 @@ function AIActionDetailPanel({ action, onClose }: { action: DecisionAction | nul
               <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
                 {action.whyItMatters || action.rationale}
               </p>
+            </DetailSection>
+          )}
+
+          {/* Portfolio impact */}
+          {action.portfolioImpacts && action.portfolioImpacts.length > 0 && (
+            <DetailSection title="Portfolio impact">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {action.portfolioImpacts.map((p, i) => {
+                  const lc = p.level === 'high' ? 'var(--risk-high)' : p.level === 'medium' ? 'var(--risk-medium)' : 'var(--risk-low)'
+                  return (
+                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '8px 10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 6 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', minWidth: 92, textTransform: 'capitalize' }}>{p.portfolio.replace(/-/g, ' ')}</span>
+                      <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.4, textTransform: 'uppercase', color: lc, background: `${lc}1f`, border: `1px solid ${lc}55`, borderRadius: 3, padding: '1px 6px', flexShrink: 0 }}>{p.level}</span>
+                      <span style={{ fontSize: 11.5, color: 'var(--text-secondary)', flex: 1, lineHeight: 1.4 }}>{p.note}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </DetailSection>
+          )}
+
+          {/* Consequence comparison */}
+          {(action.ifActed || action.ifIgnored) && (
+            <DetailSection title="Consequence comparison">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {action.ifActed && (
+                  <div style={{ padding: '10px 12px', borderRadius: 8, background: 'rgba(6,118,71,0.07)', border: '1px solid rgba(6,118,71,0.28)' }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', color: '#067647', marginBottom: 3 }}>If action taken</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.55 }}>{action.ifActed}</div>
+                  </div>
+                )}
+                {action.ifIgnored && (
+                  <div style={{ padding: '10px 12px', borderRadius: 8, background: 'rgba(180,35,24,0.07)', border: '1px solid rgba(180,35,24,0.28)' }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', color: '#B42318', marginBottom: 3 }}>If ignored</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.55 }}>{action.ifIgnored}</div>
+                  </div>
+                )}
+              </div>
             </DetailSection>
           )}
 

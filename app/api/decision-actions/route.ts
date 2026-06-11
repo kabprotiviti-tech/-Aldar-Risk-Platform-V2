@@ -14,6 +14,12 @@ export type ActionPortfolio =
   | 'facilities'
   | 'cross-portfolio'
 
+export interface PortfolioImpact {
+  portfolio: string
+  level: 'high' | 'medium' | 'low'
+  note: string
+}
+
 export interface DecisionAction {
   title: string
   portfolio: ActionPortfolio
@@ -21,11 +27,16 @@ export interface DecisionAction {
   dueInDays: number
   impactAedM: number
   aiConfidence: number // 0-100
+  owner: string
   rationale: string
   whyItMatters: string
   steps: string[]
+  portfolioImpacts: PortfolioImpact[]
+  ifActed: string
+  ifIgnored: string
   signalHeadline: string
   signalSource: string
+  signalUrl: string
   relevance: number // 0-100
 }
 
@@ -50,9 +61,13 @@ Rules for each action:
 - dueInDays: 3 for critical, 14 for high, 30 for medium (adjust slightly if warranted)
 - impactAedM: estimated AED millions at stake, realistic (typically 50-700)
 - aiConfidence: 0-100
+- owner: the ABC executive or team this should be assigned to / escalated to (e.g. "Group CFO", "FM Operations Head", "Group Risk Head / CRO", "CDO")
 - rationale: ONE concise ABC-specific sentence linking the signal to the action
 - whyItMatters: 2-3 sentences a board would read — the business mechanism and what's at stake for ABC specifically
 - steps: an array of 2-4 short, concrete first steps (each a phrase, e.g. "Brief CFO on hedge gap")
+- portfolioImpacts: an array of 1-3 affected portfolios, each { portfolio: one of real-estate|retail|hospitality|education|facilities, level: high|medium|low, note: a short phrase on how it hits that portfolio }
+- ifActed: 1-2 sentences on the likely outcome IF ABC takes this action now (include a rough residual/avoided figure if sensible)
+- ifIgnored: 1-2 sentences on the likely outcome IF ABC does nothing
 - signalHeadline: the driving news headline, VERBATIM from the input
 - signalSource: the source name of that headline, VERBATIM from the input
 - relevance: 0-100, how directly the driving signal affects ABC (>80 direct, 55-80 sector)
@@ -92,6 +107,16 @@ function sanitize(raw: Record<string, unknown>): DecisionAction {
     : 'cross-portfolio'
   const stepsRaw = Array.isArray(raw.steps) ? raw.steps : []
   const steps = stepsRaw.map((s) => String(s).slice(0, 100)).filter(Boolean).slice(0, 4)
+  const piRaw = Array.isArray(raw.portfolioImpacts) ? raw.portfolioImpacts : []
+  const portfolioImpacts: PortfolioImpact[] = piRaw
+    .filter((p): p is Record<string, unknown> => !!p && typeof p === 'object')
+    .map((p) => ({
+      portfolio: String(p.portfolio || '').toLowerCase().replace(/\s+/g, '-').slice(0, 24),
+      level: (['high', 'medium', 'low'].includes(String(p.level)) ? p.level : 'medium') as PortfolioImpact['level'],
+      note: String(p.note || '').slice(0, 120),
+    }))
+    .filter((p) => p.portfolio)
+    .slice(0, 4)
   return {
     title: String(raw.title || 'Review emerging risk signal').slice(0, 140),
     portfolio,
@@ -99,13 +124,24 @@ function sanitize(raw: Record<string, unknown>): DecisionAction {
     dueInDays: Math.round(clamp(raw.dueInDays, 1, 120, priority === 'critical' ? 3 : priority === 'high' ? 14 : 30)),
     impactAedM: Math.round(clamp(raw.impactAedM, 5, 2000, 120)),
     aiConfidence: Math.round(clamp(raw.aiConfidence, 0, 100, 70)),
+    owner: String(raw.owner || '').slice(0, 60),
     rationale: String(raw.rationale || '').slice(0, 240),
     whyItMatters: String(raw.whyItMatters || '').slice(0, 600),
     steps,
+    portfolioImpacts,
+    ifActed: String(raw.ifActed || '').slice(0, 400),
+    ifIgnored: String(raw.ifIgnored || '').slice(0, 400),
     signalHeadline: String(raw.signalHeadline || '').slice(0, 200),
     signalSource: String(raw.signalSource || '').slice(0, 80),
+    signalUrl: '',
     relevance: Math.round(clamp(raw.relevance, 0, 100, 50)),
   }
+}
+
+/** Match a returned action's signalHeadline back to the input item's real URL. */
+function attachUrl(action: DecisionAction, items: Array<{ headline: string; url?: string }>): DecisionAction {
+  const hit = items.find((it) => it.headline && action.signalHeadline && (it.headline === action.signalHeadline || it.headline.slice(0, 40) === action.signalHeadline.slice(0, 40)))
+  return { ...action, signalUrl: hit?.url && hit.url !== '#' ? hit.url : '' }
 }
 
 const PRIORITY_RANK = { critical: 0, high: 1, medium: 2 }
@@ -113,7 +149,7 @@ const PRIORITY_RANK = { critical: 0, high: 1, medium: 2 }
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const items: Array<{ headline: string; source: string }> = Array.isArray(body.items) ? body.items.slice(0, 18) : []
+    const items: Array<{ headline: string; source: string; url?: string }> = Array.isArray(body.items) ? body.items.slice(0, 18) : []
     if (items.length === 0) return NextResponse.json({ source: 'empty', actions: [] })
 
     const list = items.map((it, i) => `${i + 1}. SOURCE "${it.source}": ${it.headline}`).join('\n')
@@ -133,6 +169,7 @@ export async function POST(req: NextRequest) {
     const actions = parsed
       .filter((x): x is Record<string, unknown> => !!x && typeof x === 'object')
       .map(sanitize)
+      .map((a) => attachUrl(a, items))
       // Relevance floor — keep the SpaceX-pension class of noise out, but low
       // enough to surface 4-5 genuine (incl. indirect/lower-impact) actions.
       .filter((a) => a.relevance >= 45)
