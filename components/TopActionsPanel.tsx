@@ -566,12 +566,112 @@ export function TopActionsPanel({ onActionClick }: { onActionClick: (action: Act
       </CardHeader>
 
       <CardBody>
+        {/* GROUNDED actions — real exposure, register-linked, clickable detail */}
+        <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>
+          Tracked risks · sourced from register
+        </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {TOP_ACTIONS.map((action, i) => (
             <ActionRow key={action.id} action={action} rank={i + 1} onClick={onActionClick} />
           ))}
         </div>
+
+        {/* EMERGING — external-intelligence read, AI estimates to validate */}
+        <ExternalIntelRead />
       </CardBody>
     </Card>
+  )
+}
+
+// ─── External-intelligence read (AI estimate, clearly labelled) ────────────────
+// Answers "what if the risk was never identified?" — the live feed surfaces
+// candidate impacts that may NOT be in the register yet. Numbers here are AI
+// ESTIMATES, badged as such, never mixed with the sourced register figures.
+
+function ExternalIntelRead() {
+  const { actions, source, updatedAt } = useDecisionActions()
+  const live = source === 'ai' && actions.length > 0
+
+  return (
+    <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px dashed var(--border-color)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
+        <Radio size={13} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
+        <span style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-primary)' }}>
+          External intelligence read
+        </span>
+        <span
+          style={{
+            fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase',
+            color: '#B54708', background: 'rgba(181,71,8,0.10)', border: '1px solid rgba(181,71,8,0.35)',
+            borderRadius: '4px', padding: '2px 7px',
+          }}
+        >
+          AI estimate · validate before acting
+        </span>
+        {live && updatedAt && (
+          <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', marginLeft: 'auto' }}>updated {updatedAt}</span>
+        )}
+      </div>
+
+      {source === 'loading' ? (
+        <div style={{ fontSize: '0.72rem', color: 'var(--accent-primary)', fontWeight: 600, padding: '6px 2px' }}>
+          Scanning the live external feed for emerging impacts… (~30s)
+        </div>
+      ) : live ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {actions.map((a, i) => {
+            const color = PRIORITY_COLOR[a.priority]
+            return (
+              <div
+                key={i}
+                style={{
+                  display: 'flex', alignItems: 'flex-start', gap: '10px',
+                  padding: '10px 12px', borderRadius: '8px',
+                  border: '1px dashed var(--border-color)', background: 'var(--bg-card)',
+                }}
+              >
+                <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: color, marginTop: '6px', flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-primary)', flex: 1, minWidth: 0 }}>
+                      {a.title}
+                    </span>
+                    <PriorityBadge priority={a.priority} />
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color }}>
+                      est. AED {a.impactAedM}M
+                      <span style={{ color: 'var(--text-muted)', fontWeight: 500, marginLeft: '4px' }}>· unverified</span>
+                    </span>
+                    <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Act in {a.dueInDays} days</span>
+                  </div>
+                  {a.signalHeadline && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '4px', minWidth: 0 }}>
+                      <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', flexShrink: 0 }}>from signal:</span>
+                      <span title={a.signalHeadline} style={{ fontSize: '0.62rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+                        {a.signalHeadline} ({a.relevance}%)
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <a
+                  href="/risk-register"
+                  style={{ fontSize: '0.64rem', fontWeight: 700, color: 'var(--accent-primary)', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0, marginTop: '2px' }}
+                >
+                  Assess →
+                </a>
+              </div>
+            )
+          })}
+          <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontStyle: 'italic', marginTop: '2px' }}>
+            AI read of the live news feed. Figures are first-pass estimates — confirm against the register before acting.
+          </div>
+        </div>
+      ) : (
+        <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+          Live external feed unavailable — showing tracked register risks only.
+        </div>
+      )}
+    </div>
   )
 }
