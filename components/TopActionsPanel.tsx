@@ -73,25 +73,28 @@ const PORTFOLIO_LABEL: Record<string, string> = {
   facilities:    'Facilities',
 }
 
-// ─── Live external-signal binding ─────────────────────────────────────────────
-// The curated actions stay (board-grade, never a weak AI line in the demo) but
-// the panel now visibly RESPONDS to the live external signal feed: it pulls the
-// same Claude-classified, relevance-scored signals as the Live Risk Signals
-// rail, shows how many high-relevance signals are currently factored, and binds
-// each action to the most-relevant live signal for its portfolio. Slower 60s
-// cadence — decisions don't need 10s freshness, and it keeps API cost down.
+// ─── Live signal-driven actions ───────────────────────────────────────────────
+// The priority actions are GENERATED from the live external news feed by Claude
+// (/api/decision-actions): each action is a specific ABC response tied to a real
+// signal, with its own due date and impact. Until they arrive (~30s) — or if the
+// AI call fails — the panel shows the curated TOP_ACTIONS so the demo is never
+// empty or broken. 90s cadence keeps API cost sane.
 
-interface ActionSignal {
-  id: string
-  headline: string
-  source: string
-  relevance: number
-  severity: string
-  impactedBusiness: string
+interface DecisionAction {
+  title: string
+  portfolio: string
+  priority: ActionPriority
+  dueInDays: number
+  impactAedM: number
+  aiConfidence: number // 0-100
+  rationale: string
+  signalHeadline: string
+  relevance: number // 0-100
 }
 
-function useActionSignals() {
-  const [signals, setSignals] = React.useState<ActionSignal[]>([])
+function useDecisionActions() {
+  const [actions, setActions] = React.useState<DecisionAction[]>([])
+  const [source, setSource] = React.useState<'loading' | 'ai' | 'fallback'>('loading')
   const [updatedAt, setUpdatedAt] = React.useState<string | null>(null)
 
   React.useEffect(() => {
@@ -102,83 +105,47 @@ function useActionSignals() {
     const run = async () => {
       try {
         const nr = await fetch('/api/news', { cache: 'no-store' })
-        if (!nr.ok) return
+        if (!nr.ok) { if (alive) setSource('fallback'); return }
         const nd = await nr.json()
-        const items: Array<{ id: string; headline: string; source: string }> = (nd.items || []).slice(0, 12)
-        if (items.length === 0) return
+        const items: Array<{ headline: string; source: string }> = (nd.items || []).slice(0, 10)
+        if (items.length === 0) { if (alive) setSource('fallback'); return }
 
-        // ── Phase 1: show the feed IMMEDIATELY (neutral relevance) so the panel
-        //   reacts within ~1s instead of waiting on the multi-second AI classify.
+        // Generate the actions from the live signals. 55s abort < the route's
+        // 60s maxDuration; the AI call itself runs ~30s.
+        const ctrl = new AbortController()
+        const to = setTimeout(() => ctrl.abort(), 55000)
+        const ar = await fetch('/api/decision-actions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items }),
+          signal: ctrl.signal,
+        })
+        clearTimeout(to)
+        if (!ar.ok) { if (alive) setSource('fallback'); return }
+        const ad = await ar.json()
+        const list: DecisionAction[] = Array.isArray(ad.actions) ? ad.actions : []
         if (alive) {
-          setSignals(
-            items.map((it) => ({
-              id: it.id,
-              headline: it.headline,
-              source: it.source,
-              relevance: 35,
-              severity: 'low',
-              impactedBusiness: 'cross-portfolio',
-            })),
-          )
-          setUpdatedAt(stamp())
-        }
-
-        // ── Phase 2: enrich with Claude relevance scores when they land. A 20s
-        //   abort guards against a hung classify call.
-        try {
-          const ctrl = new AbortController()
-          const to = setTimeout(() => ctrl.abort(), 20000)
-          const cr = await fetch('/api/ai-classify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ items: items.map((it) => ({ id: it.id, headline: it.headline, source: it.source })) }),
-            signal: ctrl.signal,
-          })
-          clearTimeout(to)
-          if (cr.ok) {
-            const cd = await cr.json()
-            const map: Record<string, { confidenceScore?: number; severity?: string; impactedBusiness?: string }> = {}
-            for (const r of cd.results || []) map[r.id] = r.classification
-            if (alive) {
-              setSignals(
-                items
-                  .map((it) => ({
-                    id: it.id,
-                    headline: it.headline,
-                    source: it.source,
-                    relevance: map[it.id]?.confidenceScore ?? 35,
-                    severity: map[it.id]?.severity ?? 'low',
-                    impactedBusiness: map[it.id]?.impactedBusiness ?? 'cross-portfolio',
-                  }))
-                  .sort((a, b) => b.relevance - a.relevance),
-              )
-              setUpdatedAt(stamp())
-            }
+          if (ad.source === 'ai' && list.length > 0) {
+            setActions(list)
+            setSource('ai')
+            setUpdatedAt(stamp())
+          } else {
+            setSource('fallback')
           }
-        } catch {
-          // classification optional — Phase 1 signals remain shown
         }
       } catch {
-        // network/feed error — panel keeps its curated actions
+        if (alive) setSource('fallback')
       }
     }
     run()
-    const id = setInterval(run, 60000)
+    const id = setInterval(run, 90000)
     return () => {
       alive = false
       clearInterval(id)
     }
   }, [])
 
-  return { signals, updatedAt }
-}
-
-/** Most-relevant live signal for an action's portfolio (else a cross-portfolio one). */
-function matchSignal(portfolio: string, signals: ActionSignal[]): ActionSignal | null {
-  const norm = portfolio.replace(/-/g, ' ')
-  const exact = signals.filter((s) => s.impactedBusiness === norm)
-  const pool = exact.length ? exact : signals.filter((s) => s.impactedBusiness === 'cross-portfolio')
-  return pool.length ? pool[0] : null // signals already sorted by relevance desc
+  return { actions, source, updatedAt }
 }
 
 // ─── Priority badge ───────────────────────────────────────────────────────────
@@ -213,12 +180,10 @@ function ActionRow({
   action,
   rank,
   onClick,
-  signal,
 }: {
   action: Action
   rank: number
   onClick: (a: Action) => void
-  signal?: ActionSignal | null
 }) {
   const color = PRIORITY_COLOR[action.priority]
 
@@ -406,27 +371,108 @@ function ActionRow({
             </span>
           )}
         </div>
-
-        {/* Live signal binding — which external signal is driving this action */}
-        {signal && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '6px', minWidth: 0 }}>
-            <Radio size={10} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
-            <span style={{ fontSize: '0.64rem', color: 'var(--text-muted)', flexShrink: 0 }}>Live signal:</span>
-            <span
-              title={signal.headline}
-              style={{ fontSize: '0.64rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}
-            >
-              {signal.headline}
-            </span>
-            <span style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--accent-primary)', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
-              {signal.relevance}%
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Arrow */}
       <ChevronRight size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+    </motion.div>
+  )
+}
+
+// ─── AI-generated (signal-driven) action row ──────────────────────────────────
+
+const PORTFOLIO_LABEL_DYN: Record<string, string> = {
+  ...PORTFOLIO_LABEL,
+  'cross-portfolio': 'Cross-Portfolio',
+}
+
+function DynamicActionRow({ action, rank }: { action: DecisionAction; rank: number }) {
+  const color = PRIORITY_COLOR[action.priority]
+  const impactPercent = ((action.impactAedM / 10000) * 100).toFixed(1)
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -12 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3, delay: rank * 0.06 }}
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '12px',
+        padding: '12px 14px',
+        borderRadius: '8px',
+        border: '1px solid var(--border-color)',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '3px', backgroundColor: color, borderRadius: '8px 0 0 8px' }} />
+
+      {/* Rank + relevance */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
+        <div
+          style={{
+            width: '28px', height: '28px', borderRadius: '50%',
+            backgroundColor: PRIORITY_BG[action.priority], border: `1px solid ${color}40`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color, fontWeight: 800, fontSize: '0.72rem',
+          }}
+        >
+          {rank}
+        </div>
+        <span title="Driving signal relevance to ABC" style={{ fontSize: '0.58rem', fontWeight: 700, color: 'var(--text-muted)', fontVariantNumeric: 'tabular-nums' }}>
+          {action.relevance}%
+        </span>
+      </div>
+
+      {/* Main */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <span style={{ color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 600, lineHeight: 1.3, minWidth: 0, flex: 1 }}>
+            {action.title}
+          </span>
+          {rank === 1 && (
+            <span style={{ fontSize: '0.6rem', fontWeight: 800, color, backgroundColor: PRIORITY_BG[action.priority], border: `1px solid ${color}50`, borderRadius: '4px', padding: '2px 7px', letterSpacing: '0.07em', textTransform: 'uppercase', whiteSpace: 'nowrap', flexShrink: 0 }}>
+              Highest Priority
+            </span>
+          )}
+          <PriorityBadge priority={action.priority} />
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginTop: '6px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Zap size={11} style={{ color: 'var(--text-muted)' }} />
+            <span style={{ color, fontSize: '0.74rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>AED {action.impactAedM}M</span>
+            <span style={{ color: 'var(--text-muted)', fontSize: '0.67rem' }}>({impactPercent}%)</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Clock size={10} style={{ color: 'var(--text-muted)' }} />
+            <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Act in {action.dueInDays} days</span>
+          </div>
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.64rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '3px', padding: '1px 6px' }}>
+            {PORTFOLIO_LABEL_DYN[action.portfolio] ?? action.portfolio}
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+            <Brain size={10} style={{ color: 'var(--accent-primary)' }} />
+            <span style={{ color: 'var(--accent-primary)', fontSize: '0.68rem', fontWeight: 600 }}>{action.aiConfidence}% conf</span>
+          </div>
+        </div>
+
+        {action.rationale && (
+          <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', lineHeight: 1.45, margin: '7px 0 0' }}>
+            {action.rationale}
+          </p>
+        )}
+
+        {action.signalHeadline && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '6px', minWidth: 0 }}>
+            <Radio size={10} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
+            <span style={{ fontSize: '0.64rem', color: 'var(--text-muted)', flexShrink: 0 }}>Driven by:</span>
+            <span title={action.signalHeadline} style={{ fontSize: '0.64rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+              {action.signalHeadline}
+            </span>
+          </div>
+        )}
+      </div>
     </motion.div>
   )
 }
@@ -467,14 +513,27 @@ function HeaderMetric({ label, value, color }: { label: string; value: string; c
 // ─── Main export ──────────────────────────────────────────────────────────────
 
 export function TopActionsPanel({ onActionClick }: { onActionClick: (action: Action) => void }) {
-  const criticalCount = TOP_ACTIONS.filter((a) => a.priority === 'critical').length
-  const highCount = TOP_ACTIONS.filter((a) => a.priority === 'high').length
-  const totalImpact = TOP_ACTIONS.reduce((sum, a) => sum + a.impactValue, 0)
+  // Actions are GENERATED from the live external signal feed; until they land
+  // (or if the AI call fails) we show the curated TOP_ACTIONS.
+  const { actions: aiActions, source, updatedAt } = useDecisionActions()
+  const live = source === 'ai' && aiActions.length > 0
 
-  // Live external-signal feed driving the analysis (updates every 60s)
-  const { signals, updatedAt } = useActionSignals()
-  const highRelevant = signals.filter((s) => s.relevance >= 50)
-  const topSignal = signals[0] || null
+  const criticalCount = live
+    ? aiActions.filter((a) => a.priority === 'critical').length
+    : TOP_ACTIONS.filter((a) => a.priority === 'critical').length
+  const highCount = live
+    ? aiActions.filter((a) => a.priority === 'high').length
+    : TOP_ACTIONS.filter((a) => a.priority === 'high').length
+  const totalImpact = live
+    ? aiActions.reduce((sum, a) => sum + a.impactAedM, 0)
+    : TOP_ACTIONS.reduce((sum, a) => sum + a.impactValue, 0)
+  const topAction = live ? aiActions[0] : null
+
+  const chip = live
+    ? `From ${aiActions.length} live signals${updatedAt ? ` · ${updatedAt}` : ''}`
+    : source === 'loading'
+      ? 'Live feed · generating…'
+      : 'Curated · live feed unavailable'
 
   return (
     <Card glow>
@@ -520,16 +579,13 @@ export function TopActionsPanel({ onActionClick }: { onActionClick: (action: Act
               border: '1px solid var(--border-accent)',
             }}
           >
-            {signals.length > 0
-              ? `Synced to ${signals.length} live signals${updatedAt ? ` · ${updatedAt}` : ''}`
-              : 'Live feed · connecting…'}
+            {chip}
           </span>
         </div>
       </CardHeader>
 
       <CardBody>
-        {/* Live external-signal strip — always shown so the panel is visibly
-            wired to the feed; fills in as signals arrive. */}
+        {/* Live external-signal strip — shows where the actions came from */}
         <div
           style={{
             display: 'flex',
@@ -544,17 +600,17 @@ export function TopActionsPanel({ onActionClick }: { onActionClick: (action: Act
           }}
         >
           <Radio size={13} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
-          {signals.length > 0 ? (
+          {live ? (
             <>
               <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent-primary)', whiteSpace: 'nowrap' }}>
-                {highRelevant.length} high-relevance signal{highRelevant.length === 1 ? '' : 's'} factored
+                Actions generated from live external signals
               </span>
-              {topSignal && (
+              {topAction && (
                 <span
-                  title={topSignal.headline}
+                  title={topAction.signalHeadline}
                   style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}
                 >
-                  · Top: {topSignal.headline} ({topSignal.relevance}%)
+                  · Top driver: {topAction.signalHeadline} ({topAction.relevance}%)
                 </span>
               )}
               {updatedAt && (
@@ -563,23 +619,23 @@ export function TopActionsPanel({ onActionClick }: { onActionClick: (action: Act
                 </span>
               )}
             </>
-          ) : (
+          ) : source === 'loading' ? (
             <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--accent-primary)' }}>
-              Connecting to live external signal feed…
+              Generating priority actions from live signals… (~30s)
+            </span>
+          ) : (
+            <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+              Showing curated actions — live signal feed unavailable
             </span>
           )}
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {TOP_ACTIONS.map((action, i) => (
-            <ActionRow
-              key={action.id}
-              action={action}
-              rank={i + 1}
-              onClick={onActionClick}
-              signal={matchSignal(action.portfolio, signals)}
-            />
-          ))}
+          {live
+            ? aiActions.map((action, i) => <DynamicActionRow key={i} action={action} rank={i + 1} />)
+            : TOP_ACTIONS.map((action, i) => (
+                <ActionRow key={action.id} action={action} rank={i + 1} onClick={onActionClick} />
+              ))}
         </div>
       </CardBody>
     </Card>
