@@ -7,7 +7,7 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import { ChevronRight, Zap, Clock, User, Brain, Radio } from 'lucide-react'
+import { ChevronRight, Zap, Clock, User, Brain, Radio, X } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardBody } from '@/components/ui/Card'
 import {
   TOP_ACTIONS,
@@ -88,7 +88,10 @@ interface DecisionAction {
   impactAedM: number
   aiConfidence: number // 0-100
   rationale: string
+  whyItMatters?: string
+  steps?: string[]
   signalHeadline: string
+  signalSource?: string
   relevance: number // 0-100
 }
 
@@ -386,7 +389,7 @@ const PORTFOLIO_LABEL_DYN: Record<string, string> = {
   'cross-portfolio': 'Cross-Portfolio',
 }
 
-function DynamicActionRow({ action, rank }: { action: DecisionAction; rank: number }) {
+function DynamicActionRow({ action, rank, onClick }: { action: DecisionAction; rank: number; onClick: (a: DecisionAction) => void }) {
   const color = PRIORITY_COLOR[action.priority]
   const impactPercent = ((action.impactAedM / 10000) * 100).toFixed(1)
   return (
@@ -394,6 +397,8 @@ function DynamicActionRow({ action, rank }: { action: DecisionAction; rank: numb
       initial={{ opacity: 0, x: -12 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, delay: rank * 0.06 }}
+      whileHover={{ x: 3 }}
+      onClick={() => onClick(action)}
       style={{
         display: 'flex',
         alignItems: 'flex-start',
@@ -403,7 +408,11 @@ function DynamicActionRow({ action, rank }: { action: DecisionAction; rank: numb
         border: '1px solid var(--border-color)',
         position: 'relative',
         overflow: 'hidden',
+        cursor: 'pointer',
+        transition: 'border-color 0.2s',
       }}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = `${color}50` }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border-color)' }}
     >
       <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '3px', backgroundColor: color, borderRadius: '8px 0 0 8px' }} />
 
@@ -466,14 +475,136 @@ function DynamicActionRow({ action, rank }: { action: DecisionAction; rank: numb
         {action.signalHeadline && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '6px', minWidth: 0 }}>
             <Radio size={10} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
-            <span style={{ fontSize: '0.64rem', color: 'var(--text-muted)', flexShrink: 0 }}>Driven by:</span>
+            <span style={{ fontSize: '0.64rem', color: 'var(--text-muted)', flexShrink: 0 }}>Source:</span>
             <span title={action.signalHeadline} style={{ fontSize: '0.64rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
-              {action.signalHeadline}
+              {action.signalHeadline}{action.signalSource ? ` · ${action.signalSource}` : ''}
             </span>
           </div>
         )}
       </div>
+
+      <ChevronRight size={16} style={{ color: 'var(--text-muted)', flexShrink: 0, alignSelf: 'center' }} />
     </motion.div>
+  )
+}
+
+// ─── Rich detail panel for an AI-generated action (board-confidence view) ──────
+
+function AIActionDetailPanel({ action, onClose }: { action: DecisionAction | null; onClose: () => void }) {
+  React.useEffect(() => {
+    if (!action) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [action, onClose])
+
+  if (!action) return null
+  const color = PRIORITY_COLOR[action.priority]
+  const impactPercent = ((action.impactAedM / 10000) * 100).toFixed(1)
+
+  return (
+    <>
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9000, backdropFilter: 'blur(2px)' }} />
+      <aside
+        role="dialog"
+        aria-label={`Action detail: ${action.title}`}
+        style={{
+          position: 'fixed', top: 0, right: 0, bottom: 0, width: 'min(520px, 94vw)',
+          background: 'var(--bg-primary)', borderLeft: '1px solid var(--border-color)',
+          boxShadow: '-12px 0 40px rgba(0,0,0,0.5)', zIndex: 9001,
+          display: 'flex', flexDirection: 'column', overflow: 'hidden',
+        }}
+      >
+        {/* Header */}
+        <div style={{ padding: 18, borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <PriorityBadge priority={action.priority} />
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', color: 'var(--accent-primary)', background: 'var(--accent-glow)', border: '1px solid var(--border-accent)', borderRadius: 4, padding: '2px 7px' }}>
+                AI-generated
+              </span>
+            </div>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: 0, lineHeight: 1.3 }}>
+              {action.title}
+            </h2>
+          </div>
+          <button onClick={onClose} aria-label="Close" style={{ background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-secondary)', borderRadius: 6, padding: 6, cursor: 'pointer', display: 'flex' }}>
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: 18, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Figures */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+            <DetailStat label="Est. impact" value={`AED ${action.impactAedM}M`} sub={`${impactPercent}% of portfolio`} color={color} />
+            <DetailStat label="Act within" value={`${action.dueInDays} days`} />
+            <DetailStat label="AI confidence" value={`${action.aiConfidence}%`} />
+          </div>
+
+          {/* Triggered by signal */}
+          <DetailSection title="Triggered by external signal">
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: 10, background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderLeft: '3px solid var(--accent-primary)', borderRadius: 6 }}>
+              <Radio size={13} style={{ color: 'var(--accent-primary)', flexShrink: 0, marginTop: 2 }} />
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 600, lineHeight: 1.4 }}>{action.signalHeadline}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 3 }}>
+                  {action.signalSource ? `${action.signalSource} · ` : ''}relevance to {action.portfolio === 'cross-portfolio' ? 'the group' : action.portfolio} {action.relevance}%
+                </div>
+              </div>
+            </div>
+          </DetailSection>
+
+          {/* Why it matters */}
+          {(action.whyItMatters || action.rationale) && (
+            <DetailSection title="Why this matters">
+              <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
+                {action.whyItMatters || action.rationale}
+              </p>
+            </DetailSection>
+          )}
+
+          {/* Recommended steps */}
+          {action.steps && action.steps.length > 0 && (
+            <DetailSection title="Recommended first steps">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                {action.steps.map((s, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 8, fontSize: 12.5, color: 'var(--text-primary)', lineHeight: 1.5 }}>
+                    <span style={{ color: 'var(--accent-primary)', fontWeight: 700, flexShrink: 0 }}>{i + 1}.</span>
+                    <span>{s}</span>
+                  </div>
+                ))}
+              </div>
+            </DetailSection>
+          )}
+
+          {/* Provenance note */}
+          <div style={{ fontSize: 10.5, color: 'var(--text-tertiary)', fontStyle: 'italic', lineHeight: 1.5, paddingTop: 8, borderTop: '1px solid var(--border-color)' }}>
+            AI-generated from the live external signal above. The impact is a first-pass estimate —
+            validate against the risk register before committing budget.
+          </div>
+        </div>
+      </aside>
+    </>
+  )
+}
+
+function DetailStat({ label, value, sub, color }: { label: string; value: string; sub?: string; color?: string }) {
+  return (
+    <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 8, padding: '10px 12px' }}>
+      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>{label}</div>
+      <div style={{ fontSize: 16, fontWeight: 700, color: color ?? 'var(--text-primary)', fontVariantNumeric: 'tabular-nums', marginTop: 3 }}>{value}</div>
+      {sub && <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 1 }}>{sub}</div>}
+    </div>
+  )
+}
+
+function DetailSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <h3 style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: 0.8, margin: 0 }}>{title}</h3>
+      {children}
+    </section>
   )
 }
 
@@ -513,43 +644,44 @@ function HeaderMetric({ label, value, color }: { label: string; value: string; c
 // ─── Main export ──────────────────────────────────────────────────────────────
 
 export function TopActionsPanel({ onActionClick }: { onActionClick: (action: Action) => void }) {
-  // Grounded actions: real exposure + register linkage (R-007 etc.) + the rich,
-  // CLICKABLE detail panel. The live-signal layer (re-rank + emerging-risk cards)
-  // is built on top of this — never by discarding the sourced data.
-  const criticalCount = TOP_ACTIONS.filter((a) => a.priority === 'critical').length
-  const highCount = TOP_ACTIONS.filter((a) => a.priority === 'high').length
-  const totalImpact = TOP_ACTIONS.reduce((sum, a) => sum + a.impactValue, 0)
+  // The AI layer IS the product. Priority actions are GENERATED from the live
+  // external signal feed and are the primary, clickable list. The curated
+  // TOP_ACTIONS are a silent fallback only if the AI is unavailable — so the
+  // demo never breaks, but the AI is always the star when it's up.
+  const { actions: aiActions, source, updatedAt } = useDecisionActions()
+  const live = source === 'ai' && aiActions.length > 0
+  const [selectedAI, setSelectedAI] = React.useState<DecisionAction | null>(null)
+
+  const criticalCount = live
+    ? aiActions.filter((a) => a.priority === 'critical').length
+    : TOP_ACTIONS.filter((a) => a.priority === 'critical').length
+  const highCount = live
+    ? aiActions.filter((a) => a.priority === 'high').length
+    : TOP_ACTIONS.filter((a) => a.priority === 'high').length
+  const totalImpact = live
+    ? aiActions.reduce((sum, a) => sum + a.impactAedM, 0)
+    : TOP_ACTIONS.reduce((sum, a) => sum + a.impactValue, 0)
 
   return (
     <Card glow>
       <CardHeader>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div
-            style={{
-              width: '28px',
-              height: '28px',
-              borderRadius: '7px',
-              backgroundColor: 'rgba(255,59,59,0.1)',
-              border: '1px solid rgba(255,59,59,0.25)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
+          <div style={{ width: '28px', height: '28px', borderRadius: '7px', backgroundColor: 'rgba(255,59,59,0.1)', border: '1px solid rgba(255,59,59,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Brain size={15} style={{ color: 'var(--risk-critical)' }} />
           </div>
-          <CardTitle>Priority Actions</CardTitle>
+          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
+            <CardTitle>Priority Actions</CardTitle>
+            <span style={{ fontSize: '0.62rem', color: 'var(--accent-primary)', fontWeight: 600 }}>
+              {live ? 'AI-generated from live external signals' : source === 'loading' ? 'Reading live external signals…' : 'Reference actions'}
+            </span>
+          </div>
         </div>
 
         {/* Header metrics */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           <HeaderMetric label="Critical" value={String(criticalCount)} color="var(--risk-critical)" />
           <HeaderMetric label="High" value={String(highCount)} color="var(--risk-high)" />
-          <HeaderMetric
-            label="Total Exposure"
-            value={`AED ${totalImpact.toLocaleString()}M`}
-            color="var(--accent-primary)"
-          />
+          <HeaderMetric label="Total Exposure" value={`AED ${totalImpact.toLocaleString()}M`} color="var(--accent-primary)" />
           <span
             style={{
               fontSize: '0.65rem',
@@ -560,115 +692,32 @@ export function TopActionsPanel({ onActionClick }: { onActionClick: (action: Act
               border: '1px solid var(--border-accent)',
             }}
           >
-            Click any action for the full analysis
+            {live && updatedAt ? `${updatedAt} · click any action for detail` : 'Click any action for the full analysis'}
           </span>
         </div>
       </CardHeader>
 
       <CardBody>
-        {/* ONE clean, clickable list. Every row opens the full grounded
-            analysis (register linkage, exposure, propagation). Emerging /
-            external-signal estimates live on the External Intelligence screen,
-            not stapled under here. */}
+        {source === 'loading' && !live && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', marginBottom: '10px', borderRadius: '8px', background: 'var(--accent-glow)', border: '1px solid var(--border-accent)' }}>
+            <Radio size={13} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
+            <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--accent-primary)' }}>
+              Reading the live external feed and generating priority actions…
+            </span>
+          </div>
+        )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {TOP_ACTIONS.map((action, i) => (
-            <ActionRow key={action.id} action={action} rank={i + 1} onClick={onActionClick} />
-          ))}
+          {live
+            ? aiActions.map((action, i) => (
+                <DynamicActionRow key={i} action={action} rank={i + 1} onClick={setSelectedAI} />
+              ))
+            : TOP_ACTIONS.map((action, i) => (
+                <ActionRow key={action.id} action={action} rank={i + 1} onClick={onActionClick} />
+              ))}
         </div>
       </CardBody>
+
+      <AIActionDetailPanel action={selectedAI} onClose={() => setSelectedAI(null)} />
     </Card>
-  )
-}
-
-// ─── External-intelligence read (AI estimate, clearly labelled) ────────────────
-// Answers "what if the risk was never identified?" — the live feed surfaces
-// candidate impacts that may NOT be in the register yet. Numbers here are AI
-// ESTIMATES, badged as such, never mixed with the sourced register figures.
-
-function ExternalIntelRead() {
-  const { actions, source, updatedAt } = useDecisionActions()
-  const live = source === 'ai' && actions.length > 0
-
-  return (
-    <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px dashed var(--border-color)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
-        <Radio size={13} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
-        <span style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-primary)' }}>
-          Emerging from external signals
-        </span>
-        <span
-          style={{
-            fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase',
-            color: '#B54708', background: 'rgba(181,71,8,0.10)', border: '1px solid rgba(181,71,8,0.35)',
-            borderRadius: '4px', padding: '2px 7px',
-          }}
-        >
-          Preliminary · to be validated
-        </span>
-        {live && updatedAt && (
-          <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', marginLeft: 'auto' }}>updated {updatedAt}</span>
-        )}
-      </div>
-
-      {source === 'loading' ? (
-        <div style={{ fontSize: '0.72rem', color: 'var(--accent-primary)', fontWeight: 600, padding: '6px 2px' }}>
-          Reviewing external signals…
-        </div>
-      ) : live ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {actions.map((a, i) => {
-            const color = PRIORITY_COLOR[a.priority]
-            return (
-              <div
-                key={i}
-                style={{
-                  display: 'flex', alignItems: 'flex-start', gap: '10px',
-                  padding: '10px 12px', borderRadius: '8px',
-                  border: '1px dashed var(--border-color)', background: 'var(--bg-card)',
-                }}
-              >
-                <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: color, marginTop: '6px', flexShrink: 0 }} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-primary)', flex: 1, minWidth: 0 }}>
-                      {a.title}
-                    </span>
-                    <PriorityBadge priority={a.priority} />
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color }}>
-                      est. AED {a.impactAedM}M
-                      <span style={{ color: 'var(--text-muted)', fontWeight: 500, marginLeft: '4px' }}>· unverified</span>
-                    </span>
-                    <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Act in {a.dueInDays} days</span>
-                  </div>
-                  {a.signalHeadline && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '4px', minWidth: 0 }}>
-                      <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', flexShrink: 0 }}>Source:</span>
-                      <span title={a.signalHeadline} style={{ fontSize: '0.62rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
-                        {a.signalHeadline} ({a.relevance}%)
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <a
-                  href="/risk-register"
-                  style={{ fontSize: '0.64rem', fontWeight: 700, color: 'var(--accent-primary)', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0, marginTop: '2px' }}
-                >
-                  Assess →
-                </a>
-              </div>
-            )
-          })}
-          <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontStyle: 'italic', marginTop: '2px' }}>
-            Drawn from external news. Figures are preliminary estimates — confirm against the register before acting.
-          </div>
-        </div>
-      ) : (
-        <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-          External signals unavailable — showing tracked register risks only.
-        </div>
-      )}
-    </div>
   )
 }

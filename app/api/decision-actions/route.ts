@@ -22,7 +22,10 @@ export interface DecisionAction {
   impactAedM: number
   aiConfidence: number // 0-100
   rationale: string
+  whyItMatters: string
+  steps: string[]
   signalHeadline: string
+  signalSource: string
   relevance: number // 0-100
 }
 
@@ -35,6 +38,12 @@ const SYSTEM_PROMPT = `You are the Chief Risk Strategist for ABC Holdings — Ab
 
 From LIVE external news signals, produce the Board's PRIORITY RESPONSE ACTIONS — the concrete moves ABC leadership should make this quarter. Each action MUST be derived from a specific signal, decision-grade, and ABC-specific (name the portfolio/asset).
 
+CRITICAL RELEVANCE FILTER — credibility depends on this:
+- ONLY act on signals with a clear, DIRECT line to ABC's UAE real-estate / retail / hospitality / education / facilities business, or UAE/GCC macro, rates, regulation, tourism, construction or capital flows that plainly affect it.
+- IGNORE celebrity, sports, foreign-domestic-politics, unrelated-sector, novelty, or tenuous-link news. NEVER manufacture a connection (e.g. do NOT turn a SpaceX or US-university headline into an ABC action).
+- If fewer than 5 signals genuinely qualify, return FEWER actions. Quality over quantity. An irrelevant action destroys board trust.
+- Every action you return MUST have relevance >= 55.
+
 Rules for each action:
 - title: a specific executive action (e.g. "Activate FX hedge top-up on overseas-buyer book"), NOT a generic phrase
 - portfolio: exactly one of real-estate | retail | hospitality | education | facilities | cross-portfolio
@@ -43,10 +52,13 @@ Rules for each action:
 - impactAedM: estimated AED millions at stake, realistic (typically 50-700)
 - aiConfidence: 0-100
 - rationale: ONE concise ABC-specific sentence linking the signal to the action
+- whyItMatters: 2-3 sentences a board would read — the business mechanism and what's at stake for ABC specifically
+- steps: an array of 2-4 short, concrete first steps (each a phrase, e.g. "Brief CFO on hedge gap")
 - signalHeadline: the driving news headline, VERBATIM from the input
-- relevance: 0-100, how directly the driving signal affects ABC (>80 direct, 50-80 sector, <50 indirect)
+- signalSource: the source name of that headline, VERBATIM from the input
+- relevance: 0-100, how directly the driving signal affects ABC (>80 direct, 55-80 sector)
 
-Prefer signals with the highest ABC relevance. Return ONLY a JSON array of up to 5 actions, MOST URGENT FIRST. No markdown, no prose outside the array.`
+Return ONLY a JSON array of up to 5 actions, MOST URGENT FIRST. No markdown, no prose outside the array.`
 
 function safeParseArray(text: string): unknown[] | null {
   try {
@@ -79,6 +91,8 @@ function sanitize(raw: Record<string, unknown>): DecisionAction {
   const portfolio = PORTFOLIOS.includes(portfolioRaw as ActionPortfolio)
     ? (portfolioRaw as ActionPortfolio)
     : 'cross-portfolio'
+  const stepsRaw = Array.isArray(raw.steps) ? raw.steps : []
+  const steps = stepsRaw.map((s) => String(s).slice(0, 100)).filter(Boolean).slice(0, 4)
   return {
     title: String(raw.title || 'Review emerging risk signal').slice(0, 140),
     portfolio,
@@ -87,7 +101,10 @@ function sanitize(raw: Record<string, unknown>): DecisionAction {
     impactAedM: Math.round(clamp(raw.impactAedM, 5, 2000, 120)),
     aiConfidence: Math.round(clamp(raw.aiConfidence, 0, 100, 70)),
     rationale: String(raw.rationale || '').slice(0, 240),
+    whyItMatters: String(raw.whyItMatters || '').slice(0, 600),
+    steps,
     signalHeadline: String(raw.signalHeadline || '').slice(0, 200),
+    signalSource: String(raw.signalSource || '').slice(0, 80),
     relevance: Math.round(clamp(raw.relevance, 0, 100, 50)),
   }
 }
@@ -117,6 +134,9 @@ export async function POST(req: NextRequest) {
     const actions = parsed
       .filter((x): x is Record<string, unknown> => !!x && typeof x === 'object')
       .map(sanitize)
+      // Hard relevance floor — never surface a tenuous, low-relevance action
+      // (the SpaceX-pension class of noise) to an executive.
+      .filter((a) => a.relevance >= 55)
       .sort((a, b) => PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority] || b.relevance - a.relevance)
       .slice(0, 5)
 
