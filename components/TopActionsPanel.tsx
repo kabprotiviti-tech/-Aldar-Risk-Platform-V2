@@ -566,18 +566,15 @@ export function TopActionsPanel({ onActionClick }: { onActionClick: (action: Act
       </CardHeader>
 
       <CardBody>
-        {/* GROUNDED actions — real exposure, register-linked, clickable detail */}
-        <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>
-          Tracked risks — from your register
-        </div>
+        {/* ONE clean, clickable list. Every row opens the full grounded
+            analysis (register linkage, exposure, propagation). Emerging /
+            external-signal estimates live on the External Intelligence screen,
+            not stapled under here. */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {TOP_ACTIONS.map((action, i) => (
             <ActionRow key={action.id} action={action} rank={i + 1} onClick={onActionClick} />
           ))}
         </div>
-
-        {/* EMERGING — external-intelligence read, AI estimates to validate */}
-        <ExternalIntelRead />
       </CardBody>
     </Card>
   )
