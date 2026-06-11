@@ -67,14 +67,17 @@
   --on-accent: #FFFFFF;
   --on-risk-critical: #FFFFFF;
   --on-risk-high: #FFFFFF;
-  --on-risk-medium: #1A1A1A;
+  --on-risk-medium: #FFFFFF;
   --on-risk-low: #FFFFFF;
   --border-color: #E7E7E2;
   --border-accent: rgba(228, 0, 43, 0.30);
-  --risk-critical: #B42318;
-  --risk-high: #B54708;
-  --risk-medium: #B54708;
-  --risk-low: #067647;
+  /* Batch D — severity ramp: print-safe and MUTUALLY DISTINCT. Previously
+     High and Medium were both #B54708 (the same colour), so a High risk was
+     indistinguishable from a Medium one in the default light theme. */
+  --risk-critical: #9F1B1F;
+  --risk-high: #C2410C;
+  --risk-medium: #A16207;
+  --risk-low: #15803D;
   --shadow-sm: 0 1px 2px rgba(16,24,40,0.04);
   --shadow-md: 0 1px 3px rgba(16,24,40,0.06), 0 1px 2px rgba(16,24,40,0.04);
   --shadow-lg: 0 12px 32px rgba(16,24,40,0.10);

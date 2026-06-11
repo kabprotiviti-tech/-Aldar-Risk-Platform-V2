@@ -60,15 +60,14 @@ export function Sparkline({
     )
   }
 
-  // Pad the visible range so small absolute movements don't fill the chart.
-  // Without padding, a 0..2 series stretches the line corner-to-corner and
-  // executives read it as wild volatility. We pad by 60% of the observed
-  // range (or 20% of the anchor value, whichever is larger) so the line
-  // sits comfortably in the middle and shape is preserved.
+  // Batch D — honest domain. The old version padded the range by 60% of the
+  // spread specifically so "executives don't read wild volatility" — i.e. it
+  // visually flattened real movement. A risk product cannot lie about its own
+  // trend. We now use the true min/max with only a small 8% breathing margin
+  // so the shape of the data is shown faithfully.
   const rawMin = Math.min(...values)
   const rawMax = Math.max(...values)
-  const anchor = values[values.length - 1] || rawMax || 1
-  const rangePad = Math.max((rawMax - rawMin) * 0.6, Math.abs(anchor) * 0.2)
+  const rangePad = (rawMax - rawMin) * 0.08 || Math.abs(rawMax) * 0.04 || 1
   const min = rawMin - rangePad
   const max = rawMax + rangePad
   const range = max - min || 1
