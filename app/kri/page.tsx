@@ -46,6 +46,22 @@ function KRIContent() {
   const [editingKriId, setEditingKriId] = useState<string | null>(null)
   const [entryKriId, setEntryKriId] = useState<string | null>(null)
   const [breachKriId, setBreachKriId] = useState<string | null>(null)
+
+  // Deep-link: /kri?focus=KRI-NN scrolls to and briefly highlights that KRI.
+  React.useEffect(() => {
+    const focusId = new URLSearchParams(window.location.search).get('focus')
+    if (!focusId) return
+    const t = setTimeout(() => {
+      const el = document.getElementById(`kri-${focusId}`)
+      if (!el) return
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      const prev = el.style.backgroundColor
+      el.style.transition = 'background-color 0.4s ease'
+      el.style.backgroundColor = 'var(--accent-glow)'
+      setTimeout(() => { el.style.backgroundColor = prev }, 2200)
+    }, 350)
+    return () => clearTimeout(t)
+  }, [])
   const editingKri = editingKriId
     ? KRI_DEFINITIONS.find((k) => k.id === editingKriId) ?? null
     : null
@@ -390,7 +406,7 @@ function KRIRow({
   const totalBreaches = breachEvents.length
   const recentBreach = breachEvents.length > 0 ? breachEvents[breachEvents.length - 1] : null
   return (
-    <tr style={{ borderTop: '1px solid var(--border-color)' }}>
+    <tr id={`kri-${kri.id}`} style={{ borderTop: '1px solid var(--border-color)', scrollMarginTop: 80 }}>
       <Td mono>{kri.id}</Td>
       <Td>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

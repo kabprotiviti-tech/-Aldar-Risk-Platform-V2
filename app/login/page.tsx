@@ -295,7 +295,7 @@ function BrandPane() {
             WebkitTextFillColor: 'transparent',
           }}
         >
-          Enterprise risk, decided in 8 seconds.
+          The Group's risk, in one clear view.
         </h1>
         <p
           style={{
@@ -305,19 +305,19 @@ function BrandPane() {
             color: 'rgba(255,255,255,0.74)',
           }}
         >
-          A single-pane synthesis of the Group's risk posture — engineered for
-          the ARC, calibrated to ADX disclosure standards, anchored against
-          ABC's published FY25 and Q1 FY26 results.
+          An AI-enabled view of the Group's risk posture — external signals, the
+          risk register, KRIs and the board pack, brought into one place for
+          leadership and the ARC. Working MVP · illustrative data.
         </p>
 
         <div style={{ marginTop: 26, display: 'flex', flexDirection: 'column', gap: 10 }}>
           <Pitch
             icon={<Sparkles size={14} />}
-            text="5 hand-crafted persona dashboards — CRO / Champion / Sub CEO / IA / ARC Chair"
+            text="AI reads the external feed and links it to your live register"
           />
-          <Pitch icon={<Check size={14} />} text="ISO 31000 + COSO ERM mapped to every surface" />
+          <Pitch icon={<Check size={14} />} text="Persona views for the Risk Head, Champions, Subsidiary CEOs and ARC Chair" />
+          <Pitch icon={<Check size={14} />} text="Built on ISO 31000 and COSO ERM" />
           <Pitch icon={<Check size={14} />} text="UAE-native: SCA · ADREC · DLD · RERA · DET · FTA · MoE" />
-          <Pitch icon={<Check size={14} />} text="Append-only audit trail · CSV export to external auditor" />
         </div>
       </div>
 

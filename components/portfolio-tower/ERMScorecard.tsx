@@ -150,7 +150,7 @@ export function ERMScorecard() {
           value={`${totalExposure.toFixed(0)}`}
           unit="AED mn"
           accent="var(--accent-primary)"
-          hint={`across ${risks.length} risks`}
+          hint={`post-control, ${risks.length} risks · gross is AED 2.35Bn`}
         />
         <Tile
           icon={<AlertTriangle size={14} />}

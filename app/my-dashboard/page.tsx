@@ -53,6 +53,7 @@ import { usePersona } from '@/lib/context/PersonaContext'
 import { KRI_DEFINITIONS } from '@/lib/data/kri-definitions'
 import { computeKRIStatus, STATUS_META } from '@/lib/data/kri-status'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
+import { ExposureBreakdown } from '@/components/ExposureBreakdown'
 import { ExternalIntelligenceFeed } from '@/components/home/ExternalIntelligenceFeed'
 import { TrustFooter } from '@/components/provenance/TrustFooter'
 import { BASELINE_RISK_POSTURE } from '@/lib/data/baselineRiskPosture'
@@ -112,9 +113,10 @@ function MyDashboardContent() {
 
   const auditToday = recentEvents.filter((e) => sameDay(new Date(e.at), new Date())).length
 
-  // ── KRI status roll-up (G/A/R) ──────────────────────────────────────
+  // ── KRI status roll-up (G/A/R) + which KRIs are red ─────────────────
   const kriStatus = useMemo(() => {
     let g = 0, a = 0, r = 0
+    const redIds: string[] = []
     for (const k of myKRIs) {
       const t = thresholdsFor(k)
       const latest = latestFor(k.id)
@@ -122,10 +124,18 @@ function MyDashboardContent() {
       const s = computeKRIStatus(latest.value, t, k.direction)
       if (s === 'green') g++
       else if (s === 'amber') a++
-      else if (s === 'red') r++
+      else if (s === 'red') { r++; redIds.push(k.id) }
     }
-    return { g, a, r }
+    return { g, a, r, redIds }
   }, [myKRIs, thresholdsFor, latestFor])
+
+  // The actual critical risks (engine) — so links open the exact record.
+  const criticalRiskIds = useMemo(
+    () => risks.filter((r) => r.ratingTo === 'Critical').map((r) => r.id),
+    [risks],
+  )
+  const kriHref = kriStatus.redIds[0] ? `/kri?focus=${kriStatus.redIds[0]}` : '/kri'
+  const criticalHref = criticalRiskIds[0] ? `/risk-register?focus=${criticalRiskIds[0]}` : '/risk-register'
 
   // ── Headline metrics — single source of truth.
   //   ONE canonical number set across every screen (Batch 1) — exposure,
@@ -147,8 +157,8 @@ function MyDashboardContent() {
         sev: 'critical',
         text: `${criticalCount} critical risk${criticalCount === 1 ? '' : 's'} above appetite`,
         meta: 'Board-level — needs a decision',
-        href: '/risk-register',
-        cta: 'Review register',
+        href: criticalHref,
+        cta: 'Open risk',
       })
     if (myActionsOverdue > 0)
       items.push({
@@ -163,8 +173,8 @@ function MyDashboardContent() {
         sev: 'high',
         text: `${kriStatus.r} KRI${kriStatus.r === 1 ? '' : 's'} breached threshold`,
         meta: 'Red — outside tolerance',
-        href: '/kri',
-        cta: 'Open KRIs',
+        href: kriHref,
+        cta: 'Open KRI',
       })
     if (BASELINE_RISK_POSTURE.activeControlWeaknesses > 0)
       items.push({
@@ -184,7 +194,7 @@ function MyDashboardContent() {
       })
     const rank = { critical: 0, high: 1, medium: 2 }
     return items.sort((a, b) => rank[a.sev] - rank[b.sev]).slice(0, 5)
-  }, [criticalCount, myActionsOverdue, kriStatus.r])
+  }, [criticalCount, myActionsOverdue, kriStatus.r, kriHref, criticalHref])
 
   // ── Render ──────────────────────────────────────────────────────────
   return (
@@ -254,6 +264,9 @@ function MyDashboardContent() {
           net={BASELINE_RISK_POSTURE.netUnhedgedExposure}
         />
 
+        {/* How the AED 2.35Bn gross exposure breaks down (collapsible) */}
+        <ExposureBreakdown />
+
         {/* ── What needs your attention — the single focal list ─────────── */}
         <section
           style={{
@@ -311,14 +324,14 @@ function MyDashboardContent() {
             label="Critical + High"
             value={String(headlineCriticalHigh)}
             sub={`${criticalCount} critical · ${highCount} high`}
-            href="/risk-register"
+            href={criticalHref}
           />
           <MiniStat
             label="KRIs breached"
             value={String(kriStatus.r)}
             sub={kriStatus.a > 0 ? `${kriStatus.a} more amber` : 'none amber'}
             subTone={kriStatus.r > 0 ? 'danger' : 'good'}
-            href="/kri"
+            href={kriHref}
           />
           <MiniStat
             label={seeAll ? 'Open mitigations' : 'My open actions'}
