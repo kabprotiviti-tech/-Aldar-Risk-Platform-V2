@@ -126,6 +126,7 @@ const NAV_GROUPS: NavGroup[] = [
     icon: Search,
     items: [
       { href: '/kri', label: 'KRIs', icon: Gauge, description: 'Key Risk Indicators', personas: ALL },
+      { href: '/kri-feeds', label: 'KRI Live Feeds', icon: Radio, description: 'KRIs auto-sourced from systems', personas: ['group-cro', 'risk-champion'] },
       { href: '/risk-appetite', label: 'Risk Appetite', icon: ShieldQuestion, description: 'Appetite statements', personas: ALL },
       { href: '/control-command-center', label: 'Control Center', icon: Gauge, description: 'ICOFR control catalogue', personas: ['group-cro', 'arc-chair', 'risk-champion'] },
       { href: '/control-intelligence', label: 'Control Intelligence', icon: Layers, description: 'Reuse + AI framework benchmarking', personas: ['group-cro', 'risk-champion', 'arc-chair'] },
