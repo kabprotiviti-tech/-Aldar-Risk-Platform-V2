@@ -3,6 +3,7 @@
 *Prepared by the consolidating partner panel (10 functional assessors, 10 technical assessors, 10 consolidating partners). Assessed against the client requirement document + Protiviti AI additions + V2 roadmap. 58 line-items across 10 sections.*
 
 **Coverage at a glance:** 9 fully in tool · 36 partial · 13 not yet built.
+**Plus 30 additional features in the tool beyond the requirement** (see Section 4) — AI intelligence, financial quantification, governance framing, and trust/UX capabilities the client did not ask for.
 
 ---
 
@@ -152,3 +153,67 @@ Across the 58 assessed requirements, the tool today **fully covers ~9 line-items
 - **Treatment-to-control lifecycle** — promote completed mitigations into versioned controls with immutable history (§3.6).
 - **Scenario persistence & comparison** — save/version scenarios and compare A vs B vs baseline (§P2.7).
 - **Integration workstreams** (client-access dependent) — live KRI data feeds (§4.3), Capital Projects P6/MS Project earned-value module (§V2.1), and the structured regulatory obligation register with horizon scanning (§V2.3).
+
+---
+
+## 4. Additional Features in the Tool — Beyond the Requirement
+
+These capabilities are **built in the tool but were not asked for** in the client requirement document. They are differentiators to showcase. *Status* = Live (working, demo-ready) · Partial (works but illustrative/thin) · Stub (scaffold / placeholder, not yet functional).
+
+### 4a. AI & Intelligence (beyond the required AI layer)
+
+| # | Feature | What it does | Status | Showcase value |
+|---|---|---|---|---|
+| A1 | Decision Intelligence — Priority Actions | AI reads live external signals and generates a ranked, ABC-specific priority-action list with owner, due-date, impact and confidence; rich on-click board-grade analysis (portfolio impact, consequence-of-acting-vs-ignoring, source link). | Live | The headline AI USP — turns external news into prioritised executive actions. |
+| A2 | AI Fusion layer | Cross-correlates external market headlines with internal operational/ERP data to flag risk amplification or mitigation, with an amplification factor. | Live | "Connect the dots" between outside-world and inside-the-business. |
+| A3 | Cross-portfolio propagation analysis | Shows how an activated scenario cascades across ABC's five business units, with a severity-tagged propagation chain and urgency signal. | Live | Demonstrates systemic/contagion thinking, not siloed risk. |
+| A4 | AI Advisor (executive Q&A) | Answers a free-form executive question against live risk context, returning key points, action items, portfolio focus and a confidence score. | Live | A second AI surface beyond the register Copilot. |
+| A5 | AI Business-Impact narratives | Generates a 2–3 sentence business-impact read per portfolio with revenue-at-risk, management actions and watch indicators. | Live | Per-portfolio executive colour on demand. |
+| A6 | Register Critic (AI second-line) | AI critiques the live register for missing risks (e.g. climate transition, cyber), weak controls and coverage gaps. | Live | Shows the AI challenging the register, not just reading it. |
+| A7 | Executive Brief generator | One-click AI board brief synthesising risks, exposures, cross-portfolio propagation, strategic implications and recommendations with source traceability. | Live | Board-pack narrative in seconds. |
+| A8 | Gamma deck export | Converts the executive brief into a structured Gamma.app prompt (copied to clipboard) to auto-generate a board presentation. | Live | Brief → slide deck pipeline. |
+
+### 4b. Financial quantification (beyond rating-based scoring)
+
+| # | Feature | What it does | Status | Showcase value |
+|---|---|---|---|---|
+| B1 | Scenario financial impact model | Quantifies scenarios in AED (Year-1 / Year-2 / Total), recovery time and mitigation strategies at mild/moderate/severe intensity. | Live (illustrative) | Turns likelihood×impact into money — what the board cares about. |
+| B2 | Cost-of-Inaction panel | Calculates and displays the financial loss of NOT acting on a mitigation if the scenario materialises. | Live (illustrative) | Powerful "do nothing = AED X" framing. |
+| B3 | Financial Calculation panel | Reusable overlay showing the cost math behind a KPI card (drill from a headline number to its calculation). | Live (illustrative) | Transparency — every big number is explainable. |
+| B4 | Exposure Breakdown card | Reconciles the AED 2.35Bn gross exposure into segment splits and gross→hedged→net, explaining the headline-vs-residual difference. | Live (illustrative) | Pre-empts the "why two numbers?" board question. |
+| B5 | Control → Risk → Financial-exposure drill-down | One click from a failed control to its linked risk to the AED financial impact. | Live | End-to-end traceability in a single gesture. |
+
+### 4c. Governance & framework framing (beyond required governance)
+
+| # | Feature | What it does | Status | Showcase value |
+|---|---|---|---|---|
+| C1 | Three Lines of Defense mapping | Dedicated page mapping the IIA 2020 Three Lines model to ABC roles and the platform surfaces that serve each line. | Live | Speaks the assurance language of an ARC/board. |
+| C2 | Standards Reference (ISO 31000 / COSO) | Maps every ISO 31000:2018 principle and COSO ERM 2017 component to the platform surface implementing it, with live/partial/roadmap chips. | Live | Credibility: "we are framework-aligned." |
+| C3 | Regulator Map (UAE) | Reference map of federal/market/emirate/sector regulators (CBUAE, ADX, SCA, RERA…) with ABC obligations and reporting cadence. | Live (illustrative) | Foundation for the V2.3 obligation register. |
+| C4 | Risk Library + peer benchmark grid | UAE sector risk library with 12+ peer-disclosed scenarios and a benchmark grid comparing ABC to Emaar/DAMAC/Sobha across ERM categories. | Live (illustrative) | "How do we compare to peers?" — a board favourite. |
+| C5 | Policy & Procedure register | Register of governance/financial/operational/HSE/IT/compliance policies with owners, review dates and linked risks. | Live (illustrative) | Foundation for policy-to-risk linkage. |
+| C6 | BCM module (roadmap) | Placeholder for Business Continuity (BIA/RTO/RPO, continuity plans, crisis roster, recovery strategies). | Stub | Signals the BCM expansion path. |
+| C7 | ARC Pack print-to-PDF pipeline | Board-ready Audit & Risk Committee pack with cover, posture, KRI summary, scenarios and sign-off blocks, exportable to PDF. | Live | A tangible, printable governance artefact. |
+| C8 | Portfolio Control Tower (concentration & escalations) | Group↔subsidiary 5×5 heatmaps with concentration analysis, escalations and an ERM scorecard. | Live | Group-CEO consolidated cockpit. |
+| C9 | ERM Annual Plan calendar (plan vs actual) | Jan→Dec Gantt of ERM activities showing planned window vs when each actually happened, with overdue/in-progress status. | Live (illustrative) | Programme-management view of the ERM cycle. |
+
+### 4d. Data, integration & engineering (foundations the client didn't ask for)
+
+| # | Feature | What it does | Status | Showcase value |
+|---|---|---|---|---|
+| D1 | Integration stubs (Oracle ERP, Salesforce CRM, Primavera P6) | Connection cards with live-alert/KPI tiles and sync metadata, ready to be wired to real systems. | Stub | Shows the integration architecture is anticipated. |
+| D2 | Live market-data / ADX stock feed | Pulls ABC's live ADX share price (with fallback source) onto the dashboard. | Live | A real, live external datapoint in the demo. |
+| D3 | Provenance & data-honesty labelling | Every figure tagged Verified / Illustrative / Placeholder with click-through source attribution and an illustrative-data banner on each page. | Live | Builds trust — honest about what is real vs demo. |
+| D4 | Baseline Risk Posture singleton | A single source of truth so every dashboard/brief/KPI shows identical headline numbers (no contradictions). | Live | Demo robustness — numbers always reconcile. |
+| D5 | Deep-linking with focus-scroll | Links like `?focus=KRI-001` auto-scroll to and highlight the exact record across pages. | Live | Click a breached KRI → land on the exact data. |
+
+### 4e. Experience, personas & confidentiality (UX beyond spec)
+
+| # | Feature | What it does | Status | Showcase value |
+|---|---|---|---|---|
+| E1 | Persona-aware views | My-Dashboard and the approvals queue filter risks/actions by persona (Group CRO sees all; Champion sees own; Subsidiary CEO sees entity scope). | Partial | A taste of role-based experience ahead of full RBAC. |
+| E2 | Stealth client-name toggle | One control swaps the demo client name (ABC ↔ Aldar) live and hides the real name in print for confidentiality. | Live | Re-skin the demo for any prospect instantly. |
+| E3 | Welcome / onboarding flow | Animated landing with theme switcher, live Gulf-time clock and guided navigation to core surfaces. | Live | A polished first impression. |
+| E4 | Theming (light/dark + tokens) | Full design-token theming across the app. | Live | Looks like a product, not a prototype. |
+
+> **Note on overlap:** a few of these (e.g. Executive Brief, Regulator Map, Policy register, P6 stub, persona views) partially seed required items in Sections 1–8 / P1–P5 / V2 — they are listed here because the *capability as built today exceeds or pre-stages* what the requirement asks for. Items marked **Stub** are scaffolds shown for narrative completeness, not working features.
