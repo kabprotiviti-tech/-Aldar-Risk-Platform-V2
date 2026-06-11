@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { anthropic, CLAUDE_MODEL } from '@/lib/openai'
 
-// Generating 5 RICH actions (owner, why-it-matters, portfolio impacts, both
-// consequences, steps) is a large response — give the function generous room
-// so it never gets cut off mid-generation (which surfaces as the fallback).
-export const maxDuration = 120
+// Lightweight LIST generation (titles + headline metrics). The deep per-action
+// analysis is generated on demand by /api/decision-actions/detail.
+export const maxDuration = 60
 export const dynamic = 'force-dynamic'
+
+// Small in-memory cache so repeat dashboard loads are instant (the generated
+// list only changes as the news does). 5-minute TTL.
+let _cache: { ts: number; actions: DecisionAction[] } | null = null
+const CACHE_MS = 5 * 60 * 1000
 
 export type ActionPortfolio =
   | 'real-estate'
@@ -55,20 +59,14 @@ RELEVANCE FILTER — credibility depends on this:
 - But HARD-REJECT celebrity, sports, foreign-domestic-politics, unrelated-sector, novelty, or wholly-unrelated news. NEVER manufacture a connection (e.g. do NOT turn a SpaceX or US-university headline into an ABC action). One irrelevant action destroys board trust.
 - Every action you return MUST have relevance >= 45. Prefer 5 genuine actions; only return fewer if you truly cannot find 5 with a real link.
 
-Rules for each action:
+Keep this FAST — return only these fields per action (the deeper analysis is generated separately on demand):
 - title: a specific executive action (e.g. "Activate FX hedge top-up on overseas-buyer book"), NOT a generic phrase
 - portfolio: exactly one of real-estate | retail | hospitality | education | facilities | cross-portfolio
 - priority: critical | high | medium — based on how severely and directly the signal hits ABC
 - dueInDays: 3 for critical, 14 for high, 30 for medium (adjust slightly if warranted)
 - impactAedM: estimated AED millions at stake, realistic (typically 50-700)
 - aiConfidence: 0-100
-- owner: the ABC executive or team this should be assigned to / escalated to (e.g. "Group CFO", "FM Operations Head", "Group Risk Head / CRO", "CDO")
 - rationale: ONE concise ABC-specific sentence linking the signal to the action
-- whyItMatters: 2-3 sentences a board would read — the business mechanism and what's at stake for ABC specifically
-- steps: an array of 2-4 short, concrete first steps (each a phrase, e.g. "Brief CFO on hedge gap")
-- portfolioImpacts: an array of 1-3 affected portfolios, each { portfolio: one of real-estate|retail|hospitality|education|facilities, level: high|medium|low, note: a short phrase on how it hits that portfolio }
-- ifActed: 1-2 sentences on the likely outcome IF ABC takes this action now (include a rough residual/avoided figure if sensible)
-- ifIgnored: 1-2 sentences on the likely outcome IF ABC does nothing
 - signalHeadline: the driving news headline, VERBATIM from the input
 - signalSource: the source name of that headline, VERBATIM from the input
 - relevance: 0-100, how directly the driving signal affects ABC (>80 direct, 55-80 sector)
@@ -153,13 +151,17 @@ export async function POST(req: NextRequest) {
     const items: Array<{ headline: string; source: string; url?: string }> = Array.isArray(body.items) ? body.items.slice(0, 18) : []
     if (items.length === 0) return NextResponse.json({ source: 'empty', actions: [] })
 
+    // Serve from the in-memory cache when fresh — repeat loads are instant.
+    if (_cache && Date.now() - _cache.ts < CACHE_MS && _cache.actions.length > 0) {
+      return NextResponse.json({ source: 'ai', actions: _cache.actions, cached: true })
+    }
+
     const list = items.map((it, i) => `${i + 1}. SOURCE "${it.source}": ${it.headline}`).join('\n')
     const userPrompt = `Live external news signals for ABC Holdings:\n\n${list}\n\nReturn the JSON array of up to 5 ABC priority response actions, most urgent first.`
 
     const message = await anthropic.messages.create({
       model: CLAUDE_MODEL,
-      // Headroom for the full rich JSON of 5 actions.
-      max_tokens: 10000,
+      max_tokens: 3000,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: userPrompt }],
     })
@@ -179,6 +181,7 @@ export async function POST(req: NextRequest) {
       .slice(0, 5)
 
     if (actions.length === 0) throw new Error('no actions')
+    _cache = { ts: Date.now(), actions }
     return NextResponse.json({ source: 'ai', actions })
   } catch {
     // Panel falls back to its curated action list when this returns no actions.

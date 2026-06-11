@@ -504,6 +504,9 @@ function DynamicActionRow({ action, rank, onClick }: { action: DecisionAction; r
 // ─── Rich detail panel for an AI-generated action (board-confidence view) ──────
 
 function AIActionDetailPanel({ action, onClose }: { action: DecisionAction | null; onClose: () => void }) {
+  const [detail, setDetail] = React.useState<DecisionAction | null>(null)
+  const [loadingDetail, setLoadingDetail] = React.useState(false)
+
   React.useEffect(() => {
     if (!action) return
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -511,7 +514,41 @@ function AIActionDetailPanel({ action, onClose }: { action: DecisionAction | nul
     return () => window.removeEventListener('keydown', onKey)
   }, [action, onClose])
 
+  // Generate the deep analysis on open (rich fields aren't in the fast list).
+  React.useEffect(() => {
+    if (!action) { setDetail(null); return }
+    // Curated actions / already-rich actions: no fetch needed.
+    if (action.whyItMatters || action.owner || (action.portfolioImpacts && action.portfolioImpacts.length)) {
+      setDetail(action)
+      return
+    }
+    let alive = true
+    setDetail(null)
+    setLoadingDetail(true)
+    fetch('/api/decision-actions/detail', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: {
+          title: action.title,
+          portfolio: action.portfolio,
+          impactAedM: action.impactAedM,
+          dueInDays: action.dueInDays,
+          priority: action.priority,
+          signalHeadline: action.signalHeadline,
+          signalSource: action.signalSource,
+        },
+      }),
+    })
+      .then((r) => r.json())
+      .then((d) => { if (alive && d && d.detail) setDetail({ ...action, ...d.detail }) })
+      .catch(() => {})
+      .finally(() => { if (alive) setLoadingDetail(false) })
+    return () => { alive = false }
+  }, [action])
+
   if (!action) return null
+  const a = detail ?? action
   const color = PRIORITY_COLOR[action.priority]
   const impactPercent = ((action.impactAedM / 10000) * 100).toFixed(1)
 
@@ -555,13 +592,21 @@ function AIActionDetailPanel({ action, onClose }: { action: DecisionAction | nul
             <DetailStat label="AI confidence" value={`${action.aiConfidence}%`} />
           </div>
 
+          {/* Generating the deep analysis (rich fields load on open) */}
+          {loadingDetail && !detail && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', background: 'var(--accent-glow)', border: '1px solid var(--border-accent)', borderRadius: 8 }}>
+              <Brain size={14} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent-primary)' }}>Generating the full analysis…</span>
+            </div>
+          )}
+
           {/* Assign / escalate to */}
-          {action.owner && (
+          {a.owner && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 8 }}>
               <User size={14} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>Assign / escalate to</div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{action.owner}</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{a.owner}</div>
               </div>
               <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-primary)', border: '1px solid var(--border-accent)', borderRadius: 6, padding: '4px 10px', whiteSpace: 'nowrap' }}>
                 Escalate →
@@ -588,19 +633,19 @@ function AIActionDetailPanel({ action, onClose }: { action: DecisionAction | nul
           </DetailSection>
 
           {/* Why it matters */}
-          {(action.whyItMatters || action.rationale) && (
+          {(a.whyItMatters || a.rationale) && (
             <DetailSection title="Why this matters">
               <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
-                {action.whyItMatters || action.rationale}
+                {a.whyItMatters || a.rationale}
               </p>
             </DetailSection>
           )}
 
           {/* Portfolio impact */}
-          {action.portfolioImpacts && action.portfolioImpacts.length > 0 && (
+          {a.portfolioImpacts && a.portfolioImpacts.length > 0 && (
             <DetailSection title="Portfolio impact">
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {action.portfolioImpacts.map((p, i) => {
+                {a.portfolioImpacts.map((p, i) => {
                   const lc = p.level === 'high' ? 'var(--risk-high)' : p.level === 'medium' ? 'var(--risk-medium)' : 'var(--risk-low)'
                   return (
                     <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '8px 10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 6 }}>
@@ -615,19 +660,19 @@ function AIActionDetailPanel({ action, onClose }: { action: DecisionAction | nul
           )}
 
           {/* Consequence comparison */}
-          {(action.ifActed || action.ifIgnored) && (
+          {(a.ifActed || a.ifIgnored) && (
             <DetailSection title="Consequence comparison">
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {action.ifActed && (
+                {a.ifActed && (
                   <div style={{ padding: '10px 12px', borderRadius: 8, background: 'rgba(6,118,71,0.07)', border: '1px solid rgba(6,118,71,0.28)' }}>
                     <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', color: '#067647', marginBottom: 3 }}>If action taken</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.55 }}>{action.ifActed}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.55 }}>{a.ifActed}</div>
                   </div>
                 )}
-                {action.ifIgnored && (
+                {a.ifIgnored && (
                   <div style={{ padding: '10px 12px', borderRadius: 8, background: 'rgba(180,35,24,0.07)', border: '1px solid rgba(180,35,24,0.28)' }}>
                     <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', color: '#B42318', marginBottom: 3 }}>If ignored</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.55 }}>{action.ifIgnored}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.55 }}>{a.ifIgnored}</div>
                   </div>
                 )}
               </div>
@@ -635,10 +680,10 @@ function AIActionDetailPanel({ action, onClose }: { action: DecisionAction | nul
           )}
 
           {/* Recommended steps */}
-          {action.steps && action.steps.length > 0 && (
+          {a.steps && a.steps.length > 0 && (
             <DetailSection title="Recommended first steps">
               <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-                {action.steps.map((s, i) => (
+                {(a.steps ?? []).map((s, i) => (
                   <div key={i} style={{ display: 'flex', gap: 8, fontSize: 12.5, color: 'var(--text-primary)', lineHeight: 1.5 }}>
                     <span style={{ color: 'var(--accent-primary)', fontWeight: 700, flexShrink: 0 }}>{i + 1}.</span>
                     <span>{s}</span>
