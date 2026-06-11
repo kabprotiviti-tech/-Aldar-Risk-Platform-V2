@@ -45,11 +45,11 @@ interface Msg {
 }
 
 const SUGGESTIONS = [
+  "What's in the news that affects ABC?",
+  'How would rising rates hit our exposure?',
   'Show me R-008',
-  'Risks for ABC Investment',
-  'Where does R-008 exposure come from',
+  'What should the board worry about this quarter?',
   'KRI-12 latest status',
-  'GA-FIN-01 appetite',
   'Top 5 risks',
 ]
 
@@ -60,7 +60,13 @@ const WELCOME_MSG: Msg = {
   id: 'welcome',
   who: 'memory',
   text:
-    "Hi — I'm Risk Memory. Ask me about any R-NNN / DRAFT-NNN / KRI-NN / GA-* appetite, or filter risks by subsidiary (\"ABC Investment\"). I look it up — I don't generate.",
+    "Hi — I'm your ABC Risk Assistant. Ask me anything: a specific risk (R-007), a KRI, your appetite, or open questions like \"what in the news affects our Yas hospitality exposure?\". I read your live register and the external feed, then answer in your context. Exact IDs are looked up instantly and traced to source.",
+}
+
+// Exact entity references get the instant, fully-sourced deterministic lookup;
+// everything else goes to the AI assistant (grounded in the register + signals).
+function isExactLookup(t: string): boolean {
+  return /\b(R-\d{1,4}|DRAFT-\d{1,4}|KRI-\d{1,4}|GA-[A-Z]{2,4}-\d{1,3})\b/i.test(t)
 }
 
 export function RiskMemoryChat() {
@@ -426,13 +432,39 @@ export function RiskMemoryChat() {
     }
   }
 
-  function send(q?: string) {
+  const [thinking, setThinking] = useState(false)
+
+  async function send(q?: string) {
     const text = (q ?? input).trim()
-    if (!text) return
+    if (!text || thinking) return
     const userMsg: Msg = { id: uid(), who: 'you', text }
-    const memMsg = answer(text)
-    setMsgs((m) => [...m, userMsg, memMsg])
     setInput('')
+
+    // Fast path: exact entity references → instant, fully-sourced lookup.
+    if (isExactLookup(text)) {
+      setMsgs((m) => [...m, userMsg, answer(text)])
+      return
+    }
+
+    // AI path: natural-language questions → grounded assistant.
+    const priorHistory = msgs.slice(-6).map((m) => ({ who: m.who, text: m.text }))
+    const thinkingId = uid()
+    setMsgs((m) => [...m, userMsg, { id: thinkingId, who: 'memory', text: '…' }])
+    setThinking(true)
+    try {
+      const res = await fetch('/api/risk-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, history: priorHistory }),
+      })
+      const data = await res.json()
+      const reply = (data && typeof data.reply === 'string' && data.reply) || 'I could not find that — try an exact ID like R-008.'
+      setMsgs((m) => m.map((mm) => (mm.id === thinkingId ? { ...mm, text: reply } : mm)))
+    } catch {
+      setMsgs((m) => m.map((mm) => (mm.id === thinkingId ? { ...mm, text: 'Assistant unavailable — try an exact ID like R-008.' } : mm)))
+    } finally {
+      setThinking(false)
+    }
   }
 
   const fabZ = 9050
@@ -535,7 +567,7 @@ export function RiskMemoryChat() {
                 ABC Risk Assistant
               </div>
               <div style={{ fontSize: 10, color: 'var(--text-tertiary)', letterSpacing: 0.3 }}>
-                Deterministic lookup · every answer traces to its source
+                AI assistant · grounded in your register + live external signals
               </div>
             </div>
             <button
@@ -691,7 +723,7 @@ export function RiskMemoryChat() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask about R-NNN, KRI-NN, GA-* …"
+                placeholder="Ask anything — a risk, a KRI, or what's in the news…"
                 style={{
                   flex: 1,
                   background: 'var(--bg-primary)',
