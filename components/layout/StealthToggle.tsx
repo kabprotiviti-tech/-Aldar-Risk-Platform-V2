@@ -1,47 +1,40 @@
 'use client'
 
 /**
- * StealthToggle
- * -------------
- * Tiny, nearly-invisible dot in the bottom-right corner. Clicking it toggles
- * "client anonymisation mode" — every occurrence of "ABC" / "ABC Holdings"
- * in the DOM is swapped live for a neutral alias ("ABC" / "ABC Holdings").
+ * StealthToggle — client-name switch (ABC ↔ Aldar)
+ * ------------------------------------------------
+ * Small dot in the bottom-right corner. The product ships showing the neutral
+ * demo client "ABC Holdings"; clicking the dot reveals the REAL client name
+ * "Aldar" live everywhere on screen (and back again). Persisted in
+ * localStorage (`client-stealth-mode`) so the choice carries across pages —
+ * including from the login screen — and survives reloads.
  *
  * Implementation: one MutationObserver walks text nodes + a handful of common
- * attributes (title, placeholder, aria-label, alt). State persists in
- * localStorage under `client-stealth-mode`.
+ * attributes (title, placeholder, aria-label, alt) and rewrites the brand
+ * strings in place. Toggling back to ABC reloads so the DOM rebuilds cleanly.
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 const STORAGE_KEY = 'client-stealth-mode'
 
-// Ordered longest-first so "ABC Holdings" matches before "ABC".
-// The URL rule MUST run before the generic `aldar` rule, otherwise
-// "https://aldar.com/..." would become "https://abc.com/..." (a real,
-// unrelated company), leaking what we tried to anonymise. Replace any
-// URL containing aldar.com (or sub-domain) with a neutral marker.
+// Client-name switch. The product ships with the neutral demo client "ABC
+// Holdings". Toggling ON reveals the REAL client name "Aldar" live across the
+// whole DOM. Ordered longest-first so "ABC Holdings" is rewritten before the
+// bare "ABC" token (otherwise "ABC Holdings" → "Aldar Holdings").
 const REPLACEMENTS: Array<[RegExp, string]> = [
-  // 1. URL redaction (covers href + cdn URLs in src strings)
-  [/https?:\/\/[^\s"'<>)]*aldar[^\s"'<>)]*/gi, '#source-redacted-anonymisation-mode'],
-  // 2. Brand strings — longest-first
-  [/ABC Holdings/g, 'ABC Holdings PJSC'],
-  [/ABC Holdings/g, 'ABC Holdings'],
-  [/ABC PROPERTIES/g, 'ABC HOLDINGS'],
-  [/ABC/g, 'ABC'],
-  [/ABC/g, 'ABC'],
-  [/aldar/g, 'abc'],
+  [/ABC Holdings/g, 'Aldar Properties'],
+  [/ABC HOLDINGS/g, 'ALDAR PROPERTIES'],
+  [/\bABC\b/g, 'Aldar'],
 ]
 
-// Note: REVERSE cannot losslessly restore redacted URLs (the original
-// path is gone). Toggling stealth OFF triggers a page reload to restore
-// the original DOM rather than relying on regex un-mangling.
+// Reverse map (Aldar → ABC). Toggling OFF also triggers a page reload so the
+// DOM is rebuilt cleanly from the React tree; this map is the best-effort
+// in-place restore before that reload lands.
 const REVERSE: Array<[RegExp, string]> = [
-  [/ABC Holdings PJSC/g, 'ABC Holdings'],
-  [/ABC Holdings/g, 'ABC Holdings'],
-  [/ABC HOLDINGS/g, 'ABC PROPERTIES'],
-  [/\bABC\b/g, 'ABC'],
-  [/\babc\b/g, 'aldar'],
+  [/Aldar Properties/g, 'ABC Holdings'],
+  [/ALDAR PROPERTIES/g, 'ABC HOLDINGS'],
+  [/\bAldar\b/g, 'ABC'],
 ]
 
 // Attributes the walker scans. `href` is included so source links in
@@ -200,7 +193,7 @@ export function StealthToggle() {
       onClick={toggle}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      aria-label={stealth ? 'Disable anonymisation' : 'Enable anonymisation'}
+      aria-label={stealth ? 'Switch client name to ABC (demo)' : 'Switch client name to Aldar (real)'}
       style={{
         // Large invisible hit area so the cursor finds it easily,
         // but the visible dot is drawn via ::before-style inline element.
@@ -227,20 +220,22 @@ export function StealthToggle() {
           display: 'block',
           marginRight: 8,
           marginBottom: 8,
-          width: hover ? 16 : 10,
-          height: hover ? 16 : 10,
+          width: hover ? 16 : 11,
+          height: hover ? 16 : 11,
           borderRadius: '50%',
+          // Visible on BOTH light and dark themes: amber when showing the real
+          // client (Aldar), neutral grey when showing the demo name (ABC).
           background: stealth
             ? hover
-              ? 'rgba(120, 220, 150, 0.95)'
-              : 'rgba(120, 200, 140, 0.55)'
+              ? 'rgba(228, 0, 43, 0.95)'
+              : 'rgba(228, 0, 43, 0.7)'
             : hover
-            ? 'rgba(255, 255, 255, 0.6)'
-            : 'rgba(255, 255, 255, 0.18)',
+            ? 'rgba(120, 120, 128, 0.85)'
+            : 'rgba(120, 120, 128, 0.45)',
           boxShadow: hover
             ? stealth
-              ? '0 0 12px rgba(120, 220, 150, 0.7)'
-              : '0 0 10px rgba(255, 255, 255, 0.35)'
+              ? '0 0 12px rgba(228, 0, 43, 0.6)'
+              : '0 0 10px rgba(120, 120, 128, 0.5)'
             : 'none',
           transition: 'all 180ms ease',
         }}
@@ -264,7 +259,7 @@ export function StealthToggle() {
             border: '1px solid rgba(255,255,255,0.1)',
           }}
         >
-          {stealth ? 'Anonymised (ABC) — click to restore' : 'Click to anonymise client name'}
+          {stealth ? 'Client: Aldar — click to show ABC' : 'Client: ABC — click to show Aldar'}
           <span style={{ opacity: 0.5, marginLeft: 8 }}>⇧⌘H</span>
         </span>
       )}

@@ -522,46 +522,53 @@ export function TopActionsPanel({ onActionClick }: { onActionClick: (action: Act
           >
             {signals.length > 0
               ? `Synced to ${signals.length} live signals${updatedAt ? ` · ${updatedAt}` : ''}`
-              : 'AI-generated · click any action for full analysis'}
+              : 'Live feed · connecting…'}
           </span>
         </div>
       </CardHeader>
 
       <CardBody>
-        {/* Live external-signal strip — the feed these actions respond to */}
-        {signals.length > 0 && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 12px',
-              marginBottom: '10px',
-              borderRadius: '8px',
-              background: 'var(--accent-glow)',
-              border: '1px solid var(--border-accent)',
-              flexWrap: 'wrap',
-            }}
-          >
-            <Radio size={13} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
-            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent-primary)', whiteSpace: 'nowrap' }}>
-              {highRelevant.length} high-relevance signal{highRelevant.length === 1 ? '' : 's'} factored
+        {/* Live external-signal strip — always shown so the panel is visibly
+            wired to the feed; fills in as signals arrive. */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 12px',
+            marginBottom: '10px',
+            borderRadius: '8px',
+            background: 'var(--accent-glow)',
+            border: '1px solid var(--border-accent)',
+            flexWrap: 'wrap',
+          }}
+        >
+          <Radio size={13} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
+          {signals.length > 0 ? (
+            <>
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent-primary)', whiteSpace: 'nowrap' }}>
+                {highRelevant.length} high-relevance signal{highRelevant.length === 1 ? '' : 's'} factored
+              </span>
+              {topSignal && (
+                <span
+                  title={topSignal.headline}
+                  style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}
+                >
+                  · Top: {topSignal.headline} ({topSignal.relevance}%)
+                </span>
+              )}
+              {updatedAt && (
+                <span style={{ fontSize: '0.64rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', marginLeft: 'auto' }}>
+                  updated {updatedAt}
+                </span>
+              )}
+            </>
+          ) : (
+            <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--accent-primary)' }}>
+              Connecting to live external signal feed…
             </span>
-            {topSignal && (
-              <span
-                title={topSignal.headline}
-                style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}
-              >
-                · Top: {topSignal.headline} ({topSignal.relevance}%)
-              </span>
-            )}
-            {updatedAt && (
-              <span style={{ fontSize: '0.64rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', marginLeft: 'auto' }}>
-                updated {updatedAt}
-              </span>
-            )}
-          </div>
-        )}
+          )}
+        </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {TOP_ACTIONS.map((action, i) => (

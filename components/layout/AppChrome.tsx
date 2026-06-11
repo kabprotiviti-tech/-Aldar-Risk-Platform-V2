@@ -72,8 +72,15 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
   const isWelcome = pathname === '/welcome'
 
   if (isLogin || isRootRedirect) {
-    // Login screen + root-redirect both run without chrome.
-    return <>{children}</>
+    // Login screen + root-redirect run without chrome — but the client-name
+    // switch (ABC ↔ Aldar) must be available here too, so it's set before
+    // entering the app and the choice persists across the session.
+    return (
+      <>
+        {children}
+        <StealthToggle />
+      </>
+    )
   }
 
   if (isWelcome) {
