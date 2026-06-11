@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { anthropic, CLAUDE_MODEL } from '@/lib/openai'
 
-// Claude classification of 10-12 headlines takes ~30s, so give the function
-// room (the default would cut it off and force the curated fallback).
-export const maxDuration = 60
+// Generating 5 RICH actions (owner, why-it-matters, portfolio impacts, both
+// consequences, steps) is a large response — give the function generous room
+// so it never gets cut off mid-generation (which surfaces as the fallback).
+export const maxDuration = 120
 export const dynamic = 'force-dynamic'
 
 export type ActionPortfolio =
@@ -157,10 +158,8 @@ export async function POST(req: NextRequest) {
 
     const message = await anthropic.messages.create({
       model: CLAUDE_MODEL,
-      // 5 rich actions (owner, why-it-matters, steps, portfolio impacts, both
-      // consequences) need real room — 2200 truncated the JSON and broke the
-      // parse, which surfaced as the "AI over capacity" fallback.
-      max_tokens: 6000,
+      // Headroom for the full rich JSON of 5 actions.
+      max_tokens: 10000,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: userPrompt }],
     })

@@ -126,10 +126,10 @@ function useDecisionActions() {
           .map((it: { headline: string; source: string; url?: string }) => ({ headline: it.headline, source: it.source, url: it.url }))
         if (items.length === 0) { if (alive) setSource('fallback'); return }
 
-        // Generate the actions from the live signals. 55s abort < the route's
-        // 60s maxDuration; the AI call itself runs ~30s.
+        // Generate the actions from the live signals. Abort just under the
+        // route's 120s maxDuration; the rich 5-action call can take ~60-90s.
         const ctrl = new AbortController()
-        const to = setTimeout(() => ctrl.abort(), 55000)
+        const to = setTimeout(() => ctrl.abort(), 115000)
         const ar = await fetch('/api/decision-actions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -746,7 +746,7 @@ export function TopActionsPanel({ onActionClick }: { onActionClick: (action: Act
                 ? 'AI-generated from live external signals'
                 : source === 'loading'
                   ? 'Reading live external signals…'
-                  : 'AI over capacity — showing reference actions'}
+                  : 'Showing reference actions'}
             </span>
           </div>
         </div>
