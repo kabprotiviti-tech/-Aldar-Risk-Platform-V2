@@ -20,6 +20,12 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { RiskDef } from '@/lib/engine/types'
 import { recordAuditEventDirect } from '@/lib/context/AuditTrailContext'
+import {
+  type RiskLifecycleState,
+  type LifecycleDecision,
+  type ApprovalRecord,
+  nextState as lifecycleNext,
+} from '@/lib/lifecycle/riskLifecycle'
 
 const STORAGE_KEY = 'aldar-risk-drafts-v1'
 
@@ -41,6 +47,20 @@ export interface RiskDraft extends RiskDef {
   updatedAt: string
   /** Display author (free text — no real RBAC yet, comes in Patch F). */
   createdBy: string
+  // ── Phase 0: governance lifecycle (additive) ──────────────────────────
+  /** Governance state. Defaults to 'draft' for new risks. */
+  lifecycle?: RiskLifecycleState
+  /** Structured owner (user id from the ERM directory). */
+  ownerUserId?: string
+  /** Append-only trail of lifecycle decisions (submit/approve/reject/signoff). */
+  approvals?: ApprovalRecord[]
+}
+
+/** A person performing a lifecycle decision. */
+export interface Actor {
+  userId: string | null
+  name: string
+  role: string
 }
 
 interface RiskDraftContextValue {
@@ -50,6 +70,8 @@ interface RiskDraftContextValue {
   removeDraft: (id: string) => void
   /** Generate the next available DRAFT-NNN id given existing drafts. */
   nextDraftId: () => string
+  /** Phase 0: advance a draft through the governance gate. Returns updated draft or null. */
+  decide: (id: string, decision: LifecycleDecision, actor: Actor, note?: string) => RiskDraft | null
 }
 
 const Ctx = createContext<RiskDraftContextValue | null>(null)
@@ -70,6 +92,9 @@ export function RiskDraftProvider({ children }: { children: React.ReactNode }) {
           const migrated = parsed.map((d) => ({
             ...d,
             status: (d.status as RiskStatus) || 'open',
+            // Drafts created before the governance gate existed are treated
+            // as already "of record" so they never vanish from the register.
+            lifecycle: (d.lifecycle as RiskLifecycleState) || 'published',
           }))
           setDrafts(migrated)
         }
@@ -109,6 +134,9 @@ export function RiskDraftProvider({ children }: { children: React.ReactNode }) {
       const full: RiskDraft = {
         ...draft,
         status: draft.status || 'open',
+        // New risks enter the governance gate as a Draft.
+        lifecycle: draft.lifecycle || 'draft',
+        approvals: draft.approvals || [],
         createdAt: now,
         updatedAt: now,
         createdBy: author,
@@ -160,6 +188,54 @@ export function RiskDraftProvider({ children }: { children: React.ReactNode }) {
     [],
   )
 
+  const decide = useCallback<RiskDraftContextValue['decide']>(
+    (id, decision, actor, note) => {
+      let result: RiskDraft | null = null
+      setDrafts((prev) =>
+        prev.map((d) => {
+          if (d.id !== id) return d
+          const from = (d.lifecycle as RiskLifecycleState) || 'draft'
+          const to = lifecycleNext(from, decision)
+          if (!to) return d // illegal transition — no-op
+          const record: ApprovalRecord = {
+            decision,
+            from,
+            to,
+            byUserId: actor.userId,
+            byName: actor.name,
+            byRole: actor.role,
+            at: new Date().toISOString(),
+            note,
+          }
+          result = {
+            ...d,
+            lifecycle: to,
+            approvals: [...(d.approvals || []), record],
+            updatedAt: record.at,
+          }
+          return result
+        }),
+      )
+      if (result) {
+        const r = result as RiskDraft
+        const verb =
+          decision === 'submit' ? 'submitted for review'
+          : decision === 'approve' ? 'approved'
+          : decision === 'reject' ? 'sent back'
+          : 'signed off & published'
+        recordAuditEventDirect({
+          category: 'risk',
+          action: 'status_change',
+          actor: actor.name,
+          targetId: id,
+          summary: `Risk ${id} ${verb} by ${actor.name} (${actor.role}).${note ? ` Note: ${note}` : ''}`,
+        })
+      }
+      return result
+    },
+    [],
+  )
+
   const removeDraft = useCallback<RiskDraftContextValue['removeDraft']>((id) => {
     setDrafts((prev) => prev.filter((d) => d.id !== id))
     recordAuditEventDirect({
@@ -172,8 +248,8 @@ export function RiskDraftProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const value = useMemo<RiskDraftContextValue>(
-    () => ({ drafts, addDraft, updateDraft, removeDraft, nextDraftId }),
-    [drafts, addDraft, updateDraft, removeDraft, nextDraftId],
+    () => ({ drafts, addDraft, updateDraft, removeDraft, nextDraftId, decide }),
+    [drafts, addDraft, updateDraft, removeDraft, nextDraftId, decide],
   )
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
