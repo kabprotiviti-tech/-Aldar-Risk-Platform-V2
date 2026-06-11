@@ -54,6 +54,8 @@ import { KRI_DEFINITIONS } from '@/lib/data/kri-definitions'
 import { computeKRIStatus, STATUS_META } from '@/lib/data/kri-status'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { ExposureBreakdown } from '@/components/ExposureBreakdown'
+import { ErmAnnualPlan } from '@/components/ErmAnnualPlan'
+import { ermPlanSummary } from '@/lib/data/ermAnnualPlan'
 import { ExternalIntelligenceFeed } from '@/components/home/ExternalIntelligenceFeed'
 import { TrustFooter } from '@/components/provenance/TrustFooter'
 import { BASELINE_RISK_POSTURE } from '@/lib/data/baselineRiskPosture'
@@ -144,6 +146,7 @@ function MyDashboardContent() {
   const headlineCriticalHigh = BASELINE_RISK_POSTURE.totalCriticalAndHighRisks
   const criticalCount = BASELINE_RISK_POSTURE.criticalRiskCount
   const highCount = BASELINE_RISK_POSTURE.highRiskCount
+  const ermSummary = ermPlanSummary()
   const headlineRiskScore = BASELINE_RISK_POSTURE.overallRiskScore
 
   // ── "What needs your attention" — the single focal list (Batch 5).
@@ -340,12 +343,8 @@ function MyDashboardContent() {
             subTone={myActionsOverdue > 0 ? 'danger' : 'good'}
             href="/risk-register"
           />
-          {/* ERM Annual Plan retained per earlier request — compact 3-bucket */}
-          <Link
-            href="/portfolio-tower"
-            style={{ textDecoration: 'none' }}
-            title="ERM annual plan — drill into Portfolio Tower"
-          >
+          {/* ERM Annual Plan — summary; links down to the full plan-vs-actual calendar */}
+          <a href="#erm-plan" style={{ textDecoration: 'none' }} title="ERM annual plan — view the full Jan–Dec calendar">
             <div
               style={{
                 background: 'var(--bg-secondary)',
@@ -365,20 +364,20 @@ function MyDashboardContent() {
               </span>
               <div style={{ display: 'flex', gap: 14, alignItems: 'baseline' }}>
                 <div>
-                  <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>8</div>
-                  <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>Planned</div>
+                  <div style={{ fontSize: 20, fontWeight: 700, color: '#067647', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{ermSummary.completed}</div>
+                  <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>Completed</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 20, fontWeight: 700, color: '#B42318', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>2</div>
+                  <div style={{ fontSize: 20, fontWeight: 700, color: '#B42318', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{ermSummary.overdue}</div>
                   <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>Overdue</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 20, fontWeight: 700, color: '#067647', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>14</div>
-                  <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>Completed</div>
+                  <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{ermSummary.planned}</div>
+                  <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>Upcoming</div>
                 </div>
               </div>
             </div>
-          </Link>
+          </a>
         </div>
       </header>
 
@@ -404,6 +403,11 @@ function MyDashboardContent() {
           Detail &amp; evidence
         </span>
         <span style={{ flex: 1, height: 1, background: 'var(--border-color)' }} />
+      </div>
+
+      {/* ── ERM Annual Plan — Jan→Dec plan vs actual calendar ─────────── */}
+      <div id="erm-plan" style={{ scrollMarginTop: 80 }}>
+        <ErmAnnualPlan />
       </div>
 
       {/* ── 2-up: Drafts + Actions ────────────────────────────────────── */}
