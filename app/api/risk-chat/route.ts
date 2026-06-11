@@ -86,7 +86,8 @@ export async function POST(req: NextRequest) {
 
     const reply = msg.content[0]?.type === 'text' ? msg.content[0].text.trim() : ''
     return NextResponse.json({ reply: reply || 'I could not find that. Try a risk ID (R-007), a KRI, or ask about an external development.' })
-  } catch {
+  } catch (e) {
+    console.error('[risk-chat] error:', e instanceof Error ? e.message : e)
     return NextResponse.json({ reply: 'The assistant is briefly unavailable — please try again, or look up an exact ID (e.g. R-008).' })
   }
 }
