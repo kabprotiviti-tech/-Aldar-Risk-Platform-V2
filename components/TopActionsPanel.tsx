@@ -538,7 +538,7 @@ export function TopActionsPanel({ onActionClick }: { onActionClick: (action: Act
           >
             <Brain size={15} style={{ color: 'var(--risk-critical)' }} />
           </div>
-          <CardTitle>Decision Intelligence — Priority Actions</CardTitle>
+          <CardTitle>Priority Actions</CardTitle>
         </div>
 
         {/* Header metrics */}
@@ -560,7 +560,7 @@ export function TopActionsPanel({ onActionClick }: { onActionClick: (action: Act
               border: '1px solid var(--border-accent)',
             }}
           >
-            AI-derived · click any action for full analysis
+            Click any action for the full analysis
           </span>
         </div>
       </CardHeader>
@@ -568,7 +568,7 @@ export function TopActionsPanel({ onActionClick }: { onActionClick: (action: Act
       <CardBody>
         {/* GROUNDED actions — real exposure, register-linked, clickable detail */}
         <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>
-          Tracked risks · sourced from register
+          Tracked risks — from your register
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {TOP_ACTIONS.map((action, i) => (
@@ -597,7 +597,7 @@ function ExternalIntelRead() {
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
         <Radio size={13} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
         <span style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-primary)' }}>
-          External intelligence read
+          Emerging from external signals
         </span>
         <span
           style={{
@@ -606,7 +606,7 @@ function ExternalIntelRead() {
             borderRadius: '4px', padding: '2px 7px',
           }}
         >
-          AI estimate · validate before acting
+          Preliminary · to be validated
         </span>
         {live && updatedAt && (
           <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', marginLeft: 'auto' }}>updated {updatedAt}</span>
@@ -615,7 +615,7 @@ function ExternalIntelRead() {
 
       {source === 'loading' ? (
         <div style={{ fontSize: '0.72rem', color: 'var(--accent-primary)', fontWeight: 600, padding: '6px 2px' }}>
-          Scanning the live external feed for emerging impacts… (~30s)
+          Reviewing external signals…
         </div>
       ) : live ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -647,7 +647,7 @@ function ExternalIntelRead() {
                   </div>
                   {a.signalHeadline && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '4px', minWidth: 0 }}>
-                      <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', flexShrink: 0 }}>from signal:</span>
+                      <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', flexShrink: 0 }}>Source:</span>
                       <span title={a.signalHeadline} style={{ fontSize: '0.62rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
                         {a.signalHeadline} ({a.relevance}%)
                       </span>
@@ -664,12 +664,12 @@ function ExternalIntelRead() {
             )
           })}
           <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontStyle: 'italic', marginTop: '2px' }}>
-            AI read of the live news feed. Figures are first-pass estimates — confirm against the register before acting.
+            Drawn from external news. Figures are preliminary estimates — confirm against the register before acting.
           </div>
         </div>
       ) : (
         <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-          Live external feed unavailable — showing tracked register risks only.
+          External signals unavailable — showing tracked register risks only.
         </div>
       )}
     </div>

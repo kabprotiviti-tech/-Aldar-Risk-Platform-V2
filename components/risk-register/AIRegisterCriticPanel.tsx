@@ -109,7 +109,7 @@ export function AIRegisterCriticPanel() {
                 gap: 8,
               }}
             >
-              Governed AI · Register Critic
+              Register Review
               <span
                 style={{
                   fontSize: 9,
@@ -122,12 +122,12 @@ export function AIRegisterCriticPanel() {
                   letterSpacing: 0.4,
                 }}
               >
-                Human-in-the-loop
+                Your sign-off required
               </span>
             </div>
             <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>
-              The single AI thread for the register. Every suggestion is a Hypothesis
-              you Accept or Dismiss — nothing auto-promotes, every decision is yours.
+              A second-line review of the register. Each suggestion awaits your
+              decision — nothing is added automatically.
             </div>
           </div>
         </div>
@@ -153,7 +153,7 @@ export function AIRegisterCriticPanel() {
             }}
           >
             {loading ? <Loader2 size={12} className="animate-spin" /> : <ShieldCheck size={12} />}
-            {loading ? 'Analysing…' : data ? 'Re-run' : 'Run Critic'}
+            {loading ? 'Reviewing…' : data ? 'Re-run review' : 'Run review'}
           </button>
           {data && (
             <button
@@ -389,7 +389,7 @@ function FindingCard({
             ? 'Accepted — queued for register'
             : decision === 'dismissed'
               ? 'Dismissed by reviewer'
-              : 'AI Hypothesis · pending review'}
+              : 'Suggested — for your review'}
         </span>
       </div>
       <div style={{ fontSize: 11, color: 'var(--text-primary)', lineHeight: 1.5 }}>

@@ -65,7 +65,7 @@ export function StoryThread() {
         }}
       >
         <Activity size={13} style={{ color: 'var(--accent-primary)' }} />
-        Story thread
+        At a glance
       </span>
 
       <Chip href="/my-dashboard" label="Score" value={`${B.overallRiskScore}`} delta={`${scoreDelta > 0 ? '+' : ''}${scoreDelta}`} danger={scoreDelta > 0} />

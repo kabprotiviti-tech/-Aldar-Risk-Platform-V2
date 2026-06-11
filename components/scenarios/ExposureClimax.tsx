@@ -100,7 +100,7 @@ export function ExposureClimax() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
         <div>
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--accent-primary)' }}>
-            The number that matters
+            Group exposure under stress
           </div>
           <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4, maxWidth: 560, lineHeight: 1.5 }}>
             {current.caption}
