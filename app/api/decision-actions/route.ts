@@ -114,7 +114,7 @@ const PRIORITY_RANK = { critical: 0, high: 1, medium: 2 }
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const items: Array<{ headline: string; source: string }> = Array.isArray(body.items) ? body.items.slice(0, 10) : []
+    const items: Array<{ headline: string; source: string }> = Array.isArray(body.items) ? body.items.slice(0, 18) : []
     if (items.length === 0) return NextResponse.json({ source: 'empty', actions: [] })
 
     const list = items.map((it, i) => `${i + 1}. SOURCE "${it.source}": ${it.headline}`).join('\n')

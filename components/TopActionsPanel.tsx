@@ -110,7 +110,7 @@ function useDecisionActions() {
         const nr = await fetch('/api/news', { cache: 'no-store' })
         if (!nr.ok) { if (alive) setSource('fallback'); return }
         const nd = await nr.json()
-        const items: Array<{ headline: string; source: string }> = (nd.items || []).slice(0, 10)
+        const items: Array<{ headline: string; source: string }> = (nd.items || []).slice(0, 18)
         if (items.length === 0) { if (alive) setSource('fallback'); return }
 
         // Generate the actions from the live signals. 55s abort < the route's
