@@ -513,27 +513,12 @@ function HeaderMetric({ label, value, color }: { label: string; value: string; c
 // ─── Main export ──────────────────────────────────────────────────────────────
 
 export function TopActionsPanel({ onActionClick }: { onActionClick: (action: Action) => void }) {
-  // Actions are GENERATED from the live external signal feed; until they land
-  // (or if the AI call fails) we show the curated TOP_ACTIONS.
-  const { actions: aiActions, source, updatedAt } = useDecisionActions()
-  const live = source === 'ai' && aiActions.length > 0
-
-  const criticalCount = live
-    ? aiActions.filter((a) => a.priority === 'critical').length
-    : TOP_ACTIONS.filter((a) => a.priority === 'critical').length
-  const highCount = live
-    ? aiActions.filter((a) => a.priority === 'high').length
-    : TOP_ACTIONS.filter((a) => a.priority === 'high').length
-  const totalImpact = live
-    ? aiActions.reduce((sum, a) => sum + a.impactAedM, 0)
-    : TOP_ACTIONS.reduce((sum, a) => sum + a.impactValue, 0)
-  const topAction = live ? aiActions[0] : null
-
-  const chip = live
-    ? `From ${aiActions.length} live signals${updatedAt ? ` · ${updatedAt}` : ''}`
-    : source === 'loading'
-      ? 'Live feed · generating…'
-      : 'Curated · live feed unavailable'
+  // Grounded actions: real exposure + register linkage (R-007 etc.) + the rich,
+  // CLICKABLE detail panel. The live-signal layer (re-rank + emerging-risk cards)
+  // is built on top of this — never by discarding the sourced data.
+  const criticalCount = TOP_ACTIONS.filter((a) => a.priority === 'critical').length
+  const highCount = TOP_ACTIONS.filter((a) => a.priority === 'high').length
+  const totalImpact = TOP_ACTIONS.reduce((sum, a) => sum + a.impactValue, 0)
 
   return (
     <Card glow>
@@ -558,11 +543,7 @@ export function TopActionsPanel({ onActionClick }: { onActionClick: (action: Act
 
         {/* Header metrics */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <HeaderMetric
-            label="Critical"
-            value={String(criticalCount)}
-            color="var(--risk-critical)"
-          />
+          <HeaderMetric label="Critical" value={String(criticalCount)} color="var(--risk-critical)" />
           <HeaderMetric label="High" value={String(highCount)} color="var(--risk-high)" />
           <HeaderMetric
             label="Total Exposure"
@@ -579,63 +560,16 @@ export function TopActionsPanel({ onActionClick }: { onActionClick: (action: Act
               border: '1px solid var(--border-accent)',
             }}
           >
-            {chip}
+            AI-derived · click any action for full analysis
           </span>
         </div>
       </CardHeader>
 
       <CardBody>
-        {/* Live external-signal strip — shows where the actions came from */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '8px 12px',
-            marginBottom: '10px',
-            borderRadius: '8px',
-            background: 'var(--accent-glow)',
-            border: '1px solid var(--border-accent)',
-            flexWrap: 'wrap',
-          }}
-        >
-          <Radio size={13} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
-          {live ? (
-            <>
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent-primary)', whiteSpace: 'nowrap' }}>
-                Actions generated from live external signals
-              </span>
-              {topAction && (
-                <span
-                  title={topAction.signalHeadline}
-                  style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}
-                >
-                  · Top driver: {topAction.signalHeadline} ({topAction.relevance}%)
-                </span>
-              )}
-              {updatedAt && (
-                <span style={{ fontSize: '0.64rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', marginLeft: 'auto' }}>
-                  updated {updatedAt}
-                </span>
-              )}
-            </>
-          ) : source === 'loading' ? (
-            <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--accent-primary)' }}>
-              Generating priority actions from live signals… (~30s)
-            </span>
-          ) : (
-            <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-              Showing curated actions — live signal feed unavailable
-            </span>
-          )}
-        </div>
-
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {live
-            ? aiActions.map((action, i) => <DynamicActionRow key={i} action={action} rank={i + 1} />)
-            : TOP_ACTIONS.map((action, i) => (
-                <ActionRow key={action.id} action={action} rank={i + 1} onClick={onActionClick} />
-              ))}
+          {TOP_ACTIONS.map((action, i) => (
+            <ActionRow key={action.id} action={action} rank={i + 1} onClick={onActionClick} />
+          ))}
         </div>
       </CardBody>
     </Card>
