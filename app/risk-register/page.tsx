@@ -26,6 +26,11 @@ import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { RiskDetailDrawer } from '@/components/risk-register/RiskDetailDrawer'
 import { RiskFormModal } from '@/components/risk-register/RiskFormModal'
+import { isFlagOn } from '@/lib/featureFlags'
+import { LifecycleBadge } from '@/components/lifecycle/LifecycleBadge'
+import { DraftLifecycleDrawer } from '@/components/lifecycle/DraftLifecycleDrawer'
+import type { RiskLifecycleState } from '@/lib/lifecycle/riskLifecycle'
+import { ShieldCheck } from 'lucide-react'
 import { RiskHeatmap } from '@/components/risk-register/RiskHeatmap'
 import { AIRegisterCriticPanel } from '@/components/risk-register/AIRegisterCriticPanel'
 import type { RiskState, Rating } from '@/lib/engine/types'
@@ -84,6 +89,8 @@ function RiskRegisterContent() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [selected, setSelected] = useState<RiskState | null>(null)
+  const [lifecycleDraft, setLifecycleDraft] = useState<RiskDraft | null>(null)
+  const lifecycleOn = isFlagOn('erm_lifecycle')
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<RiskDraft | null>(null)
   const { persona, session } = usePersona()
@@ -452,6 +459,11 @@ function RiskRegisterContent() {
                   <Td>
                     {row.draft.name}{' '}
                     <DraftBadge />
+                    {lifecycleOn && (
+                      <span style={{ marginLeft: 6, display: 'inline-block', verticalAlign: 'middle' }}>
+                        <LifecycleBadge state={(row.draft.lifecycle as RiskLifecycleState) || 'draft'} />
+                      </span>
+                    )}
                   </Td>
                   <Td>{row.draft.category}</Td>
                   <Td muted>{row.draft.owner}</Td>
@@ -468,6 +480,18 @@ function RiskRegisterContent() {
                   </Td>
                   <Td>
                     <div style={{ display: 'inline-flex', gap: 6 }}>
+                      {lifecycleOn && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setLifecycleDraft(row.draft)
+                          }}
+                          title="Governance lifecycle — submit / approve / sign-off"
+                          style={{ ...iconButtonStyle, color: 'var(--accent-primary)' }}
+                        >
+                          <ShieldCheck size={12} />
+                        </button>
+                      )}
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
@@ -518,6 +542,14 @@ function RiskRegisterContent() {
 
       {/* Slide-in detail drawer */}
       <RiskDetailDrawer risk={selected} onClose={() => setSelected(null)} />
+
+      {/* Phase 0 — governance lifecycle drawer for drafts */}
+      {lifecycleOn && (
+        <DraftLifecycleDrawer
+          draft={lifecycleDraft ? (drafts.find((d) => d.id === lifecycleDraft.id) ?? lifecycleDraft) : null}
+          onClose={() => setLifecycleDraft(null)}
+        />
+      )}
 
       {/* Add / Edit risk modal */}
       <RiskFormModal
