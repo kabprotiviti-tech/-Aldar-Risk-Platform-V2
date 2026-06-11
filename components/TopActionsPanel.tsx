@@ -671,8 +671,12 @@ export function TopActionsPanel({ onActionClick }: { onActionClick: (action: Act
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
             <CardTitle>Priority Actions</CardTitle>
-            <span style={{ fontSize: '0.62rem', color: 'var(--accent-primary)', fontWeight: 600 }}>
-              {live ? 'AI-generated from live external signals' : source === 'loading' ? 'Reading live external signals…' : 'Reference actions'}
+            <span style={{ fontSize: '0.62rem', color: live ? 'var(--accent-primary)' : '#B54708', fontWeight: 600 }}>
+              {live
+                ? 'AI-generated from live external signals'
+                : source === 'loading'
+                  ? 'Reading live external signals…'
+                  : 'AI over capacity — showing reference actions'}
             </span>
           </div>
         </div>
