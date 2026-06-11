@@ -96,6 +96,9 @@ function useActionSignals() {
 
   React.useEffect(() => {
     let alive = true
+    const stamp = () =>
+      new Date().toLocaleTimeString('en-AE', { timeZone: 'Asia/Dubai', hour: '2-digit', minute: '2-digit' })
+
     const run = async () => {
       try {
         const nr = await fetch('/api/news', { cache: 'no-store' })
@@ -104,37 +107,56 @@ function useActionSignals() {
         const items: Array<{ id: string; headline: string; source: string }> = (nd.items || []).slice(0, 12)
         if (items.length === 0) return
 
-        const map: Record<string, { confidenceScore?: number; severity?: string; impactedBusiness?: string }> = {}
+        // ── Phase 1: show the feed IMMEDIATELY (neutral relevance) so the panel
+        //   reacts within ~1s instead of waiting on the multi-second AI classify.
+        if (alive) {
+          setSignals(
+            items.map((it) => ({
+              id: it.id,
+              headline: it.headline,
+              source: it.source,
+              relevance: 35,
+              severity: 'low',
+              impactedBusiness: 'cross-portfolio',
+            })),
+          )
+          setUpdatedAt(stamp())
+        }
+
+        // ── Phase 2: enrich with Claude relevance scores when they land. A 20s
+        //   abort guards against a hung classify call.
         try {
+          const ctrl = new AbortController()
+          const to = setTimeout(() => ctrl.abort(), 20000)
           const cr = await fetch('/api/ai-classify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ items: items.map((it) => ({ id: it.id, headline: it.headline, source: it.source })) }),
+            signal: ctrl.signal,
           })
+          clearTimeout(to)
           if (cr.ok) {
             const cd = await cr.json()
+            const map: Record<string, { confidenceScore?: number; severity?: string; impactedBusiness?: string }> = {}
             for (const r of cd.results || []) map[r.id] = r.classification
+            if (alive) {
+              setSignals(
+                items
+                  .map((it) => ({
+                    id: it.id,
+                    headline: it.headline,
+                    source: it.source,
+                    relevance: map[it.id]?.confidenceScore ?? 35,
+                    severity: map[it.id]?.severity ?? 'low',
+                    impactedBusiness: map[it.id]?.impactedBusiness ?? 'cross-portfolio',
+                  }))
+                  .sort((a, b) => b.relevance - a.relevance),
+              )
+              setUpdatedAt(stamp())
+            }
           }
         } catch {
-          // classification optional — fall back to neutral relevance
-        }
-
-        const merged: ActionSignal[] = items
-          .map((it) => ({
-            id: it.id,
-            headline: it.headline,
-            source: it.source,
-            relevance: map[it.id]?.confidenceScore ?? 35,
-            severity: map[it.id]?.severity ?? 'low',
-            impactedBusiness: map[it.id]?.impactedBusiness ?? 'cross-portfolio',
-          }))
-          .sort((a, b) => b.relevance - a.relevance)
-
-        if (alive) {
-          setSignals(merged)
-          setUpdatedAt(
-            new Date().toLocaleTimeString('en-AE', { timeZone: 'Asia/Dubai', hour: '2-digit', minute: '2-digit' }),
-          )
+          // classification optional — Phase 1 signals remain shown
         }
       } catch {
         // network/feed error — panel keeps its curated actions
