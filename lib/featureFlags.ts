@@ -17,7 +17,7 @@ const DEFAULTS: Record<FeatureFlag, boolean> = {
   erm_lifecycle: true,
   erm_entities: true,
   erm_history: true,
-  erm_reporting: false,
+  erm_reporting: true,
 }
 
 export function isFlagOn(flag: FeatureFlag): boolean {
