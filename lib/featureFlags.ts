@@ -15,7 +15,7 @@ export type FeatureFlag =
 
 const DEFAULTS: Record<FeatureFlag, boolean> = {
   erm_lifecycle: true,
-  erm_entities: false,
+  erm_entities: true,
   erm_history: false,
   erm_reporting: false,
 }
