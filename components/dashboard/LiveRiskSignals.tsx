@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Globe,
@@ -704,6 +704,27 @@ export function LiveRiskSignals() {
 
   const isLive = source === 'live'
 
+  // ── Rank by relevance to ABC, not raw feed order ────────────────────────────
+  //   The AI confidenceScore is, per the classifier prompt, "how directly this
+  //   news affects ABC" (>80 direct, 50-80 sector, <50 global/indirect). So a
+  //   95%-relevant Abu Dhabi real-estate story must sit above a 5% UK-utility
+  //   item. We sort by that relevance desc, break ties by severity, then keep
+  //   recency (original feed order) as the final tiebreak. Unclassified items
+  //   get a neutral 35 so they slot mid-list until Claude scores them, rather
+  //   than polluting the top.
+  const rankedItems = useMemo(() => {
+    const sevRank: Record<Severity, number> = { critical: 3, high: 2, medium: 1, low: 0 }
+    return items
+      .map((item, idx) => {
+        const ai = aiData[item.id]
+        const relevance = ai ? ai.confidenceScore : 35
+        const sev = (ai?.severity as Severity) || keywordSeverity(item.headline)
+        return { item, idx, relevance, sev: sevRank[sev] ?? 0 }
+      })
+      .sort((a, b) => b.relevance - a.relevance || b.sev - a.sev || a.idx - b.idx)
+      .map((s) => s.item)
+  }, [items, aiData])
+
   return (
     <>
       <Card style={{ height: '100%' }}>
@@ -799,7 +820,7 @@ export function LiveRiskSignals() {
             ))
           ) : (
             <AnimatePresence initial={false}>
-              {items.map((item, i) => (
+              {rankedItems.map((item, i) => (
                 <NewsRow
                   key={item.id}
                   item={item}
