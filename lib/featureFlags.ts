@@ -12,12 +12,14 @@ export type FeatureFlag =
   | 'erm_entities'     // Phase 1 — incidents / acceptance / lessons / control reuse / framework tag
   | 'erm_history'      // Phase 2 — review cycles + movement/trend + mitigation→control
   | 'erm_reporting'    // Phase 3 — reporting freeze + scenario versioning + user admin
+  | 'erm_integrations' // Phase 4 — KRI values sourced from external systems
 
 const DEFAULTS: Record<FeatureFlag, boolean> = {
   erm_lifecycle: true,
   erm_entities: true,
   erm_history: true,
   erm_reporting: true,
+  erm_integrations: true,
 }
 
 export function isFlagOn(flag: FeatureFlag): boolean {
