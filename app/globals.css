@@ -52,40 +52,48 @@
 
 /* ---- EXECUTIVE LIGHT ---- */
 [data-theme="executive-light"] {
-  /* Warm paper, near-monochrome, single Protiviti-red accent (Batch 2). */
-  --bg-primary: #FAFAF8;
-  --bg-secondary: #FFFFFF;
+  /* Tier-1 premium light — cool neutral canvas, crisp white surfaces,
+     rich slate ink, single Protiviti-red accent, layered elevation. */
+  --bg-primary: #F5F6F8;       /* app canvas (cool, calm) */
+  --bg-secondary: #FFFFFF;     /* cards / surfaces */
   --bg-card: #FFFFFF;
-  --bg-hover: #F4F4F1;
-  --text-primary: #1A1A1A;
-  --text-secondary: #5A5A5A;
-  --text-muted: #9A9A95;
-  --text-tertiary: #9A9A95;
+  --bg-tertiary: #EEF0F4;      /* subtle inset / disabled fill */
+  --bg-hover: #F0F2F5;
+  --text-primary: #0F1729;     /* rich slate ink (premium near-black) */
+  --text-secondary: #475467;   /* slate-600 */
+  --text-tertiary: #667085;    /* slate-500 */
+  --text-muted: #98A2B3;       /* slate-400 */
   --accent-primary: #E4002B;
   --accent-secondary: #B8001F;
-  --accent-glow: rgba(228, 0, 43, 0.12);
+  --accent-glow: rgba(228, 0, 43, 0.10);
   --on-accent: #FFFFFF;
   --on-risk-critical: #FFFFFF;
   --on-risk-high: #FFFFFF;
   --on-risk-medium: #FFFFFF;
   --on-risk-low: #FFFFFF;
-  --border-color: #E7E7E2;
-  --border-accent: rgba(228, 0, 43, 0.30);
-  /* Batch D — severity ramp: print-safe and MUTUALLY DISTINCT. Previously
-     High and Medium were both #B54708 (the same colour), so a High risk was
-     indistinguishable from a Medium one in the default light theme. */
-  --risk-critical: #9F1B1F;
-  --risk-high: #C2410C;
-  --risk-medium: #A16207;
-  --risk-low: #15803D;
-  --shadow-sm: 0 1px 2px rgba(16,24,40,0.04);
-  --shadow-md: 0 1px 3px rgba(16,24,40,0.06), 0 1px 2px rgba(16,24,40,0.04);
-  --shadow-lg: 0 12px 32px rgba(16,24,40,0.10);
+  --border-color: #E4E7EC;     /* gray-200 (cool, crisp) */
+  --border-strong: #D0D5DD;    /* gray-300 for stronger dividers */
+  --border-accent: rgba(228, 0, 43, 0.28);
+  /* Severity ramp — vibrant, premium, MUTUALLY DISTINCT, print-safe. */
+  --risk-critical: #D92D20;    /* red-600 */
+  --risk-high: #E04F16;        /* orange-dark */
+  --risk-medium: #CA8504;      /* amber-600 */
+  --risk-low: #079455;         /* green-600 */
+  --shadow-sm: 0 1px 2px rgba(16,24,40,0.05);
+  --shadow-md: 0 1px 3px rgba(16,24,40,0.10), 0 1px 2px -1px rgba(16,24,40,0.06);
+  --shadow-lg: 0 12px 28px -6px rgba(16,24,40,0.14), 0 4px 8px -4px rgba(16,24,40,0.08);
+  /* Radius scale (tier-1 consistency) */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+  /* Focus ring */
+  --ring: 0 0 0 3px rgba(228,0,43,0.16);
   --chart-1: #E4002B;
-  --chart-2: #5A5A5A;
-  --chart-3: #9A9A95;
-  --chart-4: #067647;
-  --chart-5: #B42318;
+  --chart-2: #475467;
+  --chart-3: #98A2B3;
+  --chart-4: #079455;
+  --chart-5: #E04F16;
 }
 
 /* ---- BLOOMBERG ---- */
@@ -292,23 +300,57 @@ body {
   min-height: 100vh;
 }
 
-/* ---- Scrollbar ---- */
+/* ---- Scrollbar (tier-1: thin, neutral, unobtrusive) ---- */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 9px;
+  height: 9px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-accent);
-  border-radius: 3px;
+  background: var(--border-strong, #D0D5DD);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-primary);
+  background: var(--text-muted, #98A2B3);
+  background-clip: content-box;
+}
+
+/* ---- Tier-1 global polish (visual only, no layout impact) ---- */
+/* Brand-tinted text selection */
+::selection {
+  background: rgba(228, 0, 43, 0.14);
+  color: var(--accent-secondary, #B8001F);
+}
+
+/* Smooth state changes on interactive elements — adds perceived quality
+   without animating layout (color/border/shadow/opacity only). */
+a,
+button,
+select,
+[role="button"],
+[role="menuitem"],
+.card-base,
+.card-accent {
+  transition: background-color 0.16s ease, border-color 0.16s ease,
+    color 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
+}
+
+/* Crisper headings — tighter optical tracking at display sizes */
+h1, h2, h3 {
+  letter-spacing: -0.018em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  a, button, select, [role="button"], .card-base, .card-accent {
+    transition: none;
+  }
 }
 
 /* ---- Animations ---- */
@@ -371,12 +413,18 @@ body {
 .card-base {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: var(--radius-lg, 14px);
+  box-shadow: var(--shadow-sm);
+}
+
+.card-base:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong, #D0D5DD);
 }
 
 .card-accent {
   border-color: var(--border-accent);
-  box-shadow: 0 0 20px var(--accent-glow);
+  box-shadow: var(--shadow-md), 0 0 0 1px var(--border-accent);
 }
 
 .text-accent { color: var(--accent-primary); }
