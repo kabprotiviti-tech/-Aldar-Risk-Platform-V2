@@ -13,6 +13,7 @@ import { ControlOverlaysProvider, useControlOverlays, type FrameworkTag } from '
 import { RiskDraftProvider, useRiskDrafts } from '@/lib/context/RiskDraftContext'
 import { seedRiskOptions } from '@/lib/data/governance-records'
 import { isFlagOn } from '@/lib/featureFlags'
+import { Stagger, StaggerItem, CountUp } from '@/components/motion/Motion'
 
 export default function ControlIntelligencePage() {
   return (
@@ -49,18 +50,21 @@ function Inner() {
         <Stat label="Framework-tagged" value={taggedCount} />
       </div>
 
-      {controls.map((c) => (
-        <ControlCard
-          key={c.id}
-          control={c}
-          riskOptions={riskOptions}
-          extraLinks={extraRiskLinks[c.id] || []}
-          tag={frameworkTags[c.id]}
-          onLink={(rid) => linkRisk(c.id, rid)}
-          onUnlink={(rid) => unlinkRisk(c.id, rid)}
-          onTag={(t) => setFrameworkTag(c.id, t)}
-        />
-      ))}
+      <Stagger>
+        {controls.map((c) => (
+          <StaggerItem key={c.id}>
+            <ControlCard
+              control={c}
+              riskOptions={riskOptions}
+              extraLinks={extraRiskLinks[c.id] || []}
+              tag={frameworkTags[c.id]}
+              onLink={(rid) => linkRisk(c.id, rid)}
+              onUnlink={(rid) => unlinkRisk(c.id, rid)}
+              onTag={(t) => setFrameworkTag(c.id, t)}
+            />
+          </StaggerItem>
+        ))}
+      </Stagger>
     </div>
   )
 }
@@ -68,7 +72,7 @@ function Inner() {
 function Stat({ label, value }: { label: string; value: number }) {
   return (
     <div style={{ border: '1px solid var(--border-color)', borderRadius: 10, padding: '10px 16px', background: 'var(--bg-secondary)', minWidth: 120 }}>
-      <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--accent-primary)' }}>{value}</div>
+      <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--accent-primary)' }}><CountUp value={value} /></div>
       <div style={{ fontSize: 10.5, color: 'var(--text-tertiary)', fontWeight: 600 }}>{label}</div>
     </div>
   )
