@@ -59,6 +59,7 @@ import { ermPlanSummary } from '@/lib/data/ermAnnualPlan'
 import { ExternalIntelligenceFeed } from '@/components/home/ExternalIntelligenceFeed'
 import { TrustFooter } from '@/components/provenance/TrustFooter'
 import { BASELINE_RISK_POSTURE } from '@/lib/data/baselineRiskPosture'
+import { CountUp } from '@/components/motion/Motion'
 import type { PersonaId } from '@/lib/personas'
 
 // ── Persona → owner-string filter mapping ────────────────────────────────
@@ -712,7 +713,7 @@ function ExposureHeadline({
       </div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
         <span style={{ fontSize: 44, fontWeight: 700, lineHeight: 1, letterSpacing: '-0.02em', color: tone, fontVariantNumeric: 'tabular-nums' }}>
-          {aedShort(net)}
+          <CountUp value={net} format={aedShort} duration={1.3} />
         </span>
         {overCeil && (
           <span style={{ fontSize: 12, fontWeight: 700, color: DANGER, background: 'rgba(180,35,24,0.10)', border: '1px solid rgba(180,35,24,0.30)', borderRadius: 6, padding: '3px 9px', whiteSpace: 'nowrap' }}>

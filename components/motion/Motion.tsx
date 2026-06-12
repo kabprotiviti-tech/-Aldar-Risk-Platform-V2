@@ -40,16 +40,18 @@ export function useMotionVariants() {
   return { reduce, fadeUp, container, item }
 }
 
-// ── Page-level entrance: every route gets a subtle fade-up on mount ────────
+// ── Page-level entrance: every route gets a fade-up on mount ───────────────
+// Deliberately NOT gated on reduced-motion — it's a brief, gentle, non-looping
+// transition (no vestibular trigger) and it's the signature feel of the tool,
+// so it must be visible even when the OS has "reduce animations" on.
 export function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const reduce = useReducedMotion()
   return (
     <motion.div
       key={pathname}
-      initial={{ opacity: 0, y: reduce ? 0 : 8 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.34, ease: EASE }}
+      transition={{ duration: 0.5, ease: EASE }}
       style={{ minHeight: '100%' }}
     >
       {children}
@@ -147,25 +149,28 @@ export function CountUp({
   decimals = 0,
   prefix = '',
   suffix = '',
-  duration = 1.1,
+  duration = 1.2,
+  format,
 }: {
   value: number
   decimals?: number
   prefix?: string
   suffix?: string
   duration?: number
+  /** Optional formatter — receives the live animated number, returns a string. */
+  format?: (v: number) => string
 }) {
-  const reduce = useReducedMotion()
-  const [display, setDisplay] = React.useState(reduce ? value : 0)
+  // Count-up always runs (short, non-looping) — it's a headline "wow" beat.
+  const [display, setDisplay] = React.useState(0)
   React.useEffect(() => {
-    if (reduce) { setDisplay(value); return }
     const controls = animate(0, value, {
       duration,
       ease: EASE,
       onUpdate: (v) => setDisplay(v),
     })
     return () => controls.stop()
-  }, [value, duration, reduce])
+  }, [value, duration])
+  if (format) return <>{format(display)}</>
   return <>{prefix}{display.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}{suffix}</>
 }
 
