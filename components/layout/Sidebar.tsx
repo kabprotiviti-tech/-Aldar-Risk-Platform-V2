@@ -345,15 +345,13 @@ export function Sidebar() {
                       display: 'flex',
                       alignItems: 'center',
                       gap: '10px',
-                      padding: collapsed ? '8px 14px' : '6px 14px',
-                      margin: '1px 6px',
-                      borderRadius: '6px',
+                      padding: collapsed ? '9px 13px' : '8px 12px',
+                      margin: '2px 8px',
+                      borderRadius: '9px',
                       textDecoration: 'none',
-                      backgroundColor: isActive ? 'var(--accent-glow)' : 'transparent',
-                      borderLeft: isActive
-                        ? '2px solid var(--accent-primary)'
-                        : '2px solid transparent',
-                      transition: 'all 0.15s ease',
+                      backgroundColor: isActive ? 'var(--accent-primary)' : 'transparent',
+                      boxShadow: isActive ? '0 2px 8px rgba(228,0,43,0.28)' : 'none',
+                      transition: 'background-color 0.15s ease, box-shadow 0.15s ease',
                     }}
                     onMouseEnter={(e) => {
                       if (!isActive) {
@@ -371,16 +369,16 @@ export function Sidebar() {
                     <Icon
                       size={15}
                       style={{
-                        color: isActive ? 'var(--accent-primary)' : 'var(--text-muted)',
+                        color: isActive ? '#fff' : 'var(--text-muted)',
                         flexShrink: 0,
                       }}
                     />
                     {!collapsed && (
                       <div
                         style={{
-                          color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                          color: isActive ? '#fff' : 'var(--text-secondary)',
                           fontSize: '0.76rem',
-                          fontWeight: isActive ? 600 : 500,
+                          fontWeight: isActive ? 700 : 500,
                           lineHeight: 1.2,
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',

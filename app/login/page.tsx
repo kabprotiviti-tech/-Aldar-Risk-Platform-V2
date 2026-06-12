@@ -201,8 +201,9 @@ function BrandPane() {
         justifyContent: 'space-between',
         padding: '36px clamp(28px, 5vw, 56px)',
         background:
-          'linear-gradient(135deg, #0d0f14 0%, #1a1f2e 55%, #16100c 100%)',
-        color: '#fff',
+          'linear-gradient(140deg, #FFFFFF 0%, #F5F6F8 58%, #FBEDEF 100%)',
+        color: 'var(--text-primary)',
+        borderRight: '1px solid var(--border-color)',
         overflow: 'hidden',
       }}
       className="hidden md:flex"
@@ -220,8 +221,8 @@ function BrandPane() {
           height: 460,
           borderRadius: '50%',
           background:
-            'radial-gradient(circle, rgba(228,0,43,0.35) 0%, rgba(228,0,43,0) 60%)',
-          filter: 'blur(32px)',
+            'radial-gradient(circle, rgba(228,0,43,0.12) 0%, rgba(228,0,43,0) 60%)',
+          filter: 'blur(40px)',
         }}
       />
       <div
@@ -234,8 +235,8 @@ function BrandPane() {
           height: 540,
           borderRadius: '50%',
           background:
-            'radial-gradient(circle, rgba(45,158,255,0.22) 0%, rgba(45,158,255,0) 60%)',
-          filter: 'blur(32px)',
+            'radial-gradient(circle, rgba(15,23,41,0.05) 0%, rgba(15,23,41,0) 60%)',
+          filter: 'blur(40px)',
         }}
       />
       <div
@@ -272,7 +273,7 @@ function BrandPane() {
               fontWeight: 700,
               letterSpacing: 1.6,
               textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.55)',
+              color: 'var(--text-tertiary)',
             }}
           >
             Protiviti · Demo tenant: ABC Holdings
@@ -287,9 +288,10 @@ function BrandPane() {
           style={{
             fontSize: 'clamp(28px, 4vw, 40px)',
             lineHeight: 1.1,
-            fontWeight: 700,
+            fontWeight: 800,
             margin: 0,
-            background: 'linear-gradient(120deg, #fff 0%, #ffd0ad 100%)',
+            letterSpacing: '-0.02em',
+            background: 'linear-gradient(120deg, #0F1729 0%, #E4002B 130%)',
             WebkitBackgroundClip: 'text',
             backgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
@@ -302,7 +304,7 @@ function BrandPane() {
             marginTop: 18,
             fontSize: 14,
             lineHeight: 1.65,
-            color: 'rgba(255,255,255,0.74)',
+            color: 'var(--text-secondary)',
           }}
         >
           An AI-enabled view of the Group's risk posture — external signals, the
@@ -327,12 +329,12 @@ function BrandPane() {
           position: 'relative',
           zIndex: 1,
           paddingTop: 18,
-          borderTop: '1px solid rgba(255,255,255,0.10)',
+          borderTop: '1px solid var(--border-color)',
           display: 'flex',
           gap: 18,
           flexWrap: 'wrap',
           fontSize: 9,
-          color: 'rgba(255,255,255,0.45)',
+          color: 'var(--text-tertiary)',
           letterSpacing: 0.6,
           textTransform: 'uppercase',
           fontWeight: 700,
@@ -361,8 +363,8 @@ function BrandPane() {
 
 function Pitch({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'rgba(255,255,255,0.78)' }}>
-      <span style={{ color: '#B8001F', display: 'inline-flex' }}>{icon}</span>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: 'var(--text-secondary)' }}>
+      <span style={{ color: 'var(--accent-primary)', display: 'inline-flex' }}>{icon}</span>
       {text}
     </div>
   )
