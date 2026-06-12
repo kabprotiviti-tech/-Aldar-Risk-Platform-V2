@@ -318,7 +318,6 @@ function BrandPane() {
 
         <ProductGlimpse />
       </div>
-      </div>
 
       {/* Bottom — trust strip */}
       <div
