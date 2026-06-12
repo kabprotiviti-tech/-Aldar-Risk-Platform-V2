@@ -14,6 +14,7 @@ import { RiskDraftProvider, useRiskDrafts } from '@/lib/context/RiskDraftContext
 import { seedRiskOptions } from '@/lib/data/governance-records'
 import { isFlagOn } from '@/lib/featureFlags'
 import { Stagger, StaggerItem, CountUp } from '@/components/motion/Motion'
+import { PageHeader } from '@/components/ui/PageHeader'
 
 export default function ControlIntelligencePage() {
   return (
@@ -39,10 +40,11 @@ function Inner() {
 
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 18px 60px' }}>
-      <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>Control Intelligence</h1>
-      <p style={{ fontSize: 12.5, color: 'var(--text-tertiary)', marginBottom: 16 }}>
-        Reuse a control across multiple risks, and benchmark it against ISO 31000 / COSO ERM / NIST with AI. Overlays persist in this browser; the seed control library is untouched.
-      </p>
+      <PageHeader
+        eyebrow="Controls"
+        title="Control Intelligence"
+        subtitle="Reuse a control across multiple risks, and benchmark it against ISO 31000 / COSO ERM / NIST with AI. Overlays persist in this browser; the seed control library is untouched."
+      />
 
       <div style={{ display: 'flex', gap: 10, marginBottom: 18, flexWrap: 'wrap' }}>
         <Stat label="Controls" value={controls.length} />

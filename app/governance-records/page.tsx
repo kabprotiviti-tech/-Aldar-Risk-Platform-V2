@@ -25,6 +25,7 @@ import {
 } from '@/lib/data/governance-records'
 import { ERM_USERS, assignableOwners } from '@/lib/data/erm-users'
 import { isFlagOn } from '@/lib/featureFlags'
+import { PageHeader } from '@/components/ui/PageHeader'
 
 type Tab = 'incidents' | 'acceptances' | 'lessons'
 
@@ -53,10 +54,11 @@ function Inner() {
 
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 18px 60px' }}>
-      <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>Governance Records</h1>
-      <p style={{ fontSize: 12.5, color: 'var(--text-tertiary)', marginBottom: 18 }}>
-        Incidents, formal risk acceptances and lessons learned — each linked back to the risk register. Illustrative data, persists in this browser.
-      </p>
+      <PageHeader
+        eyebrow="Governance"
+        title="Governance Records"
+        subtitle="Incidents, formal risk acceptances and lessons learned — each linked back to the risk register. Illustrative data, persists in this browser."
+      />
 
       <div style={{ display: 'flex', gap: 6, marginBottom: 18, borderBottom: '1px solid var(--border-color)' }}>
         <TabBtn active={tab === 'incidents'} onClick={() => setTab('incidents')} icon={<AlertTriangle size={14} />} label="Incidents" />
