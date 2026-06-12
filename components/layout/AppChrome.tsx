@@ -15,6 +15,7 @@ import { StoryThread } from './StoryThread'
 import { StoryRail } from './StoryRail'
 import { CommandPaletteProvider } from './CommandPalette'
 import { usePersona } from '@/lib/context/PersonaContext'
+import { PageTransition } from '@/components/motion/Motion'
 
 /**
  * Auth guard — redirect to /login when the user hits a protected
@@ -108,7 +109,9 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
             <Header />
             {/* Story Thread — persistent ledger on spine screens (Batch C) */}
             <StoryThread />
-            <main className="layout-main-content">{children}</main>
+            <main className="layout-main-content">
+              <PageTransition>{children}</PageTransition>
+            </main>
           </div>
         </div>
         <MobileNav />

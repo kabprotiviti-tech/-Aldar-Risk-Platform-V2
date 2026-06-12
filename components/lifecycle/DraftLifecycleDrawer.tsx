@@ -9,6 +9,7 @@
 
 import React from 'react'
 import { X } from 'lucide-react'
+import { motion } from 'framer-motion'
 import type { RiskDraft } from '@/lib/context/RiskDraftContext'
 import { LifecyclePanel } from './LifecyclePanel'
 import { LifecycleBadge } from './LifecycleBadge'
@@ -20,8 +21,15 @@ export function DraftLifecycleDrawer({ draft, onClose }: { draft: RiskDraft | nu
   const owner = getUser(draft.ownerUserId)
   return (
     <>
-      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 60 }} />
-      <div
+      <motion.div
+        onClick={onClose}
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+        transition={{ duration: 0.2 }}
+        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 60 }}
+      />
+      <motion.div
+        initial={{ x: '100%' }} animate={{ x: 0 }}
+        transition={{ type: 'spring', stiffness: 320, damping: 32 }}
         style={{
           position: 'fixed', top: 0, right: 0, bottom: 0, width: 'min(460px, 94vw)',
           background: 'var(--bg-primary)', borderLeft: '1px solid var(--border-color)',
@@ -53,7 +61,7 @@ export function DraftLifecycleDrawer({ draft, onClose }: { draft: RiskDraft | nu
         )}
 
         <LifecyclePanel draft={draft} />
-      </div>
+      </motion.div>
     </>
   )
 }
