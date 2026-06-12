@@ -387,6 +387,18 @@ function ActionRow({
             </span>
           )}
         </div>
+
+        {/* Triggered-by signal — ties this action to the External Intelligence feed */}
+        {action.sourceSignal && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 7, paddingTop: 7, borderTop: '1px dashed var(--border-color)' }}>
+            <Radio size={11} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
+            <span style={{ fontSize: '0.66rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+              <span style={{ fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.04em', fontSize: '0.6rem' }}>Triggered by · </span>
+              {action.sourceSignal.headline}
+              <span style={{ color: 'var(--text-muted)' }}> · {action.sourceSignal.source}</span>
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Arrow */}

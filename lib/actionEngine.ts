@@ -63,6 +63,10 @@ export interface Action {
   portfolio: Portfolio
   category: string
   triggerIds: string[]         // Risk/signal IDs that triggered this
+  /** The external-intelligence signal that triggered this action — keeps the
+   *  Priority Actions panel coherent with the External Intelligence feed
+   *  (same headline text both ways). */
+  sourceSignal?: { headline: string; source: string }
   rootCauses: string[]
   propagationPath: PropagationStep[]
   dataPoints: DataPoint[]
@@ -294,6 +298,7 @@ function buildActions(): Action[] {
   const action1: RawAction = {
     id: 'ACT-001',
     title: 'Activate HNI Buyer Retention & Mortgage Flexibility Program',
+    sourceSignal: { headline: 'EIBOR 3M holds at 4.42% — Fed pause priced in', source: 'CBUAE · Central Bank' },
     priority: 'critical',
     impactValue: hniImpact,
     impactLabel: `AED ${hniImpact}M at risk`,
@@ -353,6 +358,7 @@ function buildActions(): Action[] {
   const action2: RawAction = {
     id: 'ACT-002',
     title: 'Launch Corporate Long-Stay & Bridging Event Campaign — Hospitality',
+    sourceSignal: { headline: 'Abu Dhabi hotel RevPAR −3.2% as Q1 event calendar thins', source: 'DCT Abu Dhabi · tourism' },
     priority: 'high',
     impactValue: hospImpact,
     impactLabel: `AED ${hospImpact}M recoverable`,
@@ -414,6 +420,7 @@ function buildActions(): Action[] {
   const action3: RawAction = {
     id: 'ACT-003',
     title: 'Activate Fixed-Price Provisions & Multi-Source Supply Chain — Construction',
+    sourceSignal: { headline: 'Steel + cement spot prices +4% WoW (Suez disruption)', source: 'Reuters · MENA construction' },
     priority: 'critical',
     impactValue: constructionImpact,
     impactLabel: `AED ${constructionImpact}M exposure`,
@@ -468,6 +475,7 @@ function buildActions(): Action[] {
   const action4: RawAction = {
     id: 'ACT-004',
     title: 'Emergency OT/IT Security Audit — Smart Building Infrastructure',
+    sourceSignal: { headline: 'NCA advisory: OT/BMS targeting campaign across GCC', source: 'NCA · National Cyber Security' },
     priority: 'high',
     impactValue: r006.financialImpact,
     impactLabel: `AED ${r006.financialImpact}M tail risk`,
@@ -527,6 +535,7 @@ function buildActions(): Action[] {
   const action5: RawAction = {
     id: 'ACT-005',
     title: 'Retail Vacancy Repositioning & Receivables Recovery',
+    sourceSignal: { headline: 'Commercial vacancy down 0.6pts in Q1 26', source: 'Bayut · sector index' },
     priority: 'high',
     impactValue: vacancyImpact + Math.round(receivablesRisk * 0.35),
     impactLabel: `AED ${vacancyImpact + Math.round(receivablesRisk * 0.35)}M exposure`,

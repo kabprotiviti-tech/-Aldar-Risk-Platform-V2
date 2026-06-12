@@ -24,6 +24,7 @@ import {
   Newspaper,
   Building2,
   Banknote,
+  ArrowRight,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -39,6 +40,9 @@ interface IntelItem {
   touches: string[]
   /** Relative time string e.g. "12 min ago" / "2 h ago". */
   ago: string
+  /** The priority action this signal drives — keeps the feed coherent with
+   *  the Priority Actions panel (same wording both ways). */
+  recommendedAction?: string
 }
 
 const CATEGORY_META: Record<
@@ -62,53 +66,13 @@ const SIGNAL_META: Record<
 }
 
 // Illustrative curated set — pilot replaces with live feed.
+// Ordered so the first five signals map 1:1 to the five Priority Actions on
+// the dashboard: each `recommendedAction` is the exact action it triggers, so
+// the External Intelligence feed and the Priority Actions panel read as ONE
+// signal -> decision thread (and stay coherent even when the live AI is down).
 const INTEL: IntelItem[] = [
   {
-    id: 'intel-1',
-    source: 'ADREC · Abu Dhabi Real Estate Centre',
-    category: 'market',
-    headline: 'Abu Dhabi residential price index +1.8% MoM',
-    detail:
-      'Off-plan absorption strong across Saadiyat & Yas. Supportive for KRI-14 baseline.',
-    signal: 'up',
-    touches: ['R-003', 'R-008', 'KRI-14'],
-    ago: '12 min ago',
-  },
-  {
-    id: 'intel-2',
-    source: 'CBUAE · Central Bank',
-    category: 'macro',
-    headline: 'EIBOR 3M holds at 4.42% — Fed pause priced in',
-    detail:
-      'Buyer affordability stress unchanged; treasury hedge book valuation neutral.',
-    signal: 'neutral',
-    touches: ['R-008', 'KRI-13'],
-    ago: '38 min ago',
-  },
-  {
-    id: 'intel-3',
-    source: 'DLD · Dubai Land Department',
-    category: 'regulator',
-    headline: 'Mollak escrow audit window opens Q3 FY26',
-    detail:
-      'Cross-emirate JV exposure: review GA-CMP-01 evidence pack pre-audit.',
-    signal: 'alert',
-    touches: ['R-009'],
-    ago: '1 h ago',
-  },
-  {
-    id: 'intel-4',
-    source: 'Bayut · sector index',
-    category: 'sector',
-    headline: 'Commercial vacancy down 0.6pts in Q1 26',
-    detail:
-      'Yas Mall + ADGM corridor tightening. Positive for KRI-10 / KRI-15.',
-    signal: 'up',
-    touches: ['R-004', 'KRI-10', 'KRI-15'],
-    ago: '3 h ago',
-  },
-  {
-    id: 'intel-5',
+    id: 'intel-steel',
     source: 'Reuters · MENA construction',
     category: 'macro',
     headline: 'Steel + cement spot prices +4% WoW (Suez disruption)',
@@ -116,10 +80,81 @@ const INTEL: IntelItem[] = [
       'Project cost-overrun risk on active GMP contracts up; consider hedge top-up.',
     signal: 'down',
     touches: ['R-001', 'R-007'],
+    ago: '12 min ago',
+    recommendedAction: 'Activate Fixed-Price Provisions & Multi-Source Supply Chain — Construction',
+  },
+  {
+    id: 'intel-cyber',
+    source: 'NCA · National Cyber Security',
+    category: 'regulator',
+    headline: 'NCA advisory: OT/BMS targeting campaign across GCC',
+    detail:
+      'Nation-state actor targeting building-management & OT networks; smart-building assets exposed.',
+    signal: 'alert',
+    touches: ['R-006'],
+    ago: '40 min ago',
+    recommendedAction: 'Emergency OT/IT Security Audit — Smart Building Infrastructure',
+  },
+  {
+    id: 'intel-eibor',
+    source: 'CBUAE · Central Bank',
+    category: 'macro',
+    headline: 'EIBOR 3M holds at 4.42% — Fed pause priced in',
+    detail:
+      'Buyer affordability stress unchanged; HNI mortgage demand soft at current rates.',
+    signal: 'neutral',
+    touches: ['R-008', 'R-001', 'KRI-13'],
+    ago: '1 h ago',
+    recommendedAction: 'Activate HNI Buyer Retention & Mortgage Flexibility Program',
+  },
+  {
+    id: 'intel-vacancy',
+    source: 'Bayut · sector index',
+    category: 'sector',
+    headline: 'Commercial vacancy down 0.6pts in Q1 26',
+    detail:
+      'Market tightening, but ABC retail vacancy (8.5%) still lags the 5.2% benchmark.',
+    signal: 'up',
+    touches: ['R-004', 'KRI-10', 'KRI-15'],
+    ago: '2 h ago',
+    recommendedAction: 'Retail Vacancy Repositioning & Receivables Recovery',
+  },
+  {
+    id: 'intel-revpar',
+    source: 'DCT Abu Dhabi · tourism',
+    category: 'sector',
+    headline: 'Abu Dhabi hotel RevPAR −3.2% as Q1 event calendar thins',
+    detail:
+      'Softer corporate & MICE demand into the shoulder season; occupancy pressure on Yas hotels.',
+    signal: 'down',
+    touches: ['R-004'],
+    ago: '3 h ago',
+    recommendedAction: 'Launch Corporate Long-Stay & Bridging Event Campaign — Hospitality',
+  },
+  {
+    id: 'intel-priceindex',
+    source: 'ADREC · Abu Dhabi Real Estate Centre',
+    category: 'market',
+    headline: 'Abu Dhabi residential price index +1.8% MoM',
+    detail:
+      'Off-plan absorption strong across Saadiyat & Yas. Supportive for KRI-14 baseline.',
+    signal: 'up',
+    touches: ['R-003', 'R-008', 'KRI-14'],
+    ago: '4 h ago',
+  },
+  {
+    id: 'intel-mollak',
+    source: 'DLD · Dubai Land Department',
+    category: 'regulator',
+    headline: 'Mollak escrow audit window opens Q3 FY26',
+    detail:
+      'Cross-emirate JV exposure: review GA-CMP-01 evidence pack pre-audit.',
+    signal: 'alert',
+    touches: ['R-009'],
     ago: '5 h ago',
   },
   {
-    id: 'intel-6',
+    id: 'intel-circular',
     source: 'ADX · listing rules',
     category: 'regulator',
     headline: 'Continuous-disclosure circular #2026/04 issued',
@@ -297,6 +332,15 @@ export function ExternalIntelligenceFeed({ limit = 6 }: Props) {
                 >
                   {it.detail}
                 </div>
+                {it.recommendedAction && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, padding: '5px 9px', borderRadius: 7, background: 'var(--accent-glow)', border: '1px solid var(--border-accent)' }}>
+                    <ArrowRight size={12} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
+                    <span style={{ fontSize: 10.5, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+                      <span style={{ fontWeight: 700, color: 'var(--accent-primary)', textTransform: 'uppercase', letterSpacing: '0.04em', fontSize: 9.5 }}>Drives · </span>
+                      {it.recommendedAction}
+                    </span>
+                  </div>
+                )}
                 {it.touches.length > 0 && (
                   <div
                     style={{
