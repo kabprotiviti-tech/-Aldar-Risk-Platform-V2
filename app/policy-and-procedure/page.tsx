@@ -21,6 +21,7 @@ import {
   ExternalLink,
 } from 'lucide-react'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
+import { PageHeader } from '@/components/ui/PageHeader'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { TrustFooter } from '@/components/provenance/TrustFooter'
 
@@ -228,18 +229,13 @@ export default function PolicyAndProcedurePage() {
     <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 14 }}>
       <IllustrativeDataBanner pilotFeeds="Live policy management system (e.g. Diligent / Convene / SharePoint policy library)" />
 
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-        <div>
-          <h1 style={{ fontSize: 26, fontWeight: 600, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.015em', display: 'inline-flex', alignItems: 'center', gap: 10 }}>
-            <BookMarked size={20} style={{ color: 'var(--accent-primary)' }} />
-            Policy & Procedure register
-          </h1>
-          <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '6px 0 0', maxWidth: 720, lineHeight: 1.55 }}>
-            {POLICIES.length} group policies tracked with status, owner, review cycle, and linked risks. Pilot wires this to the live policy management system; pre-pilot the entries are illustrative based on what a UAE listed PJSC would maintain.
-          </p>
-        </div>
-        <StatusBadge tier="MVP" note={`${POLICIES.length} illustrative · ${counts['Overdue review']} overdue`} />
-      </div>
+      <PageHeader
+        icon={<BookMarked size={18} />}
+        eyebrow="Governance"
+        title="Policy & Procedure register"
+        subtitle={`${POLICIES.length} group policies tracked with status, owner, review cycle, and linked risks. Pilot wires this to the live policy management system; pre-pilot the entries are illustrative based on what a UAE listed PJSC would maintain.`}
+        actions={<StatusBadge tier="MVP" note={`${POLICIES.length} illustrative · ${counts['Overdue review']} overdue`} />}
+      />
 
       {/* Summary tiles */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10 }}>
