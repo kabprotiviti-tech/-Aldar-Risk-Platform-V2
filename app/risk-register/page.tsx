@@ -193,37 +193,23 @@ function RiskRegisterContent() {
       <div
         style={{
           display: 'flex',
-          alignItems: 'flex-start',
+          alignItems: 'flex-end',
           justifyContent: 'space-between',
           gap: 16,
           flexWrap: 'wrap',
+          paddingBottom: 16,
+          marginBottom: 4,
+          borderBottom: '1px solid var(--border-color)',
         }}
       >
-        <div>
-          <h1
-            style={{
-              fontSize: 22,
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              margin: 0,
-            }}
-          >
-            Risk Register
-          </h1>
-          <p
-            style={{
-              fontSize: 12,
-              color: 'var(--text-secondary)',
-              margin: '4px 0 0',
-              maxWidth: 720,
-              lineHeight: 1.5,
-            }}
-          >
+        <div style={{ minWidth: 0 }}>
+          <div className="ui-eyebrow">Risk Operations</div>
+          <h1 className="ui-page-title">Risk Register</h1>
+          <p className="ui-page-subtitle">
             Cause-Event-Impact register for ABC Group. Inherent and residual scores
-            for engine risks come from the simulation. User-added risks are stored
-            locally as DRAFT and persist between sessions in this browser. Click any
-            row for the detail drawer — mitigation actions, status workflow,
-            heatmap, KRI linkage and escalate-to-Group are all wired.
+            for engine risks come from the simulation; user-added risks are stored
+            as DRAFT in this browser. Click any row for the detail drawer —
+            mitigation actions, status workflow, heatmap, KRI linkage and escalation.
           </p>
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
