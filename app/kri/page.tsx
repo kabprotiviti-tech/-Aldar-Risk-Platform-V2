@@ -85,14 +85,7 @@ function KRIContent() {
         }}
       >
         <div>
-          <h1
-            style={{
-              fontSize: 22,
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              margin: 0,
-            }}
-          >
+          <h1 className="ui-page-title">
             Key Risk Indicators
           </h1>
           <p
