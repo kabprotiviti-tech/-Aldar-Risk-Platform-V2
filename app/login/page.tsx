@@ -282,45 +282,42 @@ function BrandPane() {
         </div>
       </div>
 
-      {/* Middle — pitch */}
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: 440 }}>
+      {/* Middle — pitch + live product glimpse */}
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 500 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, marginBottom: 18, padding: '5px 12px', borderRadius: 999, background: 'rgba(228,0,43,0.06)', border: '1px solid var(--border-accent)' }}>
+          <Sparkles size={12} style={{ color: 'var(--accent-primary)' }} />
+          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-secondary)', letterSpacing: 0.3 }}>AI-enabled Enterprise Risk &amp; Control</span>
+        </div>
         <h1
           style={{
-            fontSize: 'clamp(28px, 4vw, 40px)',
-            lineHeight: 1.1,
+            fontSize: 'clamp(30px, 4.2vw, 44px)',
+            lineHeight: 1.08,
             fontWeight: 800,
             margin: 0,
-            letterSpacing: '-0.02em',
-            background: 'linear-gradient(120deg, #0F1729 0%, #E4002B 130%)',
+            letterSpacing: '-0.025em',
+            background: 'linear-gradient(118deg, #0F1729 0%, #2A3550 60%, #E4002B 125%)',
             WebkitBackgroundClip: 'text',
             backgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
           }}
         >
-          The Group's risk, in one clear view.
+          The Group&rsquo;s risk,<br />in one clear view.
         </h1>
         <p
           style={{
-            marginTop: 18,
-            fontSize: 14,
-            lineHeight: 1.65,
+            marginTop: 16,
+            fontSize: 14.5,
+            lineHeight: 1.6,
             color: 'var(--text-secondary)',
+            maxWidth: 430,
           }}
         >
-          An AI-enabled view of the Group's risk posture — external signals, the
-          risk register, KRIs and the board pack, brought into one place for
-          leadership and the ARC. Working MVP · illustrative data.
+          External signals, the live register, KRIs and the board pack — brought
+          into one decision surface for leadership and the ARC.
         </p>
 
-        <div style={{ marginTop: 26, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <Pitch
-            icon={<Sparkles size={14} />}
-            text="AI reads the external feed and links it to your live register"
-          />
-          <Pitch icon={<Check size={14} />} text="Persona views for the Risk Head, Champions, Subsidiary CEOs and ARC Chair" />
-          <Pitch icon={<Check size={14} />} text="Built on ISO 31000 and COSO ERM" />
-          <Pitch icon={<Check size={14} />} text="UAE-native: SCA · ADREC · DLD · RERA · DET · FTA · MoE" />
-        </div>
+        <ProductGlimpse />
+      </div>
       </div>
 
       {/* Bottom — trust strip */}
@@ -358,6 +355,75 @@ function BrandPane() {
         }
       `}</style>
     </div>
+  )
+}
+
+// Illustrative live-posture preview card — makes the hero feel like a real
+// product (the single biggest "tier-1" signal on a login screen).
+function ProductGlimpse() {
+  // 5×5 heat pattern (illustrative). c=critical h=high m=medium l=low.
+  const HEAT = [
+    'l', 'l', 'm', 'h', 'c',
+    'l', 'm', 'm', 'h', 'h',
+    'l', 'm', 'h', 'h', 'm',
+    'm', 'm', 'h', 'c', 'h',
+    'l', 'l', 'm', 'h', 'c',
+  ]
+  const COLOR: Record<string, string> = {
+    c: 'var(--risk-critical)', h: 'var(--risk-high)', m: 'var(--risk-medium)', l: 'var(--risk-low)',
+  }
+  return (
+    <div style={{ marginTop: 26 }}>
+      <div
+        style={{
+          background: '#fff',
+          border: '1px solid var(--border-color)',
+          borderRadius: 16,
+          boxShadow: 'var(--shadow-lg)',
+          padding: 18,
+          maxWidth: 400,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+          <span className="animate-live-pulse" style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--risk-low)', display: 'inline-block' }} />
+          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.7, textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>ABC Holdings · Group posture</span>
+          <span style={{ marginLeft: 'auto', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)' }}>Q2 FY26</span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 32, fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>AED 0.90Bn</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--risk-critical)', background: 'rgba(217,45,32,0.10)', border: '1px solid rgba(217,45,32,0.30)', borderRadius: 6, padding: '2px 8px' }}>1.5× over appetite</span>
+        </div>
+        <div style={{ fontSize: 11.5, color: 'var(--text-tertiary)', marginTop: 3 }}>Net unmitigated exposure vs AED 0.60Bn board appetite</div>
+
+        <div style={{ display: 'flex', gap: 14, marginTop: 16, alignItems: 'center' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 3 }}>
+            {HEAT.map((k, i) => (
+              <span key={i} style={{ width: 16, height: 16, borderRadius: 3, background: COLOR[k], opacity: 0.92 }} />
+            ))}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+            <GlimpseStat color="var(--risk-critical)" label="3 Critical" />
+            <GlimpseStat color="var(--risk-high)" label="6 High" />
+            <GlimpseStat color="var(--risk-low)" label="2 KRIs breached" />
+          </div>
+        </div>
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginTop: 16 }}>
+        {['ISO 31000 · COSO ERM', '4 persona views', 'UAE-native regulators'].map((t) => (
+          <span key={t} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 999, padding: '4px 11px' }}>{t}</span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function GlimpseStat({ color, label }: { color: string; label: string }) {
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>
+      <span style={{ width: 7, height: 7, borderRadius: '50%', background: color }} />
+      {label}
+    </span>
   )
 }
 
