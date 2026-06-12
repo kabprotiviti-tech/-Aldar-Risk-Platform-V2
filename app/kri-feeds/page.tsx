@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { RefreshCw, Database, Wifi } from 'lucide-react'
 import { KRI_FEEDS, feedStatus, FEED_STATUS_META } from '@/lib/data/kri-feeds'
 import { isFlagOn } from '@/lib/featureFlags'
+import { PageHeader } from '@/components/ui/PageHeader'
 
 interface FeedVal { value: number; fetchedAt: string }
 
@@ -44,18 +45,16 @@ export default function KriFeedsPage() {
 
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 18px 60px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 4 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>KRI Live Feeds</h1>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 10.5, fontWeight: 700, color: '#B54708', background: '#B547081a', border: '1px solid #B5470840', borderRadius: 999, padding: '2px 9px' }}>
-          <Wifi size={11} /> Illustrative feed · connectors deferred
-        </span>
-        <button onClick={sync} disabled={syncing} style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, border: 'none', background: 'var(--accent-primary)', color: '#fff', fontSize: 12.5, fontWeight: 700, cursor: syncing ? 'wait' : 'pointer' }}>
-          <RefreshCw size={14} style={{ animation: syncing ? 'spin 1s linear infinite' : 'none' }} /> {syncing ? 'Syncing…' : 'Sync all'}
-        </button>
-      </div>
-      <p style={{ fontSize: 12.5, color: 'var(--text-tertiary)', marginBottom: 16 }}>
-        These KRIs are populated automatically from source systems instead of manual entry. {lastSync && <>Last synced <strong>{lastSync}</strong>.</>}
-      </p>
+      <PageHeader
+        eyebrow={<><Wifi size={11} /> Illustrative feed · connectors deferred</>}
+        title="KRI Live Feeds"
+        subtitle={<>These KRIs are populated automatically from source systems instead of manual entry. {lastSync && <>Last synced <strong>{lastSync}</strong>.</>}</>}
+        actions={
+          <button onClick={sync} disabled={syncing} className="ui-btn-primary" style={{ cursor: syncing ? 'wait' : 'pointer' }}>
+            <RefreshCw size={14} style={{ animation: syncing ? 'spin 1s linear infinite' : 'none' }} /> {syncing ? 'Syncing…' : 'Sync all'}
+          </button>
+        }
+      />
 
       <div style={{ overflowX: 'auto', border: '1px solid var(--border-color)', borderRadius: 10 }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 820 }}>
