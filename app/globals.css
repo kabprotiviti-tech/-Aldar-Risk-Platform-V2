@@ -431,6 +431,124 @@ h1, h2, h3 {
 .text-muted-theme { color: var(--text-muted); }
 .text-secondary-theme { color: var(--text-secondary); }
 
+/* ══════════════════════════════════════════════════════════════════════
+   TIER-1 SHARED COMPONENT LAYER (overhaul) — reusable premium primitives
+   used by the PageHeader and screen redesigns. Token-driven, light-first.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Page header — one premium header pattern across every screen */
+.ui-page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 16px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid var(--border-color);
+}
+.ui-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-primary);
+  margin-bottom: 7px;
+}
+.ui-page-title {
+  font-size: clamp(20px, 2.4vw, 27px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--text-primary);
+  margin: 0;
+}
+.ui-page-subtitle {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-tertiary);
+  margin-top: 6px;
+  max-width: 70ch;
+}
+
+/* Premium card surface */
+.ui-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg, 14px);
+  box-shadow: var(--shadow-sm);
+}
+.ui-card-pad { padding: 18px 20px; }
+
+/* Stat / KPI tile */
+.ui-stat {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md, 10px);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+}
+.ui-stat-value {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums lining-nums;
+  line-height: 1.05;
+}
+.ui-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
+/* Buttons */
+.ui-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 700;
+  padding: 9px 15px; border-radius: var(--radius-md, 10px);
+  border: 1px solid var(--border-strong, #D0D5DD);
+  background: var(--bg-secondary); color: var(--text-primary);
+  cursor: pointer; white-space: nowrap;
+}
+.ui-btn:hover { background: var(--bg-hover); }
+.ui-btn-primary {
+  border: none; color: var(--on-accent, #fff);
+  background: var(--accent-primary);
+  box-shadow: 0 1px 2px rgba(228,0,43,0.25);
+}
+.ui-btn-primary:hover { background: var(--accent-secondary); }
+
+/* Pills / badges */
+.ui-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.02em;
+  padding: 2px 9px; border-radius: var(--radius-pill, 999px);
+  border: 1px solid var(--border-color); color: var(--text-secondary);
+  background: var(--bg-secondary);
+}
+
+/* Premium default table styling for the simpler (non-inline-styled) tables.
+   Inline-styled tables keep their own look; this lifts the plain ones. */
+.layout-main-content table:not([style]) thead th {
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--text-tertiary);
+  text-align: left; padding: 10px 12px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-primary);
+}
+.layout-main-content table:not([style]) tbody td {
+  font-size: 12.5px; color: var(--text-secondary);
+  padding: 10px 12px; border-bottom: 1px solid var(--border-color);
+}
+.layout-main-content table:not([style]) tbody tr:hover td {
+  background: var(--bg-hover);
+}
+
 .bg-card-theme { background-color: var(--bg-card); }
 .bg-hover-theme { background-color: var(--bg-hover); }
 .border-theme { border-color: var(--border-color); }

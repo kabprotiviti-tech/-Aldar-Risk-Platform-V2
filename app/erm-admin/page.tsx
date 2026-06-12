@@ -16,6 +16,7 @@ import { type ErmRole } from '@/lib/data/erm-users'
 import { RISKS } from '@/lib/engine/seedData'
 import { bandForScore, liveScore } from '@/lib/data/risk-history'
 import { isFlagOn } from '@/lib/featureFlags'
+import { PageHeader } from '@/components/ui/PageHeader'
 
 type Tab = 'users' | 'reporting' | 'scenarios'
 
@@ -36,10 +37,11 @@ function Inner() {
   if (!isFlagOn('erm_reporting')) return <div style={{ padding: 24, color: 'var(--text-tertiary)' }}>This module is not enabled.</div>
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 18px 60px' }}>
-      <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px' }}>ERM Administration</h1>
-      <p style={{ fontSize: 12.5, color: 'var(--text-tertiary)', marginBottom: 18 }}>
-        Manage users &amp; roles, freeze versioned reporting cut-offs, and save / compare scenarios. Illustrative, persists in this browser.
-      </p>
+      <PageHeader
+        eyebrow="Administration"
+        title="ERM Administration"
+        subtitle="Manage users & roles, freeze versioned reporting cut-offs, and save / compare scenarios. Illustrative, persists in this browser."
+      />
       <div style={{ display: 'flex', gap: 6, marginBottom: 18, borderBottom: '1px solid var(--border-color)' }}>
         <TabBtn active={tab === 'users'} onClick={() => setTab('users')} icon={<Users size={14} />} label="Users & Roles" />
         <TabBtn active={tab === 'reporting'} onClick={() => setTab('reporting')} icon={<FileLock2 size={14} />} label="Reporting Cut-offs" />
