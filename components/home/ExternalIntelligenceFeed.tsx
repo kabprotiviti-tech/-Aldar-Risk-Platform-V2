@@ -25,6 +25,7 @@ import {
   Building2,
   Banknote,
   ArrowRight,
+  ChevronDown,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -172,7 +173,15 @@ interface Props {
 }
 
 export function ExternalIntelligenceFeed({ limit = 6 }: Props) {
-  const items = INTEL.slice(0, limit)
+  const [openId, setOpenId] = React.useState<string | null>(null)
+  // Order the feed so it lines up row-for-row with the Priority Actions panel
+  // (which is sorted by priority: HNI, Fixed-Price, OT/IT, Long-Stay, Retail).
+  const ACTION_ORDER = ['HNI Buyer', 'Fixed-Price', 'OT/IT', 'Long-Stay', 'Retail Vacancy']
+  const rankOf = (it: IntelItem) => {
+    const i = ACTION_ORDER.findIndex((k) => (it.recommendedAction || '').includes(k))
+    return i < 0 ? 99 : i
+  }
+  const items = [...INTEL].sort((a, b) => rankOf(a) - rankOf(b)).slice(0, limit)
   return (
     <section
       style={{
@@ -239,14 +248,18 @@ export function ExternalIntelligenceFeed({ limit = 6 }: Props) {
           return (
             <article
               key={it.id}
+              onClick={() => setOpenId(openId === it.id ? null : it.id)}
               style={{
                 background: 'var(--bg-primary)',
-                border: '1px solid var(--border-color)',
+                border: openId === it.id ? '1px solid var(--border-accent)' : '1px solid var(--border-color)',
+                boxShadow: openId === it.id ? 'var(--shadow-sm)' : 'none',
                 borderRadius: 6,
                 padding: 12,
                 display: 'flex',
                 gap: 12,
                 alignItems: 'flex-start',
+                cursor: 'pointer',
+                transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
               }}
             >
               <div
@@ -304,12 +317,12 @@ export function ExternalIntelligenceFeed({ limit = 6 }: Props) {
                       marginLeft: 'auto',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: 4,
-                      color: sig.color,
+                      gap: 6,
                     }}
                     title={`Signal direction: ${it.signal}`}
                   >
-                    <SigIcon size={12} />
+                    <SigIcon size={12} style={{ color: sig.color }} />
+                    <ChevronDown size={13} style={{ color: 'var(--text-tertiary)', transform: openId === it.id ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />
                   </span>
                 </div>
                 <div
@@ -378,6 +391,17 @@ export function ExternalIntelligenceFeed({ limit = 6 }: Props) {
                         </Link>
                       )
                     })}
+                  </div>
+                )}
+                {openId === it.id && (
+                  <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px dashed var(--border-color)' }}>
+                    <div style={{ fontSize: 9.5, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>
+                      Intelligence read
+                    </div>
+                    <div style={{ fontSize: 11.5, color: 'var(--text-secondary)', lineHeight: 1.55 }}>
+                      {`This ${cat.label.toLowerCase()} signal ${it.signal === 'up' ? 'is supportive for' : it.signal === 'down' ? 'adds pressure to' : it.signal === 'alert' ? 'flags emerging risk to' : 'is broadly neutral for'} ${it.touches.length} tracked register item${it.touches.length === 1 ? '' : 's'} (${it.touches.join(', ')}). Source: ${it.source}.`}
+                      {it.recommendedAction ? ` Recommended response — ${it.recommendedAction} — see the matching row in Priority Actions below.` : ''}
+                    </div>
                   </div>
                 )}
               </div>
