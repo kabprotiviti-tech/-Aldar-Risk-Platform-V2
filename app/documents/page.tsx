@@ -29,6 +29,7 @@ import { AIInsightBox } from '@/components/ui/AIInsightBox'
 import { DocumentUpload } from '@/components/DocumentUpload'
 import { DocumentControlExtractor } from '@/components/controls/DocumentControlExtractor'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
+import { PageHeader } from '@/components/ui/PageHeader'
 import { ControlAssessmentPanel } from '@/components/simulation/ControlAssessmentPanel'
 
 // ─── Document Intelligence (paste) ───────────────────────────────────────────
@@ -897,6 +898,11 @@ export default function DocumentsPage() {
   return (
     <div className="space-y-6">
       <IllustrativeDataBanner />
+      <PageHeader
+        eyebrow="AI extraction"
+        title="Document Intelligence"
+        subtitle="Upload or paste board packs, audit reports and policies — the AI extracts risks, controls and compliance items as proposed register updates for your review."
+      />
       {/* Tab Switcher */}
       <div className="flex items-center gap-1" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0' }}>
         {[

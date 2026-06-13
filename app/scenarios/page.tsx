@@ -23,6 +23,7 @@ import { CostOfInactionPanel } from '@/components/scenarios/CostOfInactionPanel'
 import { ExposureClimax } from '@/components/scenarios/ExposureClimax'
 import { SimulationWorkbench } from '@/components/simulation/SimulationWorkbench'
 import { BaselineComparisonPanel } from '@/components/scenarios/BaselineComparisonPanel'
+import { PageHeader } from '@/components/ui/PageHeader'
 
 type Intensity = 'mild' | 'moderate' | 'severe'
 
@@ -299,6 +300,11 @@ export default function ScenariosPage() {
 
   return (
     <div className="space-y-6">
+      <PageHeader
+        eyebrow="What-if"
+        title="Scenario Analysis"
+        subtitle="Stress-test the Group's risk posture against named scenarios and see the cost of inaction. Adjust the drivers and the engine recalculates exposure and ratings live."
+      />
 
       {/* ══════════════════════════════════════════════════════════════════
           CLIMAX — the one animated number (Batch 6). Baseline → severe
