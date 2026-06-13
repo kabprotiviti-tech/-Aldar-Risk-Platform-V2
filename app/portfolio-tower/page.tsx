@@ -86,14 +86,7 @@ function PortfolioTowerContent() {
         }}
       >
         <div>
-          <h1
-            style={{
-              fontSize: 22,
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              margin: 0,
-            }}
-          >
+          <h1 className="ui-page-title">
             Portfolio Control Tower
           </h1>
           <p
