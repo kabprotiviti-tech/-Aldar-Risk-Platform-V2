@@ -11,6 +11,7 @@ import { Card, CardHeader, CardTitle, CardBody } from '@/components/ui/Card'
 import { ConfidenceBadge } from '@/components/ui/Badge'
 import { AIInsightBox } from '@/components/ui/AIInsightBox'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
+import { PageHeader } from '@/components/ui/PageHeader'
 import { ConsolidationBanner } from '@/components/provenance/ConsolidationBanner'
 import { BASELINE_RISK_POSTURE } from '@/lib/data/baselineRiskPosture'
 import { formatCurrencyShort, formatExposureBn } from '@/lib/utils/formatters'
@@ -161,6 +162,12 @@ export default function ExecutiveBriefPage() {
   return (
     <div className="space-y-6">
       <IllustrativeDataBanner />
+
+      <PageHeader
+        eyebrow="Board reporting"
+        title="Executive Brief"
+        subtitle="An AI-generated, board-level synthesis of the Group's risk posture — portfolio risks, exposures, cross-portfolio propagation and recommended actions."
+      />
 
       <ConsolidationBanner
         message="The executive brief is now part of the board pack. The ARC Pack assembles this summary alongside the risk register, KRIs and recommended actions in one board-ready document."

@@ -31,6 +31,7 @@ import { FinancialCalculationPanel, ViewCalcButton, type FinancialCalcContext } 
 import { TopActionsPanel } from '@/components/TopActionsPanel'
 import { ActionDetailPanel } from '@/components/ActionDetailPanel'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
+import { PageHeader } from '@/components/ui/PageHeader'
 import { type Action } from '@/lib/actionEngine'
 import Link from 'next/link'
 import { controlSummary } from '@/lib/controlData'
@@ -471,6 +472,11 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <IllustrativeDataBanner />
+      <PageHeader
+        eyebrow="Outside-in"
+        title="External Intelligence"
+        subtitle="What's moving in the outside world — market, regulator, macro and sector signals — mapped to ABC's live register, with the priority actions each one drives."
+      />
       {/* Last Updated Bar */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
