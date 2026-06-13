@@ -825,15 +825,18 @@ function ReconStrip({
   hedged: number
   net: number
 }) {
+  const Chip = ({ value, label, color }: { value: string; label: string; color?: string }) => (
+    <div style={{ flex: '1 1 150px', minWidth: 130, background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md, 10px)', padding: '11px 15px', boxShadow: 'var(--shadow-sm)' }}>
+      <div style={{ fontSize: 20, fontWeight: 800, color: color || 'var(--text-primary)', letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums', lineHeight: 1.05 }}>{value}</div>
+      <div style={{ fontSize: 10.5, fontWeight: 600, color: 'var(--text-tertiary)', marginTop: 4 }}>{label}</div>
+    </div>
+  )
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 7, padding: '10px 14px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: 8, fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-      <strong style={{ color: 'var(--text-primary)' }}>{criticalHigh} of {total}</strong> risks are Critical or High
-      <span style={{ color: 'var(--text-tertiary)' }}>({critical} critical · {high} high)</span>
-      <span style={{ color: 'var(--text-tertiary)' }}>—</span>
-      driving <strong style={{ color: 'var(--text-primary)' }}>{aedShort(gross)}</strong> gross,
-      <strong style={{ color: 'var(--text-primary)' }}>{aedShort(hedged)}</strong> hedged
-      <span aria-hidden>→</span>
-      <strong style={{ color: DANGER }}>{aedShort(net)}</strong> net unhedged.
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+      <Chip value={`${criticalHigh} / ${total}`} label={`Critical or High · ${critical}C ${high}H`} />
+      <Chip value={aedShort(gross)} label="Gross exposure" />
+      <Chip value={aedShort(hedged)} label="Hedged" />
+      <Chip value={aedShort(net)} label="Net unhedged vs appetite" color={DANGER} />
     </div>
   )
 }
