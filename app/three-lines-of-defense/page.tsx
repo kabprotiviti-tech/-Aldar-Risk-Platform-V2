@@ -36,15 +36,8 @@ export default function ThreeLinesPage() {
       >
         <div>
           <h1
-            style={{
-              fontSize: 22,
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              margin: 0,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-            }}
+            className="ui-page-title"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}
           >
             <ShieldHalf size={20} style={{ color: 'var(--accent-primary)' }} />
             Three Lines of Defense
