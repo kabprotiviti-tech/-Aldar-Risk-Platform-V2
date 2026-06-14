@@ -30,7 +30,6 @@ import {
   Gavel,
   Sparkles,
   Check,
-  Lock,
   type LucideIcon,
 } from 'lucide-react'
 import { usePersona } from '@/lib/context/PersonaContext'
