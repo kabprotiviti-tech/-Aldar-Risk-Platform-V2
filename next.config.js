@@ -22,5 +22,20 @@ const nextConfig = {
       // /control-command-center is the ICOFR control catalog. Both stay.
     ]
   },
+  async headers() {
+    // Stop corporate proxies / browsers from serving STALE HTML — the
+    // chronic "I deployed but can't see the update" problem. HTML pages and
+    // API responses are marked no-store so every load fetches the latest
+    // build; the immutable hashed /_next/static assets are excluded so they
+    // keep their long-cache headers and performance is unaffected.
+    return [
+      {
+        source: '/((?!_next/static|_next/image|favicon.ico).*)',
+        headers: [
+          { key: 'Cache-Control', value: 'no-store, max-age=0, must-revalidate' },
+        ],
+      },
+    ]
+  },
 }
 module.exports = nextConfig
