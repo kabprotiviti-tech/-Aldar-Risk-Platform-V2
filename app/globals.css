@@ -549,6 +549,27 @@ h1, h2, h3 {
   background: var(--bg-hover);
 }
 
+/* Final consistency pass (tier-3): premium defaults for the common
+   un-styled form controls + stat hover. Inline-styled elements keep
+   their own look, so this only lifts the plain ones (safe). */
+.layout-main-content select:not([style]),
+.layout-main-content input[type="text"]:not([style]),
+.layout-main-content input[type="search"]:not([style]),
+.layout-main-content input[type="date"]:not([style]),
+.layout-main-content textarea:not([style]) {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm, 6px);
+  padding: 7px 10px;
+  font-size: 12.5px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+.ui-stat:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong, #D0D5DD);
+}
+.ui-btn:active, .ui-btn-primary:active { transform: translateY(0.5px); }
+
 .bg-card-theme { background-color: var(--bg-card); }
 .bg-hover-theme { background-color: var(--bg-hover); }
 .border-theme { border-color: var(--border-color); }
