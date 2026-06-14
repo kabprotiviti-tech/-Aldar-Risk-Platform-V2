@@ -30,6 +30,7 @@ import {
   Gavel,
   Sparkles,
   Check,
+  Lock,
   type LucideIcon,
 } from 'lucide-react'
 import { usePersona } from '@/lib/context/PersonaContext'
@@ -360,14 +361,10 @@ function BrandPane() {
 // Illustrative live-posture preview card — makes the hero feel like a real
 // product (the single biggest "tier-1" signal on a login screen).
 function ProductGlimpse() {
-  // 5×5 heat pattern (illustrative). c=critical h=high m=medium l=low.
-  const HEAT = [
-    'l', 'l', 'm', 'h', 'c',
-    'l', 'm', 'm', 'h', 'h',
-    'l', 'm', 'h', 'h', 'm',
-    'm', 'm', 'h', 'c', 'h',
-    'l', 'l', 'm', 'h', 'c',
-  ]
+  // Decorative 5×5 grid only — shown BLURRED behind a lock. Group-level
+  // posture (exposure, risk counts) must NEVER be visible pre-auth, and is
+  // role-scoped after sign-in (a Risk Champion only sees their entity).
+  const HEAT = ['l','l','m','h','c','l','m','m','h','h','l','m','h','h','m','m','m','h','c','h','l','l','m','h','c']
   const COLOR: Record<string, string> = {
     c: 'var(--risk-critical)', h: 'var(--risk-high)', m: 'var(--risk-medium)', l: 'var(--risk-low)',
   }
@@ -383,46 +380,35 @@ function ProductGlimpse() {
           maxWidth: 400,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
           <span className="animate-live-pulse" style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--risk-low)', display: 'inline-block' }} />
-          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.7, textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>ABC Holdings · Group posture</span>
-          <span style={{ marginLeft: 'auto', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)' }}>Q2 FY26</span>
+          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.7, textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>ABC Holdings · Risk cockpit</span>
+          <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 9.5, fontWeight: 700, color: 'var(--accent-primary)', background: 'var(--accent-glow)', border: '1px solid var(--border-accent)', borderRadius: 999, padding: '2px 8px' }}>
+            <Lock size={10} /> Role-scoped
+          </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 32, fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>AED 0.90Bn</span>
-          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--risk-critical)', background: 'rgba(217,45,32,0.10)', border: '1px solid rgba(217,45,32,0.30)', borderRadius: 6, padding: '2px 8px' }}>1.5× over appetite</span>
-        </div>
-        <div style={{ fontSize: 11.5, color: 'var(--text-tertiary)', marginTop: 3 }}>Net unmitigated exposure vs AED 0.60Bn board appetite</div>
-
-        <div style={{ display: 'flex', gap: 14, marginTop: 16, alignItems: 'center' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 3 }}>
+        <div style={{ position: 'relative', borderRadius: 10, overflow: 'hidden' }}>
+          <div aria-hidden style={{ filter: 'blur(7px)', opacity: 0.5, padding: 10, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6 }}>
             {HEAT.map((k, i) => (
-              <span key={i} style={{ width: 16, height: 16, borderRadius: 3, background: COLOR[k], opacity: 0.92 }} />
+              <span key={i} style={{ height: 22, borderRadius: 4, background: COLOR[k] }} />
             ))}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-            <GlimpseStat color="var(--risk-critical)" label="3 Critical" />
-            <GlimpseStat color="var(--risk-high)" label="6 High" />
-            <GlimpseStat color="var(--risk-low)" label="2 KRIs breached" />
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, textAlign: 'center', padding: '8px 14px' }}>
+            <span style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--accent-glow)', border: '1px solid var(--border-accent)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-primary)' }}>
+              <Lock size={16} />
+            </span>
+            <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--text-primary)' }}>Your risk posture unlocks at sign-in</span>
+            <span style={{ fontSize: 10.5, color: 'var(--text-tertiary)', maxWidth: 290, lineHeight: 1.5 }}>Views are role-scoped — Risk Champions see only their entity; the Group CRO sees the consolidated view.</span>
           </div>
         </div>
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginTop: 16 }}>
-        {['ISO 31000 · COSO ERM', '4 persona views', 'UAE-native regulators'].map((t) => (
+        {['ISO 31000 · COSO ERM', 'Role-based access', 'UAE-native regulators'].map((t) => (
           <span key={t} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 999, padding: '4px 11px' }}>{t}</span>
         ))}
       </div>
     </div>
-  )
-}
-
-function GlimpseStat({ color, label }: { color: string; label: string }) {
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>
-      <span style={{ width: 7, height: 7, borderRadius: '50%', background: color }} />
-      {label}
-    </span>
   )
 }
 
