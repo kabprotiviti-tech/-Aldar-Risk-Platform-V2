@@ -1703,13 +1703,20 @@ h1, h2, h3 {
    - Reduce page padding on narrow viewports so the main content area
      uses every available pixel. */
 .layout-main-content table {
-  display: block;
-  overflow-x: auto;
+  /* Keep the native table formatting context so <thead> and <tbody> share ONE
+     column model and stay aligned. Forcing display:block here (and re-declaring
+     thead/tbody as separate display:table boxes) makes each compute its own
+     column widths, which skews headers off their data on every device. */
+  width: 100%;
   max-width: 100%;
-  -webkit-overflow-scrolling: touch;
 }
-.layout-main-content table thead,
-.layout-main-content table tbody { display: table; width: 100%; table-layout: auto; }
+/* Horizontal scroll on narrow screens is handled by wrapping the table in a
+   scroll container (.table-scroll) — never by changing the table's display. */
+.layout-main-content .table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
 @media (max-width: 767px) {
   .layout-main-content { padding-left: 12px !important; padding-right: 12px !important; }
   .arc-toolbar > div:last-child { gap: 6px !important; flex-wrap: wrap; }
