@@ -1113,7 +1113,10 @@ export default function DocumentsPage() {
                           <thead>
                             <tr>
                               <th>ID</th><th>Risk Title</th><th>Category</th><th>Portfolio</th>
-                              <th>Severity</th><th>L</th><th>I</th><th>Score</th>
+                              <th>Severity</th>
+                              <th className="text-center">L</th>
+                              <th className="text-center">I</th>
+                              <th className="text-center">Score</th>
                               <th>Financial Impact</th><th>Source</th>
                             </tr>
                           </thead>

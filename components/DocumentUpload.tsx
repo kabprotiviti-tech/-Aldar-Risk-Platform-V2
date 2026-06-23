@@ -617,9 +617,9 @@ export function DocumentUpload() {
                         <th>Category</th>
                         <th>Portfolio</th>
                         <th>Severity</th>
-                        <th>L</th>
-                        <th>I</th>
-                        <th>Score</th>
+                        <th style={{ textAlign: 'center' }}>L</th>
+                        <th style={{ textAlign: 'center' }}>I</th>
+                        <th style={{ textAlign: 'center' }}>Score</th>
                         <th>Financial Impact</th>
                         <th>Source</th>
                       </tr>
