@@ -132,7 +132,7 @@ export function Top10RisksTable() {
         </colgroup>
         <thead>
           <tr style={{ background: 'var(--bg-primary)' }}>
-            <Th>#</Th>
+            <Th center>#</Th>
             <Th>ID</Th>
             <Th>Risk</Th>
             <Th>Entity</Th>
