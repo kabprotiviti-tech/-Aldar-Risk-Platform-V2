@@ -23,11 +23,9 @@ import { MitigationActionsProvider } from '@/lib/context/MitigationActionsContex
 import { KRIThresholdsProvider } from '@/lib/context/KRIThresholdsContext'
 import { KRIEntriesProvider } from '@/lib/context/KRIEntriesContext'
 import { EscalationsProvider } from '@/lib/context/EscalationsContext'
-import { ERMPlanActivitiesProvider } from '@/lib/context/ERMPlanActivitiesContext'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { Top10RisksTable } from '@/components/portfolio-tower/Top10RisksTable'
-import { ERMAnnualPlan } from '@/components/portfolio-tower/ERMAnnualPlan'
 import { ConcentrationPanel } from '@/components/portfolio-tower/ConcentrationPanel'
 import { ERMScorecard } from '@/components/portfolio-tower/ERMScorecard'
 import { EscalatedToGroupPanel } from '@/components/portfolio-tower/EscalatedToGroupPanel'
@@ -166,9 +164,6 @@ function PortfolioTowerContent() {
 
       {/* M4.2 — Top-10 Group risks */}
       <Top10RisksTable />
-
-      {/* M4.2 — ERM Annual Plan */}
-      <ERMAnnualPlan />
 
       {/* Hierarchy disclaimer */}
       <div
@@ -723,9 +718,7 @@ export default function PortfolioTowerPage() {
         <KRIThresholdsProvider>
           <KRIEntriesProvider>
             <EscalationsProvider>
-              <ERMPlanActivitiesProvider>
-                <PortfolioTowerContent />
-              </ERMPlanActivitiesProvider>
+              <PortfolioTowerContent />
             </EscalationsProvider>
           </KRIEntriesProvider>
         </KRIThresholdsProvider>

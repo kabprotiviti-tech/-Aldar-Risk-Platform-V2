@@ -24,6 +24,13 @@ export type PlanActivityCategory =
   | 'monitoring'
   | 'reporting'
 
+/**
+ * Lifecycle status the user sets on a plan activity. "Due" and "Overdue"
+ * are NOT stored here — they are derived in the component from this status
+ * plus the activity's scheduled months against today's date.
+ */
+export type PlanActivityStatus = 'planned' | 'in_progress' | 'completed'
+
 export interface PlanActivity {
   id: string
   title: string
@@ -43,18 +50,44 @@ const { Provider: StoreProvider, useStore } = createPersistedContext<PlanActivit
   migrate: (raw) => (Array.isArray(raw) ? (raw as PlanActivity[]) : []),
 })
 
+/**
+ * Status map keyed by activity id — covers BOTH the baked-in seeded
+ * activities and user-added ones, so any activity can be marked
+ * Planned / In Progress / Completed. Absent id ⇒ 'planned' default.
+ */
+const { Provider: StatusProvider, useStore: useStatusStore } =
+  createPersistedContext<Record<string, PlanActivityStatus>>({
+    storageKey: 'aldar-erm-plan-status-v1',
+    defaultValue: {},
+    migrate: (raw) =>
+      raw && typeof raw === 'object' && !Array.isArray(raw)
+        ? (raw as Record<string, PlanActivityStatus>)
+        : {},
+  })
+
 interface CtxValue {
   activities: PlanActivity[]
   addActivity: (
     input: Omit<PlanActivity, 'id' | 'createdAt'>,
   ) => PlanActivity
   removeActivity: (id: string) => void
+  /** Lifecycle status by activity id ('planned' when absent). */
+  statuses: Record<string, PlanActivityStatus>
+  /** Set/update the status of any activity (seeded or custom). */
+  setStatus: (id: string, status: PlanActivityStatus, title?: string) => void
 }
 
 const Ctx = React.createContext<CtxValue | null>(null)
 
+const STATUS_LABELS: Record<PlanActivityStatus, string> = {
+  planned: 'Planned',
+  in_progress: 'In Progress',
+  completed: 'Completed',
+}
+
 function Inner({ children }: { children: React.ReactNode }) {
   const { state: activities, setState } = useStore()
+  const { state: statuses, setState: setStatuses } = useStatusStore()
 
   const addActivity = useCallback<CtxValue['addActivity']>(
     (input) => {
@@ -96,9 +129,26 @@ function Inner({ children }: { children: React.ReactNode }) {
     [setState],
   )
 
+  const setStatus = useCallback<CtxValue['setStatus']>(
+    (id, status, title) => {
+      setStatuses((prev) => {
+        if (prev[id] === status) return prev
+        return { ...prev, [id]: status }
+      })
+      recordAuditEventDirect({
+        category: 'system',
+        action: 'update',
+        actor: 'AVP (demo)',
+        targetId: id,
+        summary: `ERM Annual Plan activity "${title ?? id}" status set to ${STATUS_LABELS[status]}.`,
+      })
+    },
+    [setStatuses],
+  )
+
   const value = useMemo<CtxValue>(
-    () => ({ activities, addActivity, removeActivity }),
-    [activities, addActivity, removeActivity],
+    () => ({ activities, addActivity, removeActivity, statuses, setStatus }),
+    [activities, addActivity, removeActivity, statuses, setStatus],
   )
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
@@ -107,7 +157,9 @@ function Inner({ children }: { children: React.ReactNode }) {
 export function ERMPlanActivitiesProvider({ children }: { children: React.ReactNode }) {
   return (
     <StoreProvider>
-      <Inner>{children}</Inner>
+      <StatusProvider>
+        <Inner>{children}</Inner>
+      </StatusProvider>
     </StoreProvider>
   )
 }

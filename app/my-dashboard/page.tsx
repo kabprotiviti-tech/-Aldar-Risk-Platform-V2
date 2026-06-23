@@ -36,6 +36,8 @@ import {
 } from 'lucide-react'
 import { SimulationProvider, useSimulation } from '@/lib/context/SimulationContext'
 import { RiskDraftProvider, useRiskDrafts } from '@/lib/context/RiskDraftContext'
+import { ERMPlanActivitiesProvider } from '@/lib/context/ERMPlanActivitiesContext'
+import { ERMAnnualPlan } from '@/components/portfolio-tower/ERMAnnualPlan'
 import {
   MitigationActionsProvider,
   useMitigationActions,
@@ -603,6 +605,11 @@ function MyDashboardContent() {
         )}
       </Section>
 
+      {/* ERM Annual Plan — interactive status tracker (Planned / In Progress /
+          Completed; Due & Overdue derived from today vs. schedule). Full
+          plotted plan also lives at /erm-plan. */}
+      <ERMAnnualPlan />
+
       <TrustFooter />
     </div>
   )
@@ -1105,7 +1112,9 @@ export default function MyDashboardPage() {
         <MitigationActionsProvider>
           <KRIThresholdsProvider>
             <KRIEntriesProvider>
-              <MyDashboardContent />
+              <ERMPlanActivitiesProvider>
+                <MyDashboardContent />
+              </ERMPlanActivitiesProvider>
             </KRIEntriesProvider>
           </KRIThresholdsProvider>
         </MitigationActionsProvider>
