@@ -51,13 +51,14 @@ const { Provider: StoreProvider, useStore } = createPersistedContext<PlanActivit
 })
 
 /**
- * Status map keyed by activity id — covers BOTH the baked-in seeded
- * activities and user-added ones, so any activity can be marked
- * Planned / In Progress / Completed. Absent id ⇒ 'planned' default.
+ * Status map keyed PER OCCURRENCE — key is `${activityId}|${month}` so an
+ * activity that recurs across several months (e.g. monthly KRI reporting,
+ * quarterly ARC review) can have each month marked independently. Covers
+ * both seeded and user-added activities. Absent key ⇒ 'planned' default.
  */
 const { Provider: StatusProvider, useStore: useStatusStore } =
   createPersistedContext<Record<string, PlanActivityStatus>>({
-    storageKey: 'aldar-erm-plan-status-v1',
+    storageKey: 'aldar-erm-plan-status-v2',
     defaultValue: {},
     migrate: (raw) =>
       raw && typeof raw === 'object' && !Array.isArray(raw)
@@ -65,16 +66,26 @@ const { Provider: StatusProvider, useStore: useStatusStore } =
         : {},
   })
 
+/** Stable key for one activity-month occurrence. */
+export function occurrenceKey(id: string, month: number): string {
+  return `${id}|${month}`
+}
+
 interface CtxValue {
   activities: PlanActivity[]
   addActivity: (
     input: Omit<PlanActivity, 'id' | 'createdAt'>,
   ) => PlanActivity
   removeActivity: (id: string) => void
-  /** Lifecycle status by activity id ('planned' when absent). */
+  /** Lifecycle status keyed by `${activityId}|${month}` ('planned' when absent). */
   statuses: Record<string, PlanActivityStatus>
-  /** Set/update the status of any activity (seeded or custom). */
-  setStatus: (id: string, status: PlanActivityStatus, title?: string) => void
+  /** Set/update the status of ONE month-occurrence of an activity. */
+  setStatus: (
+    id: string,
+    month: number,
+    status: PlanActivityStatus,
+    title?: string,
+  ) => void
 }
 
 const Ctx = React.createContext<CtxValue | null>(null)
@@ -84,6 +95,8 @@ const STATUS_LABELS: Record<PlanActivityStatus, string> = {
   in_progress: 'In Progress',
   completed: 'Completed',
 }
+
+const MONTH_ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 function Inner({ children }: { children: React.ReactNode }) {
   const { state: activities, setState } = useStore()
@@ -130,17 +143,18 @@ function Inner({ children }: { children: React.ReactNode }) {
   )
 
   const setStatus = useCallback<CtxValue['setStatus']>(
-    (id, status, title) => {
+    (id, month, status, title) => {
+      const key = occurrenceKey(id, month)
       setStatuses((prev) => {
-        if (prev[id] === status) return prev
-        return { ...prev, [id]: status }
+        if (prev[key] === status) return prev
+        return { ...prev, [key]: status }
       })
       recordAuditEventDirect({
         category: 'system',
         action: 'update',
         actor: 'AVP (demo)',
-        targetId: id,
-        summary: `ERM Annual Plan activity "${title ?? id}" status set to ${STATUS_LABELS[status]}.`,
+        targetId: key,
+        summary: `ERM Annual Plan activity "${title ?? id}" (${MONTH_ABBR[month - 1] ?? month}) status set to ${STATUS_LABELS[status]}.`,
       })
     },
     [setStatuses],

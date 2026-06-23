@@ -13,9 +13,10 @@
  */
 
 import React, { useState } from 'react'
-import { Calendar, Plus, X, Check, Clock, AlertTriangle, Circle, ChevronDown, type LucideIcon } from 'lucide-react'
+import { Calendar, Plus, X, Check, Clock, AlertTriangle, Circle, type LucideIcon } from 'lucide-react'
 import {
   useERMPlanActivities,
+  occurrenceKey,
   type PlanActivityCategory,
   type PlanActivity,
   type PlanActivityStatus,
@@ -57,21 +58,33 @@ const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'S
 
 // ── Status (lifecycle the user sets) + derived urgency ──────────────────
 // "Due" and "Overdue" are NOT stored — they are computed from the user-set
-// lifecycle status plus the activity's scheduled months vs. today's month.
+// lifecycle status of EACH month-occurrence vs. today's month.
 type PlanState = 'completed' | 'overdue' | 'in_progress' | 'due' | 'planned'
 
-/** Real current month (1..12). Drives Due / Overdue. */
-const CURRENT_MONTH = new Date().getMonth() + 1
+/** Real current month + day (drives the Due/Overdue logic and the today line). */
+const NOW = new Date()
+const CURRENT_MONTH = NOW.getMonth() + 1 // 1..12
+const CURRENT_YEAR = NOW.getFullYear()
 
-function deriveState(months: number[], status: PlanActivityStatus): PlanState {
+/** State of ONE month-occurrence, from its stored lifecycle status + the date. */
+function deriveOccState(month: number, status: PlanActivityStatus): PlanState {
   if (status === 'completed') return 'completed'
-  if (months.length === 0) return status === 'in_progress' ? 'in_progress' : 'planned'
-  const max = Math.max(...months)
-  const min = Math.min(...months)
-  if (max < CURRENT_MONTH) return 'overdue' // scheduled window has passed, not completed
+  if (month < CURRENT_MONTH) return 'overdue' // month has passed, not completed
   if (status === 'in_progress') return 'in_progress'
-  if (min <= CURRENT_MONTH && CURRENT_MONTH <= max) return 'due' // inside the window now
-  return 'planned' // window is still in the future
+  if (month === CURRENT_MONTH) return 'due' // happening this month
+  return 'planned' // future month
+}
+
+const STATE_PRIORITY: PlanState[] = ['overdue', 'due', 'in_progress', 'planned', 'completed']
+
+/** Roll up several occurrence states into one chip state for the row. */
+function rollupState(states: PlanState[]): PlanState {
+  if (states.length === 0) return 'planned'
+  if (states.every((s) => s === 'completed')) return 'completed'
+  for (const p of STATE_PRIORITY) {
+    if (states.includes(p)) return p
+  }
+  return 'planned'
 }
 
 const STATE_META: Record<
@@ -98,7 +111,7 @@ type Row =
 export function ERMAnnualPlan() {
   const { activities, removeActivity, statuses, setStatus } = useERMPlanActivities()
   const [open, setOpen] = useState(false)
-  const [statusFor, setStatusFor] = useState<{ id: string; title: string; months: number[] } | null>(null)
+  const [statusFor, setStatusFor] = useState<{ id: string; title: string; month: number } | null>(null)
 
   const rows: Row[] = [
     ...SEED_ACTIVITIES.map<Row>((r) => ({ kind: 'seed', row: r })),
@@ -136,8 +149,9 @@ export function ERMAnnualPlan() {
           </div>
           <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>
             Seeded illustrative cycle plus AVP-added activities. Click <strong>+ Add Activity</strong> to schedule a new item,
-            or click any activity&rsquo;s <strong>status chip</strong> to mark it Planned / In Progress / Completed.
-            <span style={{ fontStyle: 'italic' }}> Due &amp; Overdue are derived from today&rsquo;s date against the schedule.</span>
+            or click any <strong>month cell</strong> to mark that occurrence Planned / In Progress / Completed —
+            so a recurring activity can be part-done. The chip by each title rolls up the row.
+            <span style={{ fontStyle: 'italic' }}> Due &amp; Overdue are derived from today&rsquo;s date against the schedule; the red line marks today.</span>
           </div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginTop: 6 }}>
             {(['completed', 'due', 'overdue', 'in_progress', 'planned'] as PlanState[]).map((s) => {
@@ -228,22 +242,42 @@ export function ERMAnnualPlan() {
               >
                 Activity
               </th>
-              {MONTH_LABELS.map((m) => (
-                <th
-                  key={m}
-                  style={{
-                    textAlign: 'center',
-                    fontSize: 9,
-                    fontWeight: 700,
-                    color: 'var(--text-tertiary)',
-                    textTransform: 'uppercase',
-                    letterSpacing: 0.5,
-                    padding: '6px 4px',
-                  }}
-                >
-                  {m}
-                </th>
-              ))}
+              {MONTH_LABELS.map((m, i) => {
+                const isTodayCol = i + 1 === CURRENT_MONTH
+                return (
+                  <th
+                    key={m}
+                    style={{
+                      textAlign: 'center',
+                      fontSize: 9,
+                      fontWeight: 700,
+                      color: isTodayCol ? 'var(--accent-primary)' : 'var(--text-tertiary)',
+                      textTransform: 'uppercase',
+                      letterSpacing: 0.5,
+                      padding: '6px 4px',
+                      borderLeft: isTodayCol ? '2px solid var(--accent-primary)' : undefined,
+                      position: 'relative',
+                    }}
+                  >
+                    {m}
+                    {isTodayCol && (
+                      <span
+                        title={`Today — ${MONTH_LABELS[CURRENT_MONTH - 1]} ${NOW.getDate()}, ${CURRENT_YEAR}`}
+                        style={{
+                          display: 'block',
+                          fontSize: 7.5,
+                          fontWeight: 800,
+                          letterSpacing: 0.6,
+                          color: 'var(--accent-primary)',
+                          marginTop: 1,
+                        }}
+                      >
+                        ● TODAY
+                      </span>
+                    )}
+                  </th>
+                )
+              })}
             </tr>
           </thead>
           <tbody>
@@ -251,8 +285,12 @@ export function ERMAnnualPlan() {
               const isCustom = r.kind === 'custom'
               const meta = CATEGORY_META[r.row.category]
               const months = r.row.months
-              const rawStatus: PlanActivityStatus = statuses[r.row.id] ?? 'planned'
-              const state = deriveState(months, rawStatus)
+              const occStatus = (m: number): PlanActivityStatus =>
+                statuses[occurrenceKey(r.row.id, m)] ?? 'planned'
+              const occStates = months.map((m) => deriveOccState(m, occStatus(m)))
+              const rollup = rollupState(occStates)
+              const doneCount = occStates.filter((s) => s === 'completed').length
+              const isRecurring = months.length > 1
               return (
                 <tr key={r.row.id} style={{ borderTop: '1px solid var(--border-color)' }}>
                   <td
@@ -285,11 +323,9 @@ export function ERMAnnualPlan() {
                           </span>
                         )}
                       </div>
-                      <StatusPill
-                        state={state}
-                        onClick={() =>
-                          setStatusFor({ id: r.row.id, title: r.row.title, months })
-                        }
+                      <RollupChip
+                        state={rollup}
+                        countLabel={isRecurring ? `${doneCount}/${months.length}` : undefined}
                       />
                       {isCustom && (
                         <button
@@ -320,28 +356,54 @@ export function ERMAnnualPlan() {
                   {MONTH_LABELS.map((_, idx) => {
                     const monthNum = idx + 1
                     const active = months.includes(monthNum)
+                    const isTodayCol = monthNum === CURRENT_MONTH
+                    const occState = active ? deriveOccState(monthNum, occStatus(monthNum)) : null
+                    // Future/planned occurrences keep the category colour (so you
+                    // can still read what KIND of activity it is); completed / due /
+                    // overdue / in-progress occurrences take the status colour.
+                    const useCat = occState === 'planned'
+                    const cellColor = useCat ? meta.color : occState ? STATE_META[occState].color : 'transparent'
+                    const cellBg = useCat ? meta.bg : occState ? STATE_META[occState].bg : 'transparent'
+                    const cellBorder = useCat ? meta.border : occState ? STATE_META[occState].border : 'transparent'
+                    const CellIcon = occState && occState !== 'planned' ? STATE_META[occState].Icon : null
                     return (
                       <td
                         key={idx}
                         style={{
-                          padding: '6px 4px',
+                          padding: '5px 4px',
                           textAlign: 'center',
-                          background: active ? meta.bg : 'transparent',
-                          border: active ? `1px solid ${meta.border}` : '1px solid transparent',
+                          borderLeft: isTodayCol ? '2px solid var(--accent-primary)' : undefined,
                         }}
                       >
-                        {active && (
-                          <span
-                            title={`${r.row.title} · ${MONTH_LABELS[idx]}`}
+                        {active && occState ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setStatusFor({ id: r.row.id, title: r.row.title, month: monthNum })
+                            }
+                            title={`${r.row.title} · ${MONTH_LABELS[idx]} — ${STATE_META[occState].label} (click to update)`}
                             style={{
-                              display: 'inline-block',
-                              width: 6,
-                              height: 6,
-                              borderRadius: '50%',
-                              background: meta.color,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: 3,
+                              width: '100%',
+                              minHeight: 22,
+                              background: cellBg,
+                              border: `1px solid ${cellBorder}`,
+                              borderRadius: 4,
+                              color: cellColor,
+                              cursor: 'pointer',
+                              padding: '2px 0',
                             }}
-                          />
-                        )}
+                          >
+                            {CellIcon ? (
+                              <CellIcon size={11} />
+                            ) : (
+                              <span style={{ width: 6, height: 6, borderRadius: '50%', background: cellColor }} />
+                            )}
+                          </button>
+                        ) : null}
                       </td>
                     )
                   })}
@@ -356,12 +418,11 @@ export function ERMAnnualPlan() {
 
       {statusFor && (
         <StatusModal
-          id={statusFor.id}
           title={statusFor.title}
-          months={statusFor.months}
-          current={statuses[statusFor.id] ?? 'planned'}
+          month={statusFor.month}
+          current={statuses[occurrenceKey(statusFor.id, statusFor.month)] ?? 'planned'}
           onSet={(s) => {
-            setStatus(statusFor.id, s, statusFor.title)
+            setStatus(statusFor.id, statusFor.month, s, statusFor.title)
             setStatusFor(null)
           }}
           onClose={() => setStatusFor(null)}
@@ -371,14 +432,17 @@ export function ERMAnnualPlan() {
   )
 }
 
-// ── Status chip (shows derived state) + picker modal ────────────────────
-function StatusPill({ state, onClick }: { state: PlanState; onClick: () => void }) {
+// ── Row roll-up chip (read-only summary of the row's occurrences) ───────
+function RollupChip({ state, countLabel }: { state: PlanState; countLabel?: string }) {
   const m = STATE_META[state]
   const Icon = m.Icon
   return (
-    <button
-      onClick={onClick}
-      title="Update status (Planned / In Progress / Completed)"
+    <span
+      title={
+        countLabel
+          ? `${countLabel} months completed — overall: ${m.label}. Click a month cell to update it.`
+          : `${m.label} — click the month cell to update.`
+      }
       style={{
         display: 'inline-flex',
         alignItems: 'center',
@@ -392,40 +456,31 @@ function StatusPill({ state, onClick }: { state: PlanState; onClick: () => void 
         fontWeight: 700,
         letterSpacing: 0.3,
         textTransform: 'uppercase',
-        cursor: 'pointer',
         whiteSpace: 'nowrap',
       }}
     >
       <Icon size={10} />
-      {m.label}
-      <ChevronDown size={9} style={{ opacity: 0.7 }} />
-    </button>
+      {countLabel ?? m.label}
+    </span>
   )
 }
 
+// ── Per-occurrence status picker ────────────────────────────────────────
 function StatusModal({
-  id,
   title,
-  months,
+  month,
   current,
   onSet,
   onClose,
 }: {
-  id: string
   title: string
-  months: number[]
+  month: number
   current: PlanActivityStatus
   onSet: (s: PlanActivityStatus) => void
   onClose: () => void
 }) {
-  const derived = deriveState(months, current)
+  const derived = deriveOccState(month, current)
   const dm = STATE_META[derived]
-  const windowLabel =
-    months.length === 0
-      ? 'no month scheduled'
-      : months.length === 1
-        ? MONTH_LABELS[months[0] - 1]
-        : `${MONTH_LABELS[Math.min(...months) - 1]}–${MONTH_LABELS[Math.max(...months) - 1]}`
 
   return (
     <Modal open onClose={onClose} ariaLabel="Update activity status" size="md">
@@ -444,12 +499,10 @@ function StatusModal({
             ERM Annual Plan · Update Status
           </div>
           <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-            {title}
+            {title} <span style={{ color: 'var(--accent-primary)' }}>· {MONTH_LABELS[month - 1]}</span>
           </h3>
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 6, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            Scheduled: <strong style={{ color: 'var(--text-secondary)' }}>{windowLabel}</strong>
-            <span style={{ color: 'var(--border-color)' }}>·</span>
-            Currently:
+            This occurrence is currently:
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: dm.color, fontWeight: 700 }}>
               <dm.Icon size={11} />
               {dm.label}
