@@ -32,3 +32,6 @@ export const INACTION_EXPOSURE = BASELINE_EXPOSURE * INACTION_MULTIPLIER
  * what acting now avoids. This is the ONE number both panels display.
  */
 export const COST_OF_INACTION = INACTION_EXPOSURE - BASELINE_EXPOSURE
+
+/** Illustrative cost of the Tier-1 mitigation package ("cost to act"). */
+export const COST_TO_ACT = 35_000_000

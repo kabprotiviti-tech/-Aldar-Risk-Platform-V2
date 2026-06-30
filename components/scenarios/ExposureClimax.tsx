@@ -22,7 +22,7 @@
 import React, { useState } from 'react'
 import { ChevronRight, ShieldCheck } from 'lucide-react'
 import { BASELINE_RISK_POSTURE } from '@/lib/data/baselineRiskPosture'
-import { STRESS_MULTIPLIER, INACTION_MULTIPLIER } from '@/lib/data/scenarioInaction'
+import { STRESS_MULTIPLIER, INACTION_MULTIPLIER, COST_TO_ACT as COST_TO_ACT_AED } from '@/lib/data/scenarioInaction'
 
 const NET = BASELINE_RISK_POSTURE.netUnhedgedExposure // 0.90bn
 const CEILING = BASELINE_RISK_POSTURE.netUnhedgedAppetiteCeiling // 0.60bn
@@ -64,13 +64,14 @@ const ACTS: Act[] = [
 ]
 
 const AVOIDED = ACTS[2].value - ACTS[0].value // ~1.27bn
-const COST_TO_ACT = 'AED 35M'
 
 function aed(n: number): string {
   const v = Math.abs(n)
   if (v >= 1e9) return `AED ${(n / 1e9).toFixed(2)}Bn`
   return `AED ${Math.round(n / 1e6)}M`
 }
+
+const COST_TO_ACT = aed(COST_TO_ACT_AED)
 
 const CHART_H = 200
 const MAX = ACTS[2].value * 1.12
