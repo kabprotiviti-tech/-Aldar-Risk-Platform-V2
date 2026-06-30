@@ -16,19 +16,24 @@
 
 import React from 'react'
 import { AlertTriangle, Zap, Calendar, Crown } from 'lucide-react'
-import { BASELINE_RISK_POSTURE } from '@/lib/data/baselineRiskPosture'
 import { formatCurrencyShort } from '@/lib/utils/formatters'
+import {
+  BASELINE_EXPOSURE,
+  INACTION_EXPOSURE,
+  INACTION_MULTIPLIER,
+  COST_OF_INACTION,
+} from '@/lib/data/scenarioInaction'
 import {
   actionsByTier,
   type RecommendedAction,
 } from '@/lib/data/recommendedActions'
 
 export function CostOfInactionPanel() {
-  // Illustrative cost of inaction: baseline net unhedged exposure projected
-  // 12 months forward without mitigation. Tagged illustrative.
-  const baselineExp = BASELINE_RISK_POSTURE.netUnhedgedExposure
-  const projectedDeterioration = baselineExp * 0.42 // illustrative 42% deterioration multiplier
-  const costOfInaction = projectedDeterioration
+  // Single source of truth (lib/data/scenarioInaction) — reconciles exactly
+  // with the Exposure Bridge above: cost of inaction = the 12-month
+  // deterioration vs. baseline, i.e. what acting now avoids. Illustrative.
+  const baselineExp = BASELINE_EXPOSURE
+  const costOfInaction = COST_OF_INACTION
 
   return (
     <section
@@ -52,7 +57,7 @@ export function CostOfInactionPanel() {
             {formatCurrencyShort(costOfInaction, 'AED')}
           </div>
           <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4, maxWidth: 600, lineHeight: 1.45 }}>
-            Projected 12-month exposure deterioration if no mitigating action is taken on top scenarios. Baseline net-unhedged exposure {formatCurrencyShort(baselineExp, 'AED')} × 42% illustrative shock multiplier.
+            Projected 12-month exposure deterioration if no mitigating action is taken on the top scenarios — net-unhedged exposure rises from {formatCurrencyShort(baselineExp, 'AED')} to {formatCurrencyShort(INACTION_EXPOSURE, 'AED')} (×{INACTION_MULTIPLIER}, illustrative). That gap is exactly what the response plan below avoids.
           </div>
         </div>
         <span

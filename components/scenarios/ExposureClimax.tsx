@@ -22,6 +22,7 @@
 import React, { useState } from 'react'
 import { ChevronRight, ShieldCheck } from 'lucide-react'
 import { BASELINE_RISK_POSTURE } from '@/lib/data/baselineRiskPosture'
+import { STRESS_MULTIPLIER, INACTION_MULTIPLIER } from '@/lib/data/scenarioInaction'
 
 const NET = BASELINE_RISK_POSTURE.netUnhedgedExposure // 0.90bn
 const CEILING = BASELINE_RISK_POSTURE.netUnhedgedAppetiteCeiling // 0.60bn
@@ -48,7 +49,7 @@ const ACTS: Act[] = [
     key: 'stressed',
     label: 'Under stress',
     sub: 'Severe shock',
-    value: NET * 1.7,
+    value: NET * STRESS_MULTIPLIER,
     color: '#C2410C',
     caption: 'Suez disruption + rate shock + overseas-buyer default, at severe intensity.',
   },
@@ -56,7 +57,7 @@ const ACTS: Act[] = [
     key: 'inaction',
     label: 'If we do nothing',
     sub: '12-month',
-    value: NET * 2.41,
+    value: NET * INACTION_MULTIPLIER,
     color: '#9F1B1F',
     caption: 'Unmitigated, the gap compounds across four quarters.',
   },
