@@ -1,5 +1,21 @@
 'use client'
 
+/**
+ * Scenario Analysis — consolidated single-flow redesign.
+ * -------------------------------------------------------
+ * One narrative, three acts, one engine:
+ *   1 · The stakes      → <ExposureClimax/> (baseline → stress → inaction bridge)
+ *   2 · Stress test     → <StressTestStudio/> (pick scenario + intensity → impact)
+ *   3 · The decision    → <CostOfInactionPanel/> (response plan + route for approval)
+ * Plus on-demand depth: Baseline & sources (collapsible) and the analyst
+ * Intelligence Workbench (driver-level sliders) behind a toggle.
+ *
+ * The four redundant engines (Quick Scenario Engine, AI Stress Test, and the
+ * old always-on Workbench wrapper) are removed so the page presents ONE way
+ * to stress-test, with one set of reconciled numbers. AI-generated impact is
+ * badged "AI Hypothesis — pending approval" per CLAUDE.md.
+ */
+
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -12,13 +28,24 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts'
-import { Play, AlertTriangle, TrendingDown, Shield, Lightbulb, Loader2, Zap, Activity } from 'lucide-react'
+import {
+  Play,
+  AlertTriangle,
+  Shield,
+  Loader2,
+  Sparkles,
+  ChevronDown,
+  SlidersHorizontal,
+  Activity,
+} from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardBody } from '@/components/ui/Card'
-import { RiskBadge, ConfidenceBadge } from '@/components/ui/Badge'
-import { AIInsightBox } from '@/components/ui/AIInsightBox'
-import { FinancialCalculationPanel, ViewCalcButton, type FinancialCalcContext } from '@/components/FinancialCalculationPanel'
+import { ConfidenceBadge } from '@/components/ui/Badge'
+import {
+  FinancialCalculationPanel,
+  ViewCalcButton,
+  type FinancialCalcContext,
+} from '@/components/FinancialCalculationPanel'
 import { scenarioTemplates, portfolioNames, type Portfolio } from '@/lib/simulated-data'
-import { ScenarioEngine } from '@/components/ScenarioEngine'
 import { CostOfInactionPanel } from '@/components/scenarios/CostOfInactionPanel'
 import { ExposureClimax } from '@/components/scenarios/ExposureClimax'
 import { SimulationWorkbench } from '@/components/simulation/SimulationWorkbench'
@@ -27,10 +54,10 @@ import { PageHeader } from '@/components/ui/PageHeader'
 
 type Intensity = 'mild' | 'moderate' | 'severe'
 
-const INTENSITY_CONFIG: Record<Intensity, { label: string; color: string; multiplier: number }> = {
-  mild: { label: 'Mild', color: 'var(--risk-low)', multiplier: 0.5 },
-  moderate: { label: 'Moderate', color: 'var(--risk-medium)', multiplier: 1.0 },
-  severe: { label: 'Severe', color: 'var(--risk-critical)', multiplier: 1.7 },
+const INTENSITY_CONFIG: Record<Intensity, { label: string; color: string }> = {
+  mild: { label: 'Mild', color: 'var(--risk-low)' },
+  moderate: { label: 'Moderate', color: 'var(--risk-medium)' },
+  severe: { label: 'Severe', color: 'var(--risk-critical)' },
 }
 
 interface SimulationResult {
@@ -72,186 +99,74 @@ interface SimulationResult {
   simulatedAt?: string
 }
 
-// ─── AI Stress Test Panel ─────────────────────────────────────────────────────
-interface StressTestResult {
-  portfolioId: string
-  scenarioName: string
-  impactAED: number
-  impactPercent: number
-  severity: 'critical' | 'high' | 'medium' | 'low'
-}
-
-const PORTFOLIOS_ALL: Portfolio[] = ['real-estate', 'retail', 'hospitality', 'education', 'facilities']
-
-function AIStressTest() {
-  const [running, setRunning] = useState(false)
-  const [stressResults, setStressResults] = useState<StressTestResult[] | null>(null)
-  const [selectedScenarios, setSelectedScenarios] = useState<string[]>(['S-001', 'S-002', 'S-003'])
-
-  const STRESS_INTENSITY: Intensity = 'severe'
-
-  const runStressTest = async () => {
-    setRunning(true)
-    setStressResults(null)
-    await new Promise((r) => setTimeout(r, 1800)) // simulate AI analysis delay
-
-    const results: StressTestResult[] = []
-    for (const sId of selectedScenarios) {
-      const scenario = scenarioTemplates.find((s) => s.id === sId)
-      if (!scenario) continue
-      for (const pi of scenario.estimatedImpact) {
-        const severityMultiplier = 1.7 // severe
-        const impactAED = Math.round(pi.impactAED * severityMultiplier)
-        const impactPercent = Math.round(pi.impactPercent * severityMultiplier)
-        const score = Math.abs(impactPercent)
-        results.push({
-          portfolioId: pi.portfolio,
-          scenarioName: scenario.name,
-          impactAED,
-          impactPercent,
-          severity: score >= 40 ? 'critical' : score >= 25 ? 'high' : score >= 12 ? 'medium' : 'low',
-        })
-      }
-    }
-    setStressResults(results)
-    setRunning(false)
-  }
-
-  // Aggregate by portfolio
-  const portfolioTotals = PORTFOLIOS_ALL.map((p) => {
-    const relevant = stressResults?.filter((r) => r.portfolioId === p) || []
-    const totalImpact = relevant.reduce((s, r) => s + r.impactAED, 0)
-    const maxSeverity = relevant.reduce<'critical' | 'high' | 'medium' | 'low'>((worst, r) => {
-      const order = { critical: 3, high: 2, medium: 1, low: 0 }
-      return order[r.severity] > order[worst] ? r.severity : worst
-    }, 'low')
-    return { portfolio: p, totalImpact, maxSeverity, scenarios: relevant }
-  })
-
-  const toggleScenario = (id: string) => {
-    setSelectedScenarios((prev) =>
-      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
-    )
-  }
-
-  const SCOLOR: Record<string, string> = {
-    critical: 'var(--risk-critical)', high: 'var(--risk-high)', medium: 'var(--risk-medium)', low: 'var(--risk-low)',
-  }
+// ════════════════════════════════════════════════════════════════════════
+// PAGE
+// ════════════════════════════════════════════════════════════════════════
+export default function ScenariosPage() {
+  const [showBaseline, setShowBaseline] = useState(false)
+  const [showAnalyst, setShowAnalyst] = useState(false)
 
   return (
-    <Card accent glow>
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <Zap size={14} style={{ color: 'var(--accent-primary)' }} />
-          <CardTitle>AI Portfolio Stress Test</CardTitle>
-        </div>
-        <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>
-          Simultaneously stress all portfolios across multiple scenarios — severe intensity
-        </span>
-      </CardHeader>
-      <CardBody>
-        {/* Scenario selector */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem', alignSelf: 'center', marginRight: '4px' }}>
-            Select scenarios:
-          </span>
-          {scenarioTemplates.map((s) => {
-            const active = selectedScenarios.includes(s.id)
-            return (
-              <button
-                key={s.id}
-                onClick={() => toggleScenario(s.id)}
-                style={{
-                  padding: '4px 12px',
-                  borderRadius: '6px',
-                  fontSize: '0.72rem',
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  border: active ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)',
-                  backgroundColor: active ? 'var(--accent-glow)' : 'var(--bg-secondary)',
-                  color: active ? 'var(--accent-primary)' : 'var(--text-muted)',
-                  transition: 'all 0.15s',
-                }}
-              >
-                {s.name}
-              </button>
-            )
-          })}
-        </div>
+    <div className="space-y-6">
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+        <PageHeader
+          eyebrow="What-if"
+          title="Scenario Analysis"
+          subtitle="One flow: see the stakes, run a stress test, decide. The cost of inaction and the recommended response are reconciled to the same baseline."
+        />
+        <button onClick={() => setShowAnalyst((v) => !v)} style={toggleBtn(showAnalyst)} title="Show driver-level analyst workbench">
+          <SlidersHorizontal size={13} />
+          Analyst view
+          <ChevronDown size={13} style={{ transform: showAnalyst ? 'rotate(180deg)' : 'none', transition: 'transform 150ms' }} />
+        </button>
+      </div>
 
-        <div className="flex items-center gap-3 mb-4">
-          <button
-            onClick={runStressTest}
-            disabled={running || selectedScenarios.length === 0}
-            className="btn-primary flex items-center gap-2"
+      {/* 1 · THE STAKES ─────────────────────────────────────────────── */}
+      <SectionLabel step={1} title="The stakes" hint="Where the Group sits today, under stress, and if nothing is done" />
+      <ExposureClimax />
+
+      {/* 2 · STRESS TEST (single engine) ─────────────────────────────── */}
+      <SectionLabel step={2} title="Stress test" hint="Pick a scenario and intensity — the engine models the impact across portfolios" />
+      <StressTestStudio />
+
+      {/* 3 · THE DECISION ────────────────────────────────────────────── */}
+      <SectionLabel step={3} title="The decision" hint="What it costs to do nothing, the recommended response, and where to route it" />
+      <CostOfInactionPanel />
+
+      {/* Reference — baseline & sources (collapsed) */}
+      <Disclosure
+        open={showBaseline}
+        onToggle={() => setShowBaseline((v) => !v)}
+        label="Baseline & sources"
+        hint="FY24 → FY25 anchors behind every figure above"
+      >
+        <BaselineComparisonPanel />
+      </Disclosure>
+
+      {/* Analyst workbench — driver-level depth, on demand */}
+      <AnimatePresence>
+        {showAnalyst && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            style={{ overflow: 'hidden' }}
           >
-            {running ? (
-              <><Loader2 size={14} className="animate-spin" />Running AI Stress Test...</>
-            ) : (
-              <><Activity size={14} />Run Stress Test ({selectedScenarios.length} scenarios · Severe)</>
-            )}
-          </button>
-          {stressResults && (
-            <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>
-              {stressResults.length} impact vectors computed
-            </span>
-          )}
-        </div>
-
-        <AnimatePresence>
-          {stressResults && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="grid grid-cols-5 gap-3"
-            >
-              {portfolioTotals.map((pt) => {
-                const hasImpact = pt.scenarios.length > 0
-                return (
-                  <div
-                    key={pt.portfolio}
-                    style={{
-                      padding: '14px',
-                      borderRadius: '10px',
-                      backgroundColor: hasImpact ? `${SCOLOR[pt.maxSeverity]}10` : 'var(--bg-secondary)',
-                      border: `1px solid ${hasImpact ? SCOLOR[pt.maxSeverity] + '35' : 'var(--border-color)'}`,
-                    }}
-                  >
-                    <div style={{ color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '6px' }}>
-                      {portfolioNames[pt.portfolio]}
-                    </div>
-                    {hasImpact ? (
-                      <>
-                        <div style={{ color: SCOLOR[pt.maxSeverity], fontSize: '1.1rem', fontWeight: 700, marginBottom: '2px' }}>
-                          AED {Math.abs(pt.totalImpact).toLocaleString()}M
-                        </div>
-                        <div style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: SCOLOR[pt.maxSeverity], marginBottom: '8px' }}>
-                          {pt.maxSeverity}
-                        </div>
-                        <div className="space-y-1">
-                          {pt.scenarios.map((s, i) => (
-                            <div key={i} style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between' }}>
-                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '70%' }}>{s.scenarioName}</span>
-                              <span style={{ color: SCOLOR[s.severity], fontWeight: 600, flexShrink: 0 }}>{s.impactPercent}%</span>
-                            </div>
-                          ))}
-                        </div>
-                      </>
-                    ) : (
-                      <div style={{ color: 'var(--risk-low)', fontSize: '0.75rem' }}>No impact</div>
-                    )}
-                  </div>
-                )
-              })}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </CardBody>
-    </Card>
+            <div style={{ border: '1px solid var(--border-color)', borderRadius: 12, padding: '4px 16px 16px' }}>
+              <SectionLabel title="Analyst workbench" hint="Driver-level sliders, explainability and decision layer — for the ERM team" />
+              <SimulationWorkbench />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }
 
-export default function ScenariosPage() {
+// ════════════════════════════════════════════════════════════════════════
+// STRESS TEST STUDIO — the one engine: pick scenario → intensity → run
+// ════════════════════════════════════════════════════════════════════════
+function StressTestStudio() {
   const [selectedScenario, setSelectedScenario] = useState<string | null>(null)
   const [intensity, setIntensity] = useState<Intensity>('moderate')
   const [loading, setLoading] = useState(false)
@@ -266,7 +181,6 @@ export default function ScenariosPage() {
     setLoading(true)
     setError(null)
     setResult(null)
-
     try {
       const res = await fetch('/api/scenario-simulation', {
         method: 'POST',
@@ -292,379 +206,178 @@ export default function ScenariosPage() {
     }
   }
 
-  const chartData = result?.portfolioImpacts.map((pi) => ({
-    name: portfolioNames[pi.portfolio as Portfolio] || pi.portfolio,
-    impact: Math.abs(pi.impactAED),
-    percent: Math.abs(pi.impactPercent),
-  })) || []
+  const chartData =
+    result?.portfolioImpacts.map((pi) => ({
+      name: portfolioNames[pi.portfolio as Portfolio] || pi.portfolio,
+      impact: Math.abs(pi.impactAED),
+      percent: Math.abs(pi.impactPercent),
+    })) || []
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        eyebrow="What-if"
-        title="Scenario Analysis"
-        subtitle="Stress-test the Group's risk posture against named scenarios and see the cost of inaction. Adjust the drivers and the engine recalculates exposure and ratings live."
-      />
-
-      {/* ══════════════════════════════════════════════════════════════════
-          CLIMAX — the one animated number (Batch 6). Baseline → severe
-          stress → 12-month cost of inaction, then the decision punchline.
-          Mounted first so "Stress & decide" opens on the stakes, not a grid.
-          ══════════════════════════════════════════════════════════════════ */}
-      <ExposureClimax />
-
-      {/* ══════════════════════════════════════════════════════════════════
-          INTELLIGENCE WORKBENCH — new real-time stress-test layer.
-          Mounted at the top of the Scenarios page so executives land on it
-          first. Includes:
-            • Pre-built Scenario Cards (Mild/Moderate/Severe)
-            • Scenario Impact Readout
-            • Executive Stress-Test Sliders (8 curated drivers)
-            • Full Driver Controls (15 drivers incl. KRI-based)
-            • Baseline vs Simulation / Decision / Explainability panels
-          ══════════════════════════════════════════════════════════════════ */}
-      <div
-        style={{
-          background: 'var(--bg-primary)',
-          border: '2px solid var(--accent-primary)',
-          borderRadius: 12,
-          padding: 16,
-          marginBottom: 8,
-        }}
-      >
+    <Card>
+      <CardBody>
+        {/* Step A — choose a scenario */}
+        <FieldLabel>1. Choose a scenario</FieldLabel>
         <div
           style={{
-            fontSize: 10,
-            fontWeight: 700,
-            color: 'var(--accent-primary)',
-            textTransform: 'uppercase',
-            letterSpacing: 1.2,
-            marginBottom: 4,
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))',
+            gap: 10,
+            marginBottom: 18,
           }}
         >
-          NEW · Real-time Intelligence Workbench
-        </div>
-        <BaselineComparisonPanel />
-        <div style={{ height: 12 }} />
-        <SimulationWorkbench />
-      </div>
-
-      {/* Cost of Inaction + Tiered Response Plan — Batch N
-          Executive hero block answering "what if we do nothing?" with
-          a single headline number, plus a 4-tier recommended response
-          plan (immediate / 30-day / 90-day / board decision). */}
-      <CostOfInactionPanel />
-
-      {/* Quick Scenario Engine */}
-      <ScenarioEngine />
-
-      {/* AI Stress Test */}
-      <AIStressTest />
-
-      {/* Scenario Selection */}
-      <div className="grid grid-cols-2 gap-4">
-        {scenarioTemplates.map((s) => {
-          const isSelected = selectedScenario === s.id
-          return (
-            <motion.div
-              key={s.id}
-              whileHover={{ scale: 1.01 }}
-              transition={{ duration: 0.15 }}
-            >
-              <Card
-                accent={isSelected}
-                glow={isSelected}
-                onClick={() => setSelectedScenario(s.id)}
-                style={{ cursor: 'pointer' }}
+          {scenarioTemplates.map((s) => {
+            const isSel = selectedScenario === s.id
+            const est = Math.abs(s.estimatedImpact.reduce((sum, i) => sum + i.impactAED, 0))
+            return (
+              <button
+                key={s.id}
+                onClick={() => {
+                  setSelectedScenario(s.id)
+                  setResult(null)
+                  setError(null)
+                }}
+                style={{
+                  textAlign: 'left',
+                  padding: '12px 13px',
+                  borderRadius: 10,
+                  cursor: 'pointer',
+                  background: isSel ? 'var(--accent-glow)' : 'var(--bg-secondary)',
+                  border: isSel ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                  transition: 'all 120ms',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 6,
+                }}
               >
-                <CardBody>
-                  <div className="flex items-start justify-between mb-3">
-                    <div
-                      style={{
-                        fontSize: '0.65rem',
-                        fontWeight: 600,
-                        letterSpacing: '0.1em',
-                        textTransform: 'uppercase',
-                        color: isSelected ? 'var(--accent-primary)' : 'var(--text-muted)',
-                        padding: '3px 8px',
-                        borderRadius: '5px',
-                        backgroundColor: isSelected ? 'var(--accent-glow)' : 'var(--bg-secondary)',
-                        border: '1px solid var(--border-color)',
-                      }}
-                    >
-                      {s.category}
-                    </div>
-                    <div
-                      style={{
-                        color: 'var(--text-muted)',
-                        fontSize: '0.7rem',
-                      }}
-                    >
-                      p={Math.round(s.parameters.probability * 100)}%
-                    </div>
-                  </div>
-
-                  <h3
-                    style={{
-                      color: isSelected ? 'var(--text-primary)' : 'var(--text-secondary)',
-                      fontSize: '0.95rem',
-                      fontWeight: 700,
-                      marginBottom: '6px',
-                    }}
-                  >
-                    {s.name}
-                  </h3>
-                  <p
-                    style={{
-                      color: 'var(--text-muted)',
-                      fontSize: '0.78rem',
-                      lineHeight: 1.5,
-                      marginBottom: '10px',
-                    }}
-                  >
-                    {s.description}
-                  </p>
-
-                  <div className="flex flex-wrap gap-1.5">
-                    {s.affectedPortfolios.map((p) => (
-                      <span
-                        key={p}
-                        style={{
-                          fontSize: '0.65rem',
-                          fontWeight: 600,
-                          padding: '2px 7px',
-                          borderRadius: '5px',
-                          backgroundColor: 'var(--bg-hover)',
-                          color: 'var(--text-secondary)',
-                          border: '1px solid var(--border-color)',
-                        }}
-                      >
-                        {portfolioNames[p]}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Static impact preview */}
-                  <div
-                    style={{
-                      marginTop: '10px',
-                      padding: '8px 10px',
-                      borderRadius: '7px',
-                      backgroundColor: 'var(--bg-hover)',
-                    }}
-                  >
-                    <div style={{ color: 'var(--text-muted)', fontSize: '0.65rem', marginBottom: '4px' }}>
-                      Estimated total impact
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <div style={{ color: 'var(--risk-high)', fontSize: '0.875rem', fontWeight: 700 }}>
-                        AED{' '}
-                        {Math.abs(
-                          s.estimatedImpact.reduce((sum, i) => sum + i.impactAED, 0)
-                        ).toLocaleString()}
-                        M
-                      </div>
-                      <ViewCalcButton onClick={() => setCalcCtx({ type: 'scenario_impact', scenarioId: s.id, value: Math.abs(s.estimatedImpact.reduce((sum, i) => sum + i.impactAED, 0)) })} />
-                    </div>
-                  </div>
-                </CardBody>
-              </Card>
-            </motion.div>
-          )
-        })}
-      </div>
-
-      {/* Controls */}
-      {selectedScenario && scenario && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <Card accent glow>
-            <CardBody>
-              <div className="flex items-center justify-between flex-wrap gap-4">
-                <div>
-                  <div style={{ color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 700 }}>
-                    {scenario.name}
-                  </div>
-                  <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>
-                    Duration: {scenario.parameters.duration} · Base probability: {Math.round(scenario.parameters.probability * 100)}%
-                  </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: isSel ? 'var(--accent-primary)' : 'var(--text-muted)' }}>
+                    {s.category}
+                  </span>
+                  <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>p={Math.round(s.parameters.probability * 100)}%</span>
                 </div>
-
-                <div className="flex items-center gap-4">
-                  {/* Intensity selector */}
-                  <div>
-                    <div style={{ color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px' }}>
-                      Intensity
-                    </div>
-                    <div className="flex gap-2">
-                      {(['mild', 'moderate', 'severe'] as Intensity[]).map((i) => {
-                        const config = INTENSITY_CONFIG[i]
-                        const isActive = intensity === i
-                        return (
-                          <button
-                            key={i}
-                            onClick={() => setIntensity(i)}
-                            style={{
-                              padding: '6px 14px',
-                              borderRadius: '7px',
-                              fontSize: '0.78rem',
-                              fontWeight: 600,
-                              cursor: 'pointer',
-                              border: isActive ? `2px solid ${config.color}` : '1px solid var(--border-color)',
-                              backgroundColor: isActive ? `${config.color}18` : 'var(--bg-secondary)',
-                              color: isActive ? config.color : 'var(--text-muted)',
-                              transition: 'all 0.15s',
-                            }}
-                          >
-                            {config.label}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={runSimulation}
-                    disabled={loading}
-                    className="btn-primary flex items-center gap-2"
-                    style={{ minWidth: '180px', justifyContent: 'center' }}
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 size={16} className="animate-spin" />
-                        Simulating...
-                      </>
-                    ) : (
-                      <>
-                        <Play size={16} />
-                        Run AI Simulation
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-        </motion.div>
-      )}
-
-      {/* Error */}
-      {error && (
-        <div
-          style={{
-            padding: '14px 18px',
-            borderRadius: '10px',
-            backgroundColor: 'rgba(255,59,59,0.1)',
-            border: '1px solid rgba(255,59,59,0.3)',
-            color: 'var(--risk-critical)',
-            fontSize: '0.875rem',
-          }}
-        >
-          {error}
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>{s.name}</span>
+                <span style={{ fontSize: 11, color: 'var(--risk-high)', fontWeight: 700 }}>~AED {est.toLocaleString()}M est. impact</span>
+              </button>
+            )
+          })}
         </div>
-      )}
 
-      {/* Loading State */}
-      {loading && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="space-y-4"
-        >
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="skeleton" style={{ height: '80px', borderRadius: '12px' }} />
-          ))}
-          <div
-            style={{
-              textAlign: 'center',
-              padding: '24px',
-              color: 'var(--accent-primary)',
-              fontSize: '0.875rem',
-            }}
-          >
-            <Loader2 size={24} className="animate-spin mx-auto mb-3" style={{ color: 'var(--accent-primary)' }} />
-            AI is modelling scenario impact across ABC portfolios...
+        {/* Step B — intensity + run */}
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+          <div>
+            <FieldLabel>2. Intensity</FieldLabel>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {(['mild', 'moderate', 'severe'] as Intensity[]).map((i) => {
+                const cfg = INTENSITY_CONFIG[i]
+                const active = intensity === i
+                return (
+                  <button
+                    key={i}
+                    onClick={() => setIntensity(i)}
+                    style={{
+                      padding: '6px 16px',
+                      borderRadius: 7,
+                      fontSize: 12.5,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      border: active ? `1.5px solid ${cfg.color}` : '1px solid var(--border-color)',
+                      background: active ? `${cfg.color}18` : 'var(--bg-secondary)',
+                      color: active ? cfg.color : 'var(--text-muted)',
+                      transition: 'all 120ms',
+                    }}
+                  >
+                    {cfg.label}
+                  </button>
+                )
+              })}
+            </div>
           </div>
-        </motion.div>
-      )}
 
-      {/* Results */}
-      <AnimatePresence>
-        {result && !loading && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-5"
-          >
-            {/* Overall Impact Summary */}
-            <Card accent glow>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <AlertTriangle size={14} style={{ color: 'var(--risk-high)' }} />
-                  <CardTitle>Simulation Results — Overall Impact</CardTitle>
-                </div>
-                <div className="flex items-center gap-2">
-                  <ConfidenceBadge confidence={result.confidence} />
-                  <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>
-                    {result.simulatedAt
-                      ? new Date(result.simulatedAt).toLocaleTimeString('en-AE', { timeZone: 'Asia/Dubai' })
-                      : ''}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            {scenario && (
+              <ViewCalcButton
+                onClick={() =>
+                  setCalcCtx({
+                    type: 'scenario_impact',
+                    scenarioId: scenario.id,
+                    value: Math.abs(scenario.estimatedImpact.reduce((sum, i) => sum + i.impactAED, 0)),
+                  })
+                }
+              />
+            )}
+            <button
+              onClick={runSimulation}
+              disabled={loading || !scenario}
+              className="btn-primary flex items-center gap-2"
+              style={{ minWidth: 190, justifyContent: 'center', opacity: !scenario ? 0.5 : 1 }}
+            >
+              {loading ? (
+                <><Loader2 size={16} className="animate-spin" />Modelling…</>
+              ) : (
+                <><Play size={16} />Run stress test</>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {!scenario && !loading && (
+          <div style={{ marginTop: 16, padding: '14px 16px', borderRadius: 10, background: 'var(--bg-secondary)', border: '1px dashed var(--border-color)', color: 'var(--text-muted)', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Activity size={14} style={{ color: 'var(--accent-primary)' }} />
+            Select a scenario above, choose an intensity, then run the stress test to see the modelled impact across portfolios.
+          </div>
+        )}
+
+        {error && (
+          <div style={{ marginTop: 16, padding: '12px 16px', borderRadius: 10, background: 'rgba(255,59,59,0.1)', border: '1px solid rgba(255,59,59,0.3)', color: 'var(--risk-critical)', fontSize: 13 }}>
+            {error}
+          </div>
+        )}
+
+        {/* Results */}
+        <AnimatePresence>
+          {result && !loading && (
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* AI hypothesis banner — provenance */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <AlertTriangle size={15} style={{ color: 'var(--risk-high)' }} />
+                  <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
+                    {scenario?.name} · {INTENSITY_CONFIG[intensity].label}
                   </span>
                 </div>
-              </CardHeader>
-              <CardBody>
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                  {[
-                    { label: 'Revenue Impact', value: result.overallImpact.revenueImpact },
-                    { label: 'EBITDA Impact', value: result.overallImpact.ebitdaImpact },
-                    { label: 'NAV Impact', value: result.overallImpact.navImpact },
-                  ].map((item) => (
-                    <div
-                      key={item.label}
-                      style={{
-                        padding: '14px',
-                        borderRadius: '10px',
-                        backgroundColor: 'var(--bg-secondary)',
-                        border: '1px solid var(--border-color)',
-                      }}
-                    >
-                      <div style={{ color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px' }}>
-                        {item.label}
-                      </div>
-                      <div style={{ color: 'var(--risk-high)', fontSize: '1.1rem', fontWeight: 700 }}>
-                        {item.value}
-                      </div>
-                    </div>
-                  ))}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <AIHypothesisBadge />
+                  <ConfidenceBadge confidence={result.confidence} />
                 </div>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: 1.6 }}>
-                  {result.overallImpact.summary}
-                </p>
-              </CardBody>
-            </Card>
+              </div>
 
-            {/* Portfolio Impact Chart */}
-            <div className="grid grid-cols-2 gap-5">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Impact by Portfolio (AED M)</CardTitle>
-                </CardHeader>
-                <CardBody>
-                  <ResponsiveContainer width="100%" height={220}>
+              {/* Overall impact KPIs */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+                {[
+                  { label: 'Revenue Impact', value: result.overallImpact.revenueImpact },
+                  { label: 'EBITDA Impact', value: result.overallImpact.ebitdaImpact },
+                  { label: 'NAV Impact', value: result.overallImpact.navImpact },
+                ].map((item) => (
+                  <div key={item.label} style={{ padding: 14, borderRadius: 10, background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
+                    <div style={{ color: 'var(--text-muted)', fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>{item.label}</div>
+                    <div style={{ color: 'var(--risk-high)', fontSize: 18, fontWeight: 700 }}>{item.value}</div>
+                  </div>
+                ))}
+              </div>
+              <p style={{ color: 'var(--text-secondary)', fontSize: 13.5, lineHeight: 1.6, margin: 0 }}>{result.overallImpact.summary}</p>
+
+              {/* Chart + timeline */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
+                <div style={panel}>
+                  <PanelTitle>Impact by Portfolio (AED M)</PanelTitle>
+                  <ResponsiveContainer width="100%" height={210}>
                     <BarChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" horizontal vertical={false} />
                       <XAxis dataKey="name" tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
                       <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
                       <Tooltip
-                        contentStyle={{
-                          backgroundColor: 'var(--bg-card)',
-                          border: '1px solid var(--border-accent)',
-                          borderRadius: '8px',
-                          fontSize: '12px',
-                          color: 'var(--text-primary)',
-                        }}
+                        contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-accent)', borderRadius: 8, fontSize: 12, color: 'var(--text-primary)' }}
                         formatter={(value) => [`AED ${value}M`, 'Impact']}
                       />
                       <Bar dataKey="impact" radius={[4, 4, 0, 0]}>
@@ -674,16 +387,11 @@ export default function ScenariosPage() {
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
-                </CardBody>
-              </Card>
+                </div>
 
-              {/* Financial Impact Table */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Financial Impact Timeline</CardTitle>
-                </CardHeader>
-                <CardBody>
-                  <div className="space-y-3">
+                <div style={panel}>
+                  <PanelTitle>Financial Impact Timeline</PanelTitle>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
                     {[
                       { label: 'Year 1 Impact', value: `AED ${result.financialImpact.year1AED?.toLocaleString() || 'N/A'}M` },
                       { label: 'Year 2 Impact', value: `AED ${result.financialImpact.year2AED?.toLocaleString() || 'N/A'}M` },
@@ -692,134 +400,183 @@ export default function ScenariosPage() {
                       { label: 'Onset', value: `${result.timeframe.onsetMonths} months` },
                       { label: 'Recovery', value: `${result.timeframe.recoveryMonths} months` },
                     ].map((item) => (
-                      <div
-                        key={item.label}
-                        className="flex justify-between items-center"
-                        style={{ paddingBottom: '10px', borderBottom: '1px solid var(--border-color)' }}
-                      >
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{item.label}</span>
-                        <span style={{ color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 600 }}>
-                          {item.value}
-                        </span>
+                      <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderBottom: '1px solid var(--border-color)' }}>
+                        <span style={{ color: 'var(--text-muted)', fontSize: 12.5 }}>{item.label}</span>
+                        <span style={{ color: 'var(--text-primary)', fontSize: 12.5, fontWeight: 700 }}>{item.value}</span>
                       </div>
                     ))}
                   </div>
-                </CardBody>
-              </Card>
-            </div>
-
-            {/* Mitigation Strategies */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Shield size={14} style={{ color: 'var(--accent-primary)' }} />
-                  <CardTitle>Mitigation Strategies</CardTitle>
-                </div>
-              </CardHeader>
-              <CardBody>
-                <div className="space-y-3">
-                  {result.mitigationStrategies?.map((m, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        padding: '14px',
-                        borderRadius: '10px',
-                        backgroundColor: 'var(--bg-secondary)',
-                        border: '1px solid var(--border-color)',
-                      }}
-                    >
-                      <div className="flex items-start justify-between gap-3 mb-2">
-                        <div style={{ color: 'var(--text-primary)', fontSize: '0.875rem', fontWeight: 600 }}>
-                          {i + 1}. {m.strategy}
-                        </div>
-                        <div className="flex gap-2 flex-shrink-0">
-                          <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
-                            {m.timeToImplement}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex gap-4">
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-                          Owner: <span style={{ color: 'var(--accent-primary)' }}>{m.owner}</span>
-                        </span>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-                          Cost: {m.costAED}
-                        </span>
-                      </div>
-                      <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '6px' }}>
-                        Expected benefit: {m.expectedBenefit}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </CardBody>
-            </Card>
-
-            {/* Opportunities */}
-            {result.opportunities && result.opportunities.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <Lightbulb size={14} style={{ color: 'var(--risk-low)' }} />
-                    <CardTitle>Silver Lining Opportunities</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardBody>
-                  <div className="space-y-2">
-                    {result.opportunities.map((opp, i) => (
-                      <div
-                        key={i}
-                        style={{
-                          display: 'flex',
-                          gap: '10px',
-                          padding: '10px 14px',
-                          borderRadius: '8px',
-                          backgroundColor: 'rgba(34,197,94,0.07)',
-                          border: '1px solid rgba(34,197,94,0.2)',
-                        }}
-                      >
-                        <span style={{ color: 'var(--risk-low)', fontWeight: 700, fontSize: '0.85rem' }}>+</span>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.825rem', lineHeight: 1.5 }}>{opp}</p>
-                      </div>
-                    ))}
-                  </div>
-                </CardBody>
-              </Card>
-            )}
-
-            {/* Key Assumptions */}
-            {result.keyAssumptions && (
-              <div
-                style={{
-                  padding: '14px 18px',
-                  borderRadius: '10px',
-                  backgroundColor: 'var(--bg-card)',
-                  border: '1px solid var(--border-color)',
-                }}
-              >
-                <div style={{ color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>
-                  Key Modelling Assumptions
-                </div>
-                <div className="space-y-1">
-                  {result.keyAssumptions.map((a, i) => (
-                    <div key={i} className="flex gap-2">
-                      <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>·</span>
-                      <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', lineHeight: 1.5 }}>{a}</p>
-                    </div>
-                  ))}
                 </div>
               </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
 
-      {/* Financial Calculation Panel */}
+              {/* Mitigation */}
+              {result.mitigationStrategies?.length > 0 && (
+                <div style={panel}>
+                  <PanelTitle icon={<Shield size={13} style={{ color: 'var(--accent-primary)' }} />}>Recommended Mitigations</PanelTitle>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {result.mitigationStrategies.map((m, i) => (
+                      <div key={i} style={{ padding: 13, borderRadius: 10, background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginBottom: 5 }}>
+                          <span style={{ color: 'var(--text-primary)', fontSize: 13.5, fontWeight: 700 }}>{i + 1}. {m.strategy}</span>
+                          <span style={{ color: 'var(--text-muted)', fontSize: 11, whiteSpace: 'nowrap' }}>{m.timeToImplement}</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                          <span style={{ color: 'var(--text-muted)', fontSize: 11.5 }}>Owner: <span style={{ color: 'var(--accent-primary)' }}>{m.owner}</span></span>
+                          <span style={{ color: 'var(--text-muted)', fontSize: 11.5 }}>Cost: {m.costAED}</span>
+                          <span style={{ color: 'var(--text-muted)', fontSize: 11.5 }}>Benefit: {m.expectedBenefit}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Assumptions */}
+              {result.keyAssumptions?.length > 0 && (
+                <div style={{ padding: '12px 16px', borderRadius: 10, background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                  <div style={{ color: 'var(--text-muted)', fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>Key Modelling Assumptions</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {result.keyAssumptions.map((a, i) => (
+                      <div key={i} style={{ display: 'flex', gap: 8 }}>
+                        <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>·</span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: 12, lineHeight: 1.5 }}>{a}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </CardBody>
+
       <AnimatePresence>
-        {calcCtx && (
-          <FinancialCalculationPanel key={JSON.stringify(calcCtx)} ctx={calcCtx} onClose={() => setCalcCtx(null)} />
+        {calcCtx && <FinancialCalculationPanel key={JSON.stringify(calcCtx)} ctx={calcCtx} onClose={() => setCalcCtx(null)} />}
+      </AnimatePresence>
+    </Card>
+  )
+}
+
+// ─── small presentational helpers ───────────────────────────────────────
+function SectionLabel({ step, title, hint }: { step?: number; title: string; hint: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginTop: 4 }}>
+      {step != null && (
+        <span style={{ flexShrink: 0, width: 22, height: 22, borderRadius: '50%', background: 'var(--accent-primary)', color: 'var(--on-accent)', fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          {step}
+        </span>
+      )}
+      <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>{title}</span>
+      <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{hint}</span>
+    </div>
+  )
+}
+
+function FieldLabel({ children }: { children: React.ReactNode }) {
+  return <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 8 }}>{children}</div>
+}
+
+function PanelTitle({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12, fontSize: 12.5, fontWeight: 700, color: 'var(--text-primary)' }}>
+      {icon}
+      {children}
+    </div>
+  )
+}
+
+function AIHypothesisBadge() {
+  return (
+    <span
+      title="AI-generated from illustrative baselines — not yet approved by a human owner"
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 4,
+        fontSize: 9.5,
+        fontWeight: 800,
+        letterSpacing: '0.05em',
+        textTransform: 'uppercase',
+        color: '#B8860B',
+        background: 'rgba(245,197,24,0.16)',
+        border: '1px solid rgba(245,197,24,0.5)',
+        padding: '3px 8px',
+        borderRadius: 999,
+      }}
+    >
+      <Sparkles size={10} />
+      AI Hypothesis · pending approval
+    </span>
+  )
+}
+
+function Disclosure({
+  open,
+  onToggle,
+  label,
+  hint,
+  children,
+}: {
+  open: boolean
+  onToggle: () => void
+  label: string
+  hint: string
+  children: React.ReactNode
+}) {
+  return (
+    <div style={{ border: '1px solid var(--border-color)', borderRadius: 12, overflow: 'hidden' }}>
+      <button
+        onClick={onToggle}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+          padding: '12px 16px',
+          background: 'var(--bg-secondary)',
+          border: 'none',
+          cursor: 'pointer',
+        }}
+      >
+        <span style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{label}</span>
+          <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)' }}>{hint}</span>
+        </span>
+        <ChevronDown size={16} style={{ color: 'var(--text-muted)', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 150ms' }} />
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} style={{ overflow: 'hidden' }}>
+            <div style={{ padding: 16 }}>{children}</div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
   )
+}
+
+const panel: React.CSSProperties = {
+  background: 'var(--bg-card)',
+  border: '1px solid var(--border-color)',
+  borderRadius: 12,
+  padding: 16,
+}
+
+function toggleBtn(active: boolean): React.CSSProperties {
+  return {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 6,
+    padding: '7px 12px',
+    borderRadius: 8,
+    fontSize: 12,
+    fontWeight: 700,
+    cursor: 'pointer',
+    whiteSpace: 'nowrap',
+    border: active ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-color)',
+    background: active ? 'var(--accent-glow)' : 'var(--bg-secondary)',
+    color: active ? 'var(--accent-primary)' : 'var(--text-secondary)',
+    transition: 'all 120ms',
+  }
 }
