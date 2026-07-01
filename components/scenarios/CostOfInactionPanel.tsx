@@ -15,7 +15,7 @@
  */
 
 import React from 'react'
-import { AlertTriangle, Zap, Calendar, Crown } from 'lucide-react'
+import { AlertTriangle, Zap, Calendar, Crown, ChevronRight } from 'lucide-react'
 import { formatCurrencyShort } from '@/lib/utils/formatters'
 import { COST_OF_INACTION } from '@/lib/data/scenarioInaction'
 import {
@@ -90,6 +90,29 @@ export function CostOfInactionPanel() {
           <Tier title="Board decision" icon={<Crown size={11} />} color="var(--accent-primary)" actions={actionsByTier('board')} />
         </div>
       </div>
+
+      {/* The single closing CTA — earned after the stakes, the stress test,
+          and the response plan. The top 'Bottom line' banner carries the
+          fast-path CTA for a reader who wants the answer and out; this is
+          for the reader who went through the whole story. */}
+      <a
+        href="/respond/approvals"
+        style={{
+          display: 'inline-flex',
+          alignSelf: 'flex-start',
+          alignItems: 'center',
+          gap: 6,
+          padding: '9px 16px',
+          borderRadius: 8,
+          fontSize: 12.5,
+          fontWeight: 700,
+          textDecoration: 'none',
+          background: '#067647',
+          color: '#fff',
+        }}
+      >
+        Route the decision for board sign-off <ChevronRight size={14} />
+      </a>
     </section>
   )
 }

@@ -20,7 +20,7 @@
  */
 
 import React, { useState } from 'react'
-import { ChevronRight, ShieldCheck } from 'lucide-react'
+import { ShieldCheck } from 'lucide-react'
 import { BASELINE_RISK_POSTURE } from '@/lib/data/baselineRiskPosture'
 import { INACTION_MULTIPLIER, STRESSED_EXPOSURE, COST_TO_ACT as COST_TO_ACT_AED } from '@/lib/data/scenarioInaction'
 
@@ -211,38 +211,25 @@ export function ExposureClimax() {
         </div>
       </div>
 
-      {/* decision punchline — permanent */}
+      {/* Cost-to-act anchor — informational only. The decision + CTA lives
+          once at the top (Bottom line) and once at the end of step 3, after
+          the response plan — not repeated here too. */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 14,
-          padding: '14px 16px',
-          borderRadius: 10,
+          gap: 12,
+          padding: '10px 14px',
+          borderRadius: 8,
           background: 'var(--bg-sunken, var(--bg-primary))',
           border: '1px solid var(--border-color)',
-          borderLeft: '3px solid #067647',
           flexWrap: 'wrap',
         }}
       >
-        <ShieldCheck size={20} style={{ color: '#067647', flexShrink: 0 }} />
-        <div style={{ flex: 1, minWidth: 240 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
-            Acting now costs {COST_TO_ACT} — and avoids {aed(AVOIDED)} of deterioration.
-          </div>
-          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
-            The recommended response plan below routes that decision for board sign-off.
-          </div>
+        <ShieldCheck size={16} style={{ color: '#067647', flexShrink: 0 }} />
+        <div style={{ fontSize: 12.5, color: 'var(--text-secondary)' }}>
+          Acting now costs <b style={{ color: 'var(--text-primary)' }}>{COST_TO_ACT}</b> — avoids <b style={{ color: 'var(--text-primary)' }}>{aed(AVOIDED)}</b> of deterioration. See the response plan in step 3.
         </div>
-        <a
-          href="/respond/approvals"
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8,
-            fontSize: 12, fontWeight: 700, textDecoration: 'none', background: '#067647', color: '#fff', whiteSpace: 'nowrap',
-          }}
-        >
-          Route the decision <ChevronRight size={14} />
-        </a>
       </div>
     </section>
   )
