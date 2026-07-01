@@ -200,15 +200,15 @@ function DriverScenarioBuilder() {
                   </div>
                   <div style={{ fontSize: 'clamp(28px,3.2vw,38px)', fontWeight: 700, color: 'var(--risk-high)', letterSpacing: '-0.02em', lineHeight: 1.02, fontVariantNumeric: 'tabular-nums' }}>{aedM(stressedM)}</div>
                   <div style={{ fontSize: 12.5, color: overM > 0 ? 'var(--risk-high)' : 'var(--risk-low)', fontWeight: 700, marginTop: 6 }}>
-                    {overM > 0 ? `${aedM(overM)} over board appetite` : `Within board appetite`} <span style={{ color: 'var(--text-tertiary)', fontWeight: 600 }}>(ceiling {aedM(CEILING_M)})</span>
+                    {overM > 0 ? `${aedM(overM)} over board appetite` : `Within board appetite`}
                   </div>
                   <div style={{ fontSize: 11.5, color: 'var(--text-tertiary)', marginTop: 8, lineHeight: 1.45, maxWidth: 300 }}>
-                    Baseline {aedM(BASE_M)} + {active.length} driver move{active.length > 1 ? 's' : ''} = your scenario.{' '}
+                    {active.length} driver move{active.length > 1 ? 's' : ''} applied on top of the baseline above —{' '}
                     {stressedM < REFERENCE_SEVERE_M
-                      ? `Milder than the reference severe scenario above (${aedM(REFERENCE_SEVERE_M)}).`
+                      ? 'milder than the reference severe scenario.'
                       : stressedM > REFERENCE_SEVERE_M
-                        ? `Harsher than the reference severe scenario above (${aedM(REFERENCE_SEVERE_M)}).`
-                        : `Matches the reference severe scenario above.`}
+                        ? 'harsher than the reference severe scenario.'
+                        : 'matches the reference severe scenario.'}
                   </div>
                 </div>
                 <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 12, padding: 12 }}>
