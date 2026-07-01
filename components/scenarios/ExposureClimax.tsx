@@ -22,7 +22,7 @@
 import React, { useState } from 'react'
 import { ChevronRight, ShieldCheck } from 'lucide-react'
 import { BASELINE_RISK_POSTURE } from '@/lib/data/baselineRiskPosture'
-import { STRESS_MULTIPLIER, INACTION_MULTIPLIER, COST_TO_ACT as COST_TO_ACT_AED } from '@/lib/data/scenarioInaction'
+import { INACTION_MULTIPLIER, STRESSED_EXPOSURE, COST_TO_ACT as COST_TO_ACT_AED } from '@/lib/data/scenarioInaction'
 
 const NET = BASELINE_RISK_POSTURE.netUnhedgedExposure // 0.90bn
 const CEILING = BASELINE_RISK_POSTURE.netUnhedgedAppetiteCeiling // 0.60bn
@@ -47,11 +47,11 @@ const ACTS: Act[] = [
   },
   {
     key: 'stressed',
-    label: 'Under stress',
-    sub: 'Severe shock',
-    value: NET * STRESS_MULTIPLIER,
+    label: 'Reference severe scenario',
+    sub: 'Fixed case',
+    value: STRESSED_EXPOSURE,
     color: '#C2410C',
-    caption: 'Suez disruption + rate shock + overseas-buyer default, at severe intensity.',
+    caption: 'Suez disruption + rate shock + overseas-buyer default, all at severe intensity — the fixed reference case. Build your own combination in the stress test below.',
   },
   {
     key: 'inaction',

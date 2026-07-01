@@ -17,12 +17,7 @@
 import React from 'react'
 import { AlertTriangle, Zap, Calendar, Crown } from 'lucide-react'
 import { formatCurrencyShort } from '@/lib/utils/formatters'
-import {
-  BASELINE_EXPOSURE,
-  INACTION_EXPOSURE,
-  INACTION_MULTIPLIER,
-  COST_OF_INACTION,
-} from '@/lib/data/scenarioInaction'
+import { COST_OF_INACTION } from '@/lib/data/scenarioInaction'
 import {
   actionsByTier,
   type RecommendedAction,
@@ -32,7 +27,9 @@ export function CostOfInactionPanel() {
   // Single source of truth (lib/data/scenarioInaction) — reconciles exactly
   // with the Exposure Bridge above: cost of inaction = the 12-month
   // deterioration vs. baseline, i.e. what acting now avoids. Illustrative.
-  const baselineExp = BASELINE_EXPOSURE
+  // NOTE: deliberately does NOT restate the baseline/severe/inaction figures
+  // in prose — those are already visualised in the Exposure Bridge directly
+  // above. Repeating "rises from X to Y" here read as duplicate content.
   const costOfInaction = COST_OF_INACTION
 
   return (
@@ -57,7 +54,7 @@ export function CostOfInactionPanel() {
             {formatCurrencyShort(costOfInaction, 'AED')}
           </div>
           <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4, maxWidth: 600, lineHeight: 1.45 }}>
-            Projected 12-month exposure deterioration if no mitigating action is taken on the top scenarios — net-unhedged exposure rises from {formatCurrencyShort(baselineExp, 'AED')} to {formatCurrencyShort(INACTION_EXPOSURE, 'AED')} (×{INACTION_MULTIPLIER}, illustrative). That gap is exactly what the response plan below avoids.
+            The 12-month gap from the reference scenario above, if unaddressed. The response plan below is sized to close it.
           </div>
         </div>
         <span

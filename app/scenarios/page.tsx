@@ -29,12 +29,13 @@ import { PageHeader } from '@/components/ui/PageHeader'
 import { formatCurrencyShort } from '@/lib/utils/formatters'
 import { portfolioNames, type Portfolio } from '@/lib/simulated-data'
 import { BASELINE_RISK_POSTURE } from '@/lib/data/baselineRiskPosture'
-import { BASELINE_EXPOSURE, INACTION_EXPOSURE, COST_OF_INACTION, COST_TO_ACT } from '@/lib/data/scenarioInaction'
+import { BASELINE_EXPOSURE, INACTION_EXPOSURE, STRESSED_EXPOSURE, COST_OF_INACTION, COST_TO_ACT } from '@/lib/data/scenarioInaction'
 import { SCENARIO_DRIVERS, SCENARIO_PRESETS, type ScenarioDriver } from '@/lib/data/scenarioDrivers'
 
 const PORTFOLIOS: Portfolio[] = ['real-estate', 'retail', 'hospitality', 'education', 'facilities']
 const BASE_M = BASELINE_EXPOSURE / 1e6
 const CEILING_M = BASELINE_RISK_POSTURE.netUnhedgedAppetiteCeiling / 1e6
+const REFERENCE_SEVERE_M = STRESSED_EXPOSURE / 1e6 // the bridge's fixed "reference severe scenario"
 const aedM = (m: number) => formatCurrencyShort(m * 1e6, 'AED')
 
 // ════════════════════════════════════════════════════════════════════════
@@ -202,7 +203,12 @@ function DriverScenarioBuilder() {
                     {overM > 0 ? `${aedM(overM)} over board appetite` : `Within board appetite`} <span style={{ color: 'var(--text-tertiary)', fontWeight: 600 }}>(ceiling {aedM(CEILING_M)})</span>
                   </div>
                   <div style={{ fontSize: 11.5, color: 'var(--text-tertiary)', marginTop: 8, lineHeight: 1.45, maxWidth: 300 }}>
-                    Baseline {aedM(BASE_M)} + {active.length} driver move{active.length > 1 ? 's' : ''} = stressed exposure. Full working on the right.
+                    Baseline {aedM(BASE_M)} + {active.length} driver move{active.length > 1 ? 's' : ''} = your scenario.{' '}
+                    {stressedM < REFERENCE_SEVERE_M
+                      ? `Milder than the reference severe scenario above (${aedM(REFERENCE_SEVERE_M)}).`
+                      : stressedM > REFERENCE_SEVERE_M
+                        ? `Harsher than the reference severe scenario above (${aedM(REFERENCE_SEVERE_M)}).`
+                        : `Matches the reference severe scenario above.`}
                   </div>
                 </div>
                 <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 12, padding: 12 }}>
