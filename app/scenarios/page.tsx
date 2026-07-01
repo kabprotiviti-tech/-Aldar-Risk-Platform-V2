@@ -19,8 +19,10 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
-import { Play, ChevronDown, SlidersHorizontal, ArrowRight, RotateCcw, Info } from 'lucide-react'
+import { Play, ChevronDown, SlidersHorizontal, ArrowRight, RotateCcw, Info, Save, X, Check } from 'lucide-react'
 import { Card, CardBody } from '@/components/ui/Card'
+import { Modal } from '@/components/ui/Modal'
+import { SavedScenariosProvider, useSavedScenarios } from '@/lib/context/SavedScenariosContext'
 import { CostOfInactionPanel } from '@/components/scenarios/CostOfInactionPanel'
 import { ExposureClimax } from '@/components/scenarios/ExposureClimax'
 import { SimulationWorkbench } from '@/components/simulation/SimulationWorkbench'
@@ -40,6 +42,14 @@ const aedM = (m: number) => formatCurrencyShort(m * 1e6, 'AED')
 
 // ════════════════════════════════════════════════════════════════════════
 export default function ScenariosPage() {
+  return (
+    <SavedScenariosProvider>
+      <ScenariosPageContent />
+    </SavedScenariosProvider>
+  )
+}
+
+function ScenariosPageContent() {
   const [showBaseline, setShowBaseline] = useState(false)
   const [showAnalyst, setShowAnalyst] = useState(false)
 
@@ -109,22 +119,42 @@ function VerdictCallout() {
 // 2 · DRIVER SCENARIO BUILDER — the playable stress test
 // ════════════════════════════════════════════════════════════════════════
 function DriverScenarioBuilder() {
+  const { scenarios: saved, saveScenario, removeScenario } = useSavedScenarios()
   const [values, setValues] = useState<Record<string, number>>({})
   const [showAll, setShowAll] = useState(false)
   const [ran, setRan] = useState(false)
   const [showCalc, setShowCalc] = useState(false)
   const [activePreset, setActivePreset] = useState<string | null>(null)
+  const [activeSaved, setActiveSaved] = useState<string | null>(null)
+  const [showSaveModal, setShowSaveModal] = useState(false)
+  const [justSaved, setJustSaved] = useState(false)
 
   const setDriver = (k: string, v: number) => {
     setValues((p) => ({ ...p, [k]: v }))
     setActivePreset(null)
+    setActiveSaved(null)
   }
   const applyPreset = (id: string, vals: Record<string, number>) => {
     setValues({ ...vals })
     setActivePreset(id)
+    setActiveSaved(null)
     setRan(false)
   }
-  const reset = () => { setValues({}); setActivePreset(null); setRan(false) }
+  const applySaved = (id: string, vals: Record<string, number>) => {
+    setValues({ ...vals })
+    setActiveSaved(id)
+    setActivePreset(null)
+    setRan(false)
+  }
+  const reset = () => { setValues({}); setActivePreset(null); setActiveSaved(null); setRan(false) }
+
+  const handleSave = (name: string) => {
+    const s = saveScenario(name, values)
+    setActiveSaved(s.id)
+    setShowSaveModal(false)
+    setJustSaved(true)
+    setTimeout(() => setJustSaved(false), 2200)
+  }
 
   const active = SCENARIO_DRIVERS.filter((d) => (values[d.key] || 0) > 0)
   const perDriver = active.map((d) => ({ d, v: values[d.key], contrib: values[d.key] * d.aedPerUnit }))
@@ -155,6 +185,47 @@ function DriverScenarioBuilder() {
           })}
         </div>
 
+        {/* Saved scenarios — user-named driver combinations */}
+        {saved.length > 0 && (
+          <>
+            <FieldLabel>Your saved scenarios</FieldLabel>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
+              {saved.map((s) => {
+                const on = activeSaved === s.id
+                return (
+                  <span
+                    key={s.id}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 6, borderRadius: 999,
+                      border: on ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                      background: on ? 'var(--accent-glow)' : 'var(--bg-secondary)', padding: '2px 4px 2px 12px',
+                    }}
+                  >
+                    <button
+                      onClick={() => applySaved(s.id, s.values)}
+                      style={{ fontSize: 12, fontWeight: 700, cursor: 'pointer', background: 'transparent', border: 'none', padding: '4px 0', color: on ? 'var(--accent-primary)' : 'var(--text-secondary)' }}
+                    >
+                      {s.name}
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm(`Remove saved scenario "${s.name}"?`)) {
+                          if (activeSaved === s.id) setActiveSaved(null)
+                          removeScenario(s.id)
+                        }
+                      }}
+                      title="Remove"
+                      style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18, borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)' }}
+                    >
+                      <X size={11} />
+                    </button>
+                  </span>
+                )
+              })}
+            </div>
+          </>
+        )}
+
         {/* Drivers */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 10 }}>
           <FieldLabel>Drivers <span style={{ textTransform: 'none', fontWeight: 600, color: 'var(--text-tertiary)' }}>· drag to set each move</span></FieldLabel>
@@ -183,9 +254,27 @@ function DriverScenarioBuilder() {
               <><b style={{ color: 'var(--text-primary)' }}>{active.length}</b> driver{active.length > 1 ? 's' : ''} in this scenario</>
             )}
           </span>
-          <button onClick={() => setRan(true)} disabled={active.length === 0} className="btn-primary flex items-center gap-2" style={{ opacity: active.length === 0 ? 0.5 : 1, cursor: active.length === 0 ? 'not-allowed' : 'pointer' }}>
-            <Play size={15} /> Run scenario
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {justSaved && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 700, color: 'var(--risk-low)' }}>
+                <Check size={13} /> Saved
+              </span>
+            )}
+            <button
+              onClick={() => setShowSaveModal(true)}
+              disabled={active.length === 0}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700, cursor: active.length === 0 ? 'not-allowed' : 'pointer',
+                background: 'transparent', border: '1px solid var(--border-color)', borderRadius: 8, padding: '9px 14px',
+                color: 'var(--text-secondary)', opacity: active.length === 0 ? 0.5 : 1,
+              }}
+            >
+              <Save size={14} /> Save scenario
+            </button>
+            <button onClick={() => setRan(true)} disabled={active.length === 0} className="btn-primary flex items-center gap-2" style={{ opacity: active.length === 0 ? 0.5 : 1, cursor: active.length === 0 ? 'not-allowed' : 'pointer' }}>
+              <Play size={15} /> Run scenario
+            </button>
+          </div>
         </div>
 
         {/* Result + calculation */}
@@ -255,7 +344,71 @@ function DriverScenarioBuilder() {
           )}
         </AnimatePresence>
       </CardBody>
+
+      {showSaveModal && (
+        <SaveScenarioModal
+          driverCount={active.length}
+          onSave={handleSave}
+          onClose={() => setShowSaveModal(false)}
+        />
+      )}
     </Card>
+  )
+}
+
+function SaveScenarioModal({
+  driverCount,
+  onSave,
+  onClose,
+}: {
+  driverCount: number
+  onSave: (name: string) => void
+  onClose: () => void
+}) {
+  const [name, setName] = useState('')
+  const canSave = name.trim().length > 0
+
+  return (
+    <Modal open onClose={onClose} ariaLabel="Save scenario" size="sm">
+      <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase', marginBottom: 4 }}>
+            Stress test
+          </div>
+          <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Save this scenario</h3>
+          <p style={{ fontSize: 12, color: 'var(--text-tertiary)', margin: '4px 0 0' }}>
+            {driverCount} driver{driverCount > 1 ? 's' : ''} set. Give it a name so leadership can reload it later.
+          </p>
+        </div>
+        <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>
+          <span>Scenario name</span>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. Q3 Board Downside Case"
+            autoFocus
+            onKeyDown={(e) => { if (e.key === 'Enter' && canSave) onSave(name.trim()) }}
+            style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 6, color: 'var(--text-primary)', padding: '8px 10px', fontSize: 13 }}
+          />
+        </label>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 6 }}>
+          <button
+            onClick={onClose}
+            style={{ background: 'transparent', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: 6, padding: '8px 14px', fontSize: 11, fontWeight: 700, letterSpacing: 0.4, textTransform: 'uppercase', cursor: 'pointer' }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => canSave && onSave(name.trim())}
+            disabled={!canSave}
+            style={{ background: 'var(--accent-primary)', color: 'var(--on-accent)', border: 'none', borderRadius: 6, padding: '8px 14px', fontSize: 11, fontWeight: 700, letterSpacing: 0.4, textTransform: 'uppercase', cursor: canSave ? 'pointer' : 'not-allowed', opacity: canSave ? 1 : 0.5 }}
+          >
+            Save scenario
+          </button>
+        </div>
+      </div>
+    </Modal>
   )
 }
 
