@@ -21,27 +21,15 @@ import {
   type PlanActivity,
   type PlanActivityStatus,
 } from '@/lib/context/ERMPlanActivitiesContext'
+import {
+  SEED_ACTIVITIES,
+  CURRENT_MONTH,
+  deriveOccState,
+  rollupState,
+  type SeedActivity,
+  type PlanState,
+} from '@/lib/data/ermPlanShared'
 import { Modal } from '@/components/ui/Modal'
-
-interface SeedActivity {
-  id: string
-  title: string
-  description: string
-  months: number[]
-  category: PlanActivityCategory
-  seeded: true
-}
-
-const SEED_ACTIVITIES: SeedActivity[] = [
-  { id: 'a1', title: 'Risk Appetite Refresh', description: 'Annual review of group risk appetite & tolerance', months: [1, 2], category: 'governance', seeded: true },
-  { id: 'a2', title: 'ERM Framework Update', description: 'Refresh ERM framework, taxonomy, ISO 31000 alignment', months: [3, 4], category: 'governance', seeded: true },
-  { id: 'a3', title: 'KRI Monthly Reporting', description: 'Monthly KRI dashboard cycle to Group ERM Head', months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], category: 'monitoring', seeded: true },
-  { id: 'a4', title: 'ARC Quarterly Review', description: 'Audit & Risk Committee review of register, KRIs, breach log', months: [3, 6, 9, 12], category: 'review', seeded: true },
-  { id: 'a5', title: 'Risk Champion Training', description: 'Training cycle for first-line risk champions', months: [5, 6], category: 'training', seeded: true },
-  { id: 'a6', title: 'Subsidiary Register Refresh', description: 'Each subsidiary refreshes its register; cascades to Group', months: [7, 8], category: 'review', seeded: true },
-  { id: 'a7', title: 'External Audit Walkthrough', description: 'External auditor walks risk register + control library', months: [10, 11], category: 'review', seeded: true },
-  { id: 'a8', title: 'Board Annual Report', description: 'Year-end ERM report to the board, ARC pack', months: [12], category: 'reporting', seeded: true },
-]
 
 const CATEGORY_META: Record<
   PlanActivityCategory,
@@ -56,36 +44,12 @@ const CATEGORY_META: Record<
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-// ── Status (lifecycle the user sets) + derived urgency ──────────────────
 // "Due" and "Overdue" are NOT stored — they are computed from the user-set
-// lifecycle status of EACH month-occurrence vs. today's month.
-type PlanState = 'completed' | 'overdue' | 'in_progress' | 'due' | 'planned'
-
-/** Real current month + day (drives the Due/Overdue logic and the today line). */
+// lifecycle status of EACH month-occurrence vs. today's month. CURRENT_MONTH,
+// deriveOccState and rollupState now live in lib/data/ermPlanShared so the
+// Dashboard summary card can compute the exact same counts.
 const NOW = new Date()
-const CURRENT_MONTH = NOW.getMonth() + 1 // 1..12
 const CURRENT_YEAR = NOW.getFullYear()
-
-/** State of ONE month-occurrence, from its stored lifecycle status + the date. */
-function deriveOccState(month: number, status: PlanActivityStatus): PlanState {
-  if (status === 'completed') return 'completed'
-  if (month < CURRENT_MONTH) return 'overdue' // month has passed, not completed
-  if (status === 'in_progress') return 'in_progress'
-  if (month === CURRENT_MONTH) return 'due' // happening this month
-  return 'planned' // future month
-}
-
-const STATE_PRIORITY: PlanState[] = ['overdue', 'due', 'in_progress', 'planned', 'completed']
-
-/** Roll up several occurrence states into one chip state for the row. */
-function rollupState(states: PlanState[]): PlanState {
-  if (states.length === 0) return 'planned'
-  if (states.every((s) => s === 'completed')) return 'completed'
-  for (const p of STATE_PRIORITY) {
-    if (states.includes(p)) return p
-  }
-  return 'planned'
-}
 
 const STATE_META: Record<
   PlanState,

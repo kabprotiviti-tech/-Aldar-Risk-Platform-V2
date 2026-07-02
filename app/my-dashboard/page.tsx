@@ -36,7 +36,7 @@ import {
 } from 'lucide-react'
 import { SimulationProvider, useSimulation } from '@/lib/context/SimulationContext'
 import { RiskDraftProvider, useRiskDrafts } from '@/lib/context/RiskDraftContext'
-import { ERMPlanActivitiesProvider } from '@/lib/context/ERMPlanActivitiesContext'
+import { ERMPlanActivitiesProvider, useERMPlanActivities } from '@/lib/context/ERMPlanActivitiesContext'
 import { ERMAnnualPlan } from '@/components/portfolio-tower/ERMAnnualPlan'
 import {
   MitigationActionsProvider,
@@ -56,8 +56,7 @@ import { KRI_DEFINITIONS } from '@/lib/data/kri-definitions'
 import { computeKRIStatus, STATUS_META } from '@/lib/data/kri-status'
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { ExposureBreakdown } from '@/components/ExposureBreakdown'
-import { ErmAnnualPlan } from '@/components/ErmAnnualPlan'
-import { ermPlanSummary } from '@/lib/data/ermAnnualPlan'
+import { computeErmPlanSummary } from '@/lib/data/ermPlanShared'
 import { ExternalIntelligenceFeed } from '@/components/home/ExternalIntelligenceFeed'
 import { TrustFooter } from '@/components/provenance/TrustFooter'
 import { BASELINE_RISK_POSTURE } from '@/lib/data/baselineRiskPosture'
@@ -149,7 +148,10 @@ function MyDashboardContent() {
   const headlineCriticalHigh = BASELINE_RISK_POSTURE.totalCriticalAndHighRisks
   const criticalCount = BASELINE_RISK_POSTURE.criticalRiskCount
   const highCount = BASELINE_RISK_POSTURE.highRiskCount
-  const ermSummary = ermPlanSummary()
+  // Same source + derivation as the interactive ERM Annual Plan grid below
+  // (lib/data/ermPlanShared) — this card and the grid can never disagree.
+  const { activities: ermCustomActivities, statuses: ermStatuses } = useERMPlanActivities()
+  const ermSummary = computeErmPlanSummary(ermCustomActivities, ermStatuses)
   const headlineRiskScore = BASELINE_RISK_POSTURE.overallRiskScore
 
   // ── "What needs your attention" — the single focal list (Batch 5).
@@ -375,7 +377,7 @@ function MyDashboardContent() {
                   <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>Overdue</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{ermSummary.planned}</div>
+                  <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{ermSummary.due + ermSummary.inProgress + ermSummary.planned}</div>
                   <div style={{ fontSize: 9, color: 'var(--text-tertiary)', fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>Upcoming</div>
                 </div>
               </div>
@@ -406,11 +408,6 @@ function MyDashboardContent() {
           Detail &amp; evidence
         </span>
         <span style={{ flex: 1, height: 1, background: 'var(--border-color)' }} />
-      </div>
-
-      {/* ── ERM Annual Plan — Jan→Dec plan vs actual calendar ─────────── */}
-      <div id="erm-plan" style={{ scrollMarginTop: 80 }}>
-        <ErmAnnualPlan />
       </div>
 
       {/* ── 2-up: Drafts + Actions ────────────────────────────────────── */}
@@ -606,9 +603,12 @@ function MyDashboardContent() {
       </Section>
 
       {/* ERM Annual Plan — interactive status tracker (Planned / In Progress /
-          Completed; Due & Overdue derived from today vs. schedule). Full
-          plotted plan also lives at /erm-plan. */}
-      <ERMAnnualPlan />
+          Completed; Due & Overdue derived from today vs. schedule). The
+          "ERM Annual Plan" summary card up top anchors here. Full plotted
+          plan also lives at /erm-plan. */}
+      <div id="erm-plan" style={{ scrollMarginTop: 80 }}>
+        <ERMAnnualPlan />
+      </div>
 
       <TrustFooter />
     </div>
