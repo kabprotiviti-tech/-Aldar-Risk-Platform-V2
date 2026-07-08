@@ -41,7 +41,6 @@ import {
   portfolioNames,
   type Portfolio,
 } from '@/lib/simulated-data'
-import { PROPAGATED_METRICS } from '@/lib/riskPropagationEngine'
 
 const PORTFOLIO_COLORS: Record<Portfolio, string> = {
   'real-estate': '#C9A84C',
@@ -439,14 +438,6 @@ export default function DashboardPage() {
   const [activeView, setActiveView] = useState<KPIView | null>(null)
   const [calcCtx, setCalcCtx] = useState<FinancialCalcContext | null>(null)
   const [selectedAction, setSelectedAction] = useState<Action | null>(null)
-
-  const portfolioScores: Partial<Record<'real-estate' | 'retail' | 'hospitality' | 'education' | 'facilities', number>> = {
-    'real-estate': PROPAGATED_METRICS['real-estate'].riskScore,
-    retail:        PROPAGATED_METRICS.retail.riskScore,
-    hospitality:   PROPAGATED_METRICS.hospitality.riskScore,
-    education:     PROPAGATED_METRICS.education.riskScore,
-    facilities:    PROPAGATED_METRICS.facilities.riskScore,
-  }
 
   // Last-updated ticker only. Risk score stays stable (no random jitter) so
   // it always matches the other dashboards.

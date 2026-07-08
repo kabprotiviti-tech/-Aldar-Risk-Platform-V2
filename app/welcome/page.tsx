@@ -17,7 +17,8 @@ import {
   ListChecks,
 } from 'lucide-react'
 import { ThemeSelector } from '@/components/layout/ThemeSelector'
-import { aggregateKPIs, externalNews, kpiData } from '@/lib/simulated-data'
+import { externalNews, kpiData } from '@/lib/simulated-data'
+import { BASELINE_RISK_POSTURE } from '@/lib/data/baselineRiskPosture'
 import { controlSummary } from '@/lib/controlData'
 import { RISKS } from '@/lib/engine/seedData'
 
@@ -473,12 +474,11 @@ export default function LandingPage() {
     return () => window.removeEventListener('keydown', onKey)
   }, [showThemes])
 
-  const totalRisks =
-    aggregateKPIs.criticalRisks +
-    aggregateKPIs.highRisks +
-    aggregateKPIs.mediumRisks +
-    aggregateKPIs.lowRisks
-  const exposureAED = Math.round(aggregateKPIs.totalFinancialExposure)
+  // Same canonical source the dashboard (/home, /my-dashboard) reads from —
+  // BASELINE_RISK_POSTURE — so the landing page can't show a different
+  // risk count / exposure / score than the screen the user lands on next.
+  const totalRisks = BASELINE_RISK_POSTURE.totalRisks
+  const exposureAED = Math.round(BASELINE_RISK_POSTURE.totalFinancialExposure)
   const riskSeries = kpiData.overallRiskScore
   const exposureSeries = kpiData.financialExposure
   const alertSeries = kpiData.aiAlertsPerMonth
@@ -566,7 +566,7 @@ export default function LandingPage() {
             value={totalRisks}
             icon={<AlertTriangle size={14} />}
             accent="warn"
-            hint={`${aggregateKPIs.criticalRisks} critical · ${aggregateKPIs.highRisks} high`}
+            hint={`${BASELINE_RISK_POSTURE.criticalRiskCount} critical · ${BASELINE_RISK_POSTURE.highRiskCount} high`}
             spark={riskSeries}
             delay={100}
           />
@@ -581,7 +581,7 @@ export default function LandingPage() {
           />
           <Stat
             label="AI Signals Today"
-            value={aggregateKPIs.aiAlertsToday}
+            value={BASELINE_RISK_POSTURE.aiAlertsToday}
             icon={<Activity size={14} />}
             accent="primary"
             hint="Fused from 4 sources"
@@ -603,7 +603,7 @@ export default function LandingPage() {
             eyebrow="01 · EXECUTIVE"
             title="Executive Dashboard"
             description="Portfolio-level risk posture, AI fusion insights, and board-ready metrics updated in real time."
-            metric={`${aggregateKPIs.totalRiskScore}`}
+            metric={`${BASELINE_RISK_POSTURE.overallRiskScore}`}
             metricLabel="Enterprise Risk Score"
             icon={<Layers size={18} />}
             delay={0}
