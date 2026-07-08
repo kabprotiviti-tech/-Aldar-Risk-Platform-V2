@@ -104,8 +104,8 @@ function VerdictCallout() {
           <IllustrativePill />
         </div>
         <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.5, color: 'var(--text-primary)', fontWeight: 600, maxWidth: 900 }}>
-          Under a severe combined shock, Group net-unhedged exposure rises from <b>{formatCurrencyShort(BASELINE_EXPOSURE, 'AED')}</b> to <b style={{ color: 'var(--risk-high)' }}>{formatCurrencyShort(INACTION_EXPOSURE, 'AED')}</b>. Doing nothing for 12 months costs ≈ <b style={{ color: 'var(--risk-high)' }}>{formatCurrencyShort(COST_OF_INACTION, 'AED')}</b>.{' '}
-          <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>Recommendation — approve the Tier-1 response (≈ {formatCurrencyShort(COST_TO_ACT, 'AED')}) and route it for board sign-off.</span>
+          If a severe shock hits, Group exposure goes from <b>{formatCurrencyShort(BASELINE_EXPOSURE, 'AED')}</b> to <b style={{ color: 'var(--risk-high)' }}>{formatCurrencyShort(INACTION_EXPOSURE, 'AED')}</b>. Waiting 12 months instead of acting costs about <b style={{ color: 'var(--risk-high)' }}>{formatCurrencyShort(COST_OF_INACTION, 'AED')}</b>.{' '}
+          <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>Acting now — the immediate actions below — costs about {formatCurrencyShort(COST_TO_ACT, 'AED')} and needs board sign-off.</span>
         </p>
       </div>
       <Link href="/respond/approvals" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'var(--accent-primary)', color: 'var(--on-accent)', padding: '10px 16px', borderRadius: 8, fontSize: 12.5, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' }}>
