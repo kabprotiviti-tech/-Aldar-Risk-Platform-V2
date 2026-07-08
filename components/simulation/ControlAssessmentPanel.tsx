@@ -25,6 +25,7 @@ import {
   type DerivedRiskMeta,
 } from '@/lib/engine/controlAssessmentAdapter'
 import type { RiskDef } from '@/lib/engine/types'
+import { recordAiSuggestion } from '@/lib/context/AuditTrailContext'
 
 interface AICriticResponse {
   weak_control_zones: Array<{ area: string; reason: string }>
@@ -114,6 +115,7 @@ export function ControlAssessmentPanel() {
       })
       const data: AICriticResponse = await res.json()
       setAi(data)
+      recordAiSuggestion({ feature: 'Control Assessment AI Critic', summary: `Reviewed control-derived risks — ${data.recommendations?.length ?? 0} recommendation(s)` })
     } catch (err) {
       setAiError(err instanceof Error ? err.message : 'AI critic failed')
     } finally {

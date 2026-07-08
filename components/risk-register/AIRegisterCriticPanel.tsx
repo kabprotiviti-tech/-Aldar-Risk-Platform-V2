@@ -16,6 +16,7 @@
 
 import React, { useState } from 'react'
 import { ShieldCheck, ChevronDown, ChevronRight, Loader2, AlertTriangle, Check, X } from 'lucide-react'
+import { recordAiSuggestion } from '@/lib/context/AuditTrailContext'
 
 interface CriticResponse {
   missing_risks: Array<{
@@ -65,6 +66,7 @@ export function AIRegisterCriticPanel() {
       const json = (await res.json()) as CriticResponse
       setData(json)
       setOpen(true)
+      recordAiSuggestion({ feature: 'AI Register Critic', summary: `Challenged the register — ${json.deep_recommendations?.length ?? 0} recommendation(s)` })
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Unknown error')
     } finally {

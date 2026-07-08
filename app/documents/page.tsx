@@ -31,6 +31,7 @@ import { DocumentControlExtractor } from '@/components/controls/DocumentControlE
 import { IllustrativeDataBanner } from '@/components/provenance/IllustrativeDataBanner'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { ControlAssessmentPanel } from '@/components/simulation/ControlAssessmentPanel'
+import { recordAiSuggestion } from '@/lib/context/AuditTrailContext'
 
 // ─── Document Intelligence (paste) ───────────────────────────────────────────
 
@@ -872,6 +873,7 @@ export default function DocumentsPage() {
       setUpdates(
         data.suggestedUpdates?.map((u: AnalysisResult['suggestedUpdates'][0]) => ({ ...u, _status: 'pending' })) || []
       )
+      recordAiSuggestion({ feature: 'Document Intelligence', summary: `Extracted ${data.suggestedUpdates?.length ?? 0} suggested register update(s) from a ${docType} document` })
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Analysis failed. Please try again.')
     } finally {

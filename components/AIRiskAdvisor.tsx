@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { internalSnapshot } from '@/lib/internalData'
 import { aggregateKPIs } from '@/lib/simulated-data'
+import { recordAiSuggestion } from '@/lib/context/AuditTrailContext'
 
 // ─── Suggested questions ──────────────────────────────────────────────────────
 
@@ -161,6 +162,7 @@ export function AIRiskAdvisor() {
       const data = await res.json()
       if (data.error) throw new Error(data.error)
       setResult(data)
+      recordAiSuggestion({ feature: 'AI Risk Advisor', summary: `Answered: "${trimmed}"` })
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Advisor unavailable. Please try again.')
     } finally {

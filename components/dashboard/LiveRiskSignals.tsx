@@ -26,6 +26,7 @@ import {
 import { Card, CardHeader, CardTitle, CardBody } from '@/components/ui/Card'
 import type { NewsItem } from '@/app/api/news/route'
 import type { AIClassification } from '@/app/api/ai-classify/route'
+import { recordAiSuggestion } from '@/lib/context/AuditTrailContext'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Severity = 'critical' | 'high' | 'medium' | 'low'
@@ -651,6 +652,7 @@ export function LiveRiskSignals() {
       // like rate-limits or quota resets.
       if (data.source === 'ai') {
         toClassify.forEach((it) => classifiedIds.current.add(it.id))
+        recordAiSuggestion({ feature: 'External Signal Classification', summary: `Classified ${toClassify.length} signal(s) by severity` })
       }
     } catch {
       // Silent fail — cards still show keyword-based severity; ids are NOT

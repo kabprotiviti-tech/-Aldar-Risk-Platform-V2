@@ -24,6 +24,7 @@ import { internalSignals, internalSnapshot } from '@/lib/internalData'
 import type { InternalSignal } from '@/lib/internalData'
 import type { FusionResult } from '@/app/api/fusion/route'
 import type { NewsItem } from '@/app/api/news/route'
+import { recordAiSuggestion } from '@/lib/context/AuditTrailContext'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 type Severity = 'critical' | 'high' | 'medium' | 'low'
@@ -438,6 +439,7 @@ export function AIFusionPanel() {
       const data = await res.json()
       setFusion(data.result)
       lastFusedAt.current = Date.now()
+      recordAiSuggestion({ feature: 'External Signal Fusion', summary: `Fused signal: "${headline}" (${source})` })
     } catch {
       // Silent fail — panel stays with previous result or empty
     } finally {

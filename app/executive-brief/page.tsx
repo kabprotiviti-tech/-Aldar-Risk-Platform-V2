@@ -18,6 +18,7 @@ import { formatCurrencyShort, formatExposureBn } from '@/lib/utils/formatters'
 import { Skeleton, SkeletonKPICard } from '@/components/ui/Skeleton'
 import { riskRegister, portfolioMetrics } from '@/lib/simulated-data'
 import { internalSnapshot } from '@/lib/internalData'
+import { recordAiSuggestion } from '@/lib/context/AuditTrailContext'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -119,6 +120,7 @@ export default function ExecutiveBriefPage() {
       const data = await res.json()
       if (data.error) throw new Error(data.error)
       setResult(data)
+      recordAiSuggestion({ feature: 'Executive Brief Generator', summary: 'Drafted a board/ARC executive brief from live risk data' })
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to generate brief. Please try again.')
     } finally {

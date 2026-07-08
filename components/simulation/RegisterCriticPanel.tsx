@@ -10,6 +10,7 @@
 
 import React, { useMemo, useState } from 'react'
 import { criticReport, type ExternalSignal, classifySignal } from '@/lib/engine/registerCritic'
+import { recordAiSuggestion } from '@/lib/context/AuditTrailContext'
 
 interface AICritique {
   missing_risks: Array<{
@@ -60,6 +61,7 @@ export function RegisterCriticPanel({ signals = [] as string[] }: { signals?: st
       const data = await res.json()
       setAi(data)
       if (data.source === 'fallback') setErr(data.error || 'AI unavailable — showing fallback')
+      else recordAiSuggestion({ feature: 'Register Critic (Simulation)', summary: 'Challenged the register against current external signals' })
     } catch (e: any) {
       setErr(e.message || 'Request failed')
     } finally {

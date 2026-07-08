@@ -35,6 +35,7 @@ export type AuditCategory =
   | 'kri_threshold'
   | 'escalation'
   | 'system'
+  | 'ai'
 
 export type AuditAction =
   | 'create'
@@ -44,6 +45,7 @@ export type AuditAction =
   | 'login'
   | 'export'
   | 'audit_cleared'
+  | 'ai_suggestion'
 
 export interface AuditEvent {
   id: string
@@ -110,6 +112,32 @@ export function recordAuditEventDirect(
   } catch {
     // quota / private-mode / parse error — non-fatal
   }
+}
+
+/**
+ * Log an AI-generated suggestion the moment it's produced — every AI
+ * touchpoint (register critic, document intelligence, AI advisor, control
+ * assessment, executive brief, fusion, live signal classification) calls
+ * this right after a successful response, so the audit trail records what
+ * the AI suggested even before a human approves/rejects it. Per CLAUDE.md,
+ * AI output is a hypothesis pending human approval, not a fact — this is
+ * the paper trail for that hypothesis.
+ */
+export function recordAiSuggestion(input: {
+  feature: string
+  summary: string
+  targetId?: string | null
+  actor?: string
+  details?: Record<string, unknown>
+}): void {
+  recordAuditEventDirect({
+    category: 'ai',
+    action: 'ai_suggestion',
+    actor: input.actor || 'AI Engine',
+    targetId: input.targetId ?? null,
+    summary: `[${input.feature}] ${input.summary}`,
+    details: input.details,
+  })
 }
 
 interface CtxValue {

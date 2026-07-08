@@ -22,6 +22,7 @@ import {
 import { Card, CardHeader, CardTitle, CardBody } from '@/components/ui/Card'
 import { RiskBadge } from '@/components/ui/Badge'
 import { useUploadedDocument } from '@/lib/context/UploadedDocumentContext'
+import { recordAiSuggestion } from '@/lib/context/AuditTrailContext'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -198,6 +199,7 @@ export function DocumentUpload() {
       const data = await res.json()
       if (data.error) throw new Error(data.error)
       setResult(data)
+      recordAiSuggestion({ feature: 'Document Upload Analysis', summary: `Analyzed "${file.name}" — extracted risks and project impacts` })
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Analysis failed. Please try again.')
     } finally {

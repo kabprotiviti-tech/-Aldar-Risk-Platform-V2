@@ -34,6 +34,7 @@ const CATEGORY_META: Record<
   kri_threshold: { label: 'KRI Threshold', color: '#F5C518' },
   escalation: { label: 'Escalation', color: '#A855F7' },
   system: { label: 'System', color: '#888888' },
+  ai: { label: 'AI Suggestion', color: '#B8860B' },
 }
 
 const ACTION_META: Record<AuditAction, { label: string; color: string }> = {
@@ -44,6 +45,7 @@ const ACTION_META: Record<AuditAction, { label: string; color: string }> = {
   login: { label: 'Login', color: 'var(--text-secondary)' },
   export: { label: 'Export', color: 'var(--text-secondary)' },
   audit_cleared: { label: 'Audit Cleared', color: 'var(--risk-critical)' },
+  ai_suggestion: { label: 'AI Suggestion', color: '#B8860B' },
 }
 
 function AuditTrailContent() {
@@ -197,6 +199,7 @@ function AuditTrailContent() {
           <option value="kri_threshold">KRI Threshold</option>
           <option value="escalation">Escalation</option>
           <option value="system">System</option>
+          <option value="ai">AI Suggestion</option>
         </select>
         <select
           value={actionFilter}
