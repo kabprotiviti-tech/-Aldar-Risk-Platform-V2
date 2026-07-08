@@ -6,94 +6,98 @@
    ALDAR RISK INTELLIGENCE PLATFORM - THEME SYSTEM
    ============================================================ */
 
-/* ---- EXECUTIVE DARK (Default) ---- */
+/* ---- MERIDIAN DARK ---- (editorial teal on deep cool ink) */
 [data-theme="executive-dark"] {
-  --bg-primary: #0A0E1A;
-  --bg-secondary: #0F1623;
-  --bg-card: #141B2D;
-  --bg-hover: #1A2240;
-  --text-primary: #F0F4FF;
-  --text-secondary: #A8B4CC;
-  --text-tertiary: #7F8CA3;
-  --text-muted: #5A6A84;
-  --accent-primary: #E4002B;
-  --accent-secondary: #FF294E;
-  --accent-glow: rgba(228, 0, 43, 0.25);
-  --on-accent: #FFFFFF;
+  --bg-primary: #0E1417;
+  --bg-secondary: #131A1E;
+  --bg-card: #161E22;
+  --bg-tertiary: #1A2429;
+  --bg-hover: #1C262B;
+  --text-primary: #ECF1F0;
+  --text-secondary: #A9B4B2;
+  --text-tertiary: #7E8A88;
+  --text-muted: #5E6A68;
+  --accent-primary: #2FB89C;      /* Meridian teal, brightened for dark */
+  --accent-secondary: #23A187;
+  --accent-glow: rgba(47, 184, 156, 0.22);
+  --gold: #C9A24A;                /* signature warm hairline */
+  --on-accent: #06120F;
   --on-risk-critical: #FFFFFF;
   --on-risk-high: #FFFFFF;
-  --on-risk-medium: #0A0E1A;
-  --on-risk-low: #0A0E1A;
-  --border-color: rgba(255,255,255,0.07);
-  --border-accent: rgba(228, 0, 43, 0.4);
-  --risk-critical: #FF3B3B;
-  --risk-high: #FF8C00;
+  --on-risk-medium: #0E1417;
+  --on-risk-low: #0E1417;
+  --border-color: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.14);
+  --border-accent: rgba(47, 184, 156, 0.4);
+  --risk-critical: #FF5C5C;
+  --risk-high: #FF8C42;
   --risk-medium: #F5C518;
-  --risk-low: #22C55E;
-  --chart-1: #C9A84C;
-  --chart-2: #4A9EFF;
-  --chart-3: #A855F7;
-  --chart-4: #22C55E;
-  --chart-5: #FF6B6B;
-  /* UX-1 design-system token additions (UI-5 audit) */
+  --risk-low: #35D07F;
+  --chart-1: #2FB89C;
+  --chart-2: #6FA8DC;
+  --chart-3: #C9A24A;
+  --chart-4: #35D07F;
+  --chart-5: #FF8C42;
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
   --shadow-md: 0 8px 24px rgba(0,0,0,0.45);
   --shadow-lg: 0 32px 64px rgba(0,0,0,0.55);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+  --ring: 0 0 0 3px rgba(47,184,156,0.28);
   --focus-ring: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-primary);
-  --link-color: #5BB8FF;
-  --link-hover: #9DD3FF;
-  --state-success: #22C55E;
+  --link-color: #5FD3BC;
+  --link-hover: #8FE4D3;
+  --state-success: #35D07F;
   --state-warning: #F5C518;
-  --state-danger: #FF3B3B;
-  --state-info: #2D9EFF;
+  --state-danger: #FF5C5C;
+  --state-info: #6FA8DC;
   --surface-1: var(--bg-card);
   --surface-2: var(--bg-hover);
 }
 
-/* ---- EXECUTIVE LIGHT ---- */
+/* ---- MERIDIAN LIGHT ---- (editorial teal on cool paper) */
 [data-theme="executive-light"] {
-  /* Tier-1 premium light — cool neutral canvas, crisp white surfaces,
-     rich slate ink, single Protiviti-red accent, layered elevation. */
-  --bg-primary: #F5F6F8;       /* app canvas (cool, calm) */
+  --bg-primary: #F6F7F9;       /* cool paper canvas */
   --bg-secondary: #FFFFFF;     /* cards / surfaces */
   --bg-card: #FFFFFF;
-  --bg-tertiary: #EEF0F4;      /* subtle inset / disabled fill */
+  --bg-tertiary: #EEF1F4;      /* subtle inset / disabled fill */
   --bg-hover: #F0F2F5;
-  --text-primary: #0F1729;     /* rich slate ink (premium near-black) */
-  --text-secondary: #475467;   /* slate-600 */
-  --text-tertiary: #667085;    /* slate-500 */
-  --text-muted: #98A2B3;       /* slate-400 */
-  --accent-primary: #E4002B;
-  --accent-secondary: #B8001F;
-  --accent-glow: rgba(228, 0, 43, 0.10);
+  --text-primary: #14181F;     /* editorial ink (near-black, cool) */
+  --text-secondary: #45505F;
+  --text-tertiary: #5A6472;
+  --text-muted: #8A93A0;
+  --accent-primary: #0B6E5B;   /* Meridian teal */
+  --accent-secondary: #0A5F4F;
+  --accent-glow: rgba(11, 110, 91, 0.10);
+  --gold: #B8862E;             /* signature warm hairline */
   --on-accent: #FFFFFF;
   --on-risk-critical: #FFFFFF;
   --on-risk-high: #FFFFFF;
   --on-risk-medium: #FFFFFF;
   --on-risk-low: #FFFFFF;
-  --border-color: #E4E7EC;     /* gray-200 (cool, crisp) */
-  --border-strong: #D0D5DD;    /* gray-300 for stronger dividers */
-  --border-accent: rgba(228, 0, 43, 0.28);
-  /* Severity ramp — vibrant, premium, MUTUALLY DISTINCT, print-safe. */
-  --risk-critical: #D92D20;    /* red-600 */
-  --risk-high: #E04F16;        /* orange-dark */
-  --risk-medium: #CA8504;      /* amber-600 */
-  --risk-low: #079455;         /* green-600 */
+  --border-color: #E4E7EC;
+  --border-strong: #D0D5DD;
+  --border-accent: rgba(11, 110, 91, 0.28);
+  /* Severity ramp — semantic, kept distinct from the teal accent. */
+  --risk-critical: #B42318;
+  --risk-high: #C2410C;
+  --risk-medium: #B7791F;
+  --risk-low: #0B6E5B;
   --shadow-sm: 0 1px 2px rgba(16,24,40,0.05);
   --shadow-md: 0 1px 3px rgba(16,24,40,0.10), 0 1px 2px -1px rgba(16,24,40,0.06);
   --shadow-lg: 0 12px 28px -6px rgba(16,24,40,0.14), 0 4px 8px -4px rgba(16,24,40,0.08);
-  /* Radius scale (tier-1 consistency) */
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
   --radius-pill: 999px;
-  /* Focus ring */
-  --ring: 0 0 0 3px rgba(228,0,43,0.16);
-  --chart-1: #E4002B;
-  --chart-2: #475467;
-  --chart-3: #98A2B3;
-  --chart-4: #079455;
-  --chart-5: #E04F16;
+  --ring: 0 0 0 3px rgba(11,110,91,0.16);
+  --chart-1: #0B6E5B;
+  --chart-2: #45505F;
+  --chart-3: #8A93A0;
+  --chart-4: #B8862E;
+  --chart-5: #C2410C;
 }
 
 /* ---- BLOOMBERG ---- */
@@ -286,11 +290,18 @@
   padding: 0;
 }
 
+:root {
+  /* Meridian type system — Inter for body/data, Newsreader (serif) for
+     editorial display headlines + hero figures. */
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-serif: var(--font-newsreader), Georgia, 'Times New Roman', serif;
+}
+
 html,
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* Batch 3: tabular-lining numerals everywhere so every figure aligns and
@@ -298,6 +309,20 @@ body {
   font-variant-numeric: tabular-nums lining-nums;
   letter-spacing: -0.005em;
   min-height: 100vh;
+}
+
+/* Meridian editorial display — serif, for page titles + hero statements.
+   Opt-in via .ui-display / .ui-page-title so data/tables stay in Inter. */
+.ui-display,
+.ui-page-title {
+  font-family: var(--font-serif);
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+.ui-serif-num {
+  font-family: var(--font-serif);
+  font-variant-numeric: lining-nums;
+  letter-spacing: -0.02em;
 }
 
 /* ---- Scrollbar (tier-1: thin, neutral, unobtrusive) ---- */

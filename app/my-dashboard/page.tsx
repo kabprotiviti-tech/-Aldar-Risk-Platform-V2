@@ -239,6 +239,38 @@ function MyDashboardContent() {
           {persona ? `${persona.title} · ${persona.line}` : 'Unauthenticated'}
         </div>
 
+        {/* Meridian editorial headline — data-driven statement of posture,
+            rewritten from the live score vs. appetite + trend (no hardcoded
+            sentence). Serif display + gold hairline is the Meridian signature. */}
+        {(() => {
+          const score = BASELINE_RISK_POSTURE.overallRiskScore
+          const ceiling = BASELINE_RISK_POSTURE.overallRiskScoreAppetiteCeiling
+          const trend = BASELINE_RISK_POSTURE.riskScoreTrend
+          const over = score - ceiling
+          const headline =
+            over > 0
+              ? `The Group is over its risk appetite${trend > 0 ? ', and the gap widened this quarter.' : trend < 0 ? ', though the gap narrowed this quarter.' : ' this quarter.'}`
+              : `The Group is back within its risk appetite${trend < 0 ? ', and still improving.' : ' this quarter.'}`
+          return (
+            <div>
+              <h1
+                className="ui-display"
+                style={{
+                  fontSize: 30,
+                  lineHeight: 1.08,
+                  color: 'var(--text-primary)',
+                  margin: 0,
+                  maxWidth: 900,
+                  textWrap: 'balance',
+                }}
+              >
+                {headline}
+              </h1>
+              <div style={{ width: 44, height: 3, background: 'var(--gold)', marginTop: 12, borderRadius: 1 }} />
+            </div>
+          )
+        })()}
+
         {/* HERO — the ONE money number vs board appetite, beside the posture
             bullet. Money is the anchor a PJSC board thinks in; the 0–100 score
             is demoted to a bullet plotted against its ceiling + prior reading. */}

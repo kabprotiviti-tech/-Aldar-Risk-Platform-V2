@@ -1,6 +1,6 @@
 import React from 'react'
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Newsreader } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/lib/context/ThemeContext'
 import { DerivedRisksProvider } from '@/lib/context/DerivedRisksContext'
@@ -14,6 +14,16 @@ const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
+})
+
+// Meridian design system — an editorial serif for display headlines and hero
+// figures, paired with Inter for body/data. Exposed as --font-newsreader.
+const newsreader = Newsreader({
+  subsets: ['latin'],
+  variable: '--font-newsreader',
+  display: 'swap',
+  weight: ['400', '500', '600', '700'],
+  style: ['normal', 'italic'],
 })
 
 export const metadata: Metadata = {
@@ -41,7 +51,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={inter.variable} suppressHydrationWarning>
+      <body className={`${inter.variable} ${newsreader.variable}`} suppressHydrationWarning>
         <ThemeProvider>
           <AuditTrailProvider>
             <PersonaProvider>
