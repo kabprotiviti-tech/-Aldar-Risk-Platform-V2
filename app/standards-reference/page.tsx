@@ -293,9 +293,9 @@ function ClauseTable({ clauses }: { clauses: StandardClause[] }) {
                         key={href}
                         href={href}
                         style={{
-                          background: 'rgba(228,0,43,0.14)',
+                          background: 'rgba(11, 110, 91,0.14)',
                           color: 'var(--accent-primary)',
-                          border: '1px solid rgba(228,0,43,0.4)',
+                          border: '1px solid rgba(11, 110, 91,0.4)',
                           padding: '1px 6px',
                           borderRadius: 3,
                           fontSize: 9,

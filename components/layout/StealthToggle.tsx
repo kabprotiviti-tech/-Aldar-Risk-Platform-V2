@@ -227,14 +227,14 @@ export function StealthToggle() {
           // client (Aldar), neutral grey when showing the demo name (ABC).
           background: stealth
             ? hover
-              ? 'rgba(228, 0, 43, 0.95)'
-              : 'rgba(228, 0, 43, 0.7)'
+              ? 'rgba(11, 110, 91, 0.95)'
+              : 'rgba(11, 110, 91, 0.7)'
             : hover
             ? 'rgba(120, 120, 128, 0.85)'
             : 'rgba(120, 120, 128, 0.45)',
           boxShadow: hover
             ? stealth
-              ? '0 0 12px rgba(228, 0, 43, 0.6)'
+              ? '0 0 12px rgba(11, 110, 91, 0.6)'
               : '0 0 10px rgba(120, 120, 128, 0.5)'
             : 'none',
           transition: 'all 180ms ease',

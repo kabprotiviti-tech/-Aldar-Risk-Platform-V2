@@ -63,7 +63,7 @@ const SIGNAL_META: Record<
   up: { color: '#22C55E', icon: TrendingUp },
   down: { color: '#FF3B3B', icon: TrendingDown },
   neutral: { color: '#7F8CA3', icon: Radio },
-  alert: { color: '#B8001F', icon: AlertTriangle },
+  alert: { color: '#0A5F4F', icon: AlertTriangle },
 }
 
 // Illustrative curated set — pilot replaces with live feed.
@@ -379,8 +379,8 @@ export function ExternalIntelligenceFeed({ limit = 6 }: Props) {
                             fontSize: 9,
                             fontWeight: 700,
                             color: 'var(--accent-primary)',
-                            background: 'rgba(228,0,43,0.10)',
-                            border: '1px solid rgba(228,0,43,0.40)',
+                            background: 'rgba(11, 110, 91,0.10)',
+                            border: '1px solid rgba(11, 110, 91,0.40)',
                             padding: '1px 6px',
                             borderRadius: 3,
                             letterSpacing: 0.4,

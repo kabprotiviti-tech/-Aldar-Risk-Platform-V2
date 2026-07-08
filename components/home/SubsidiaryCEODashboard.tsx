@@ -130,12 +130,12 @@ function Inner() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 10 }}>
         <KPI label={`${entity?.shortName ?? 'Sub'} Risks`} value={myRisks.length} accent="#A855F7" sparkSeed={5} />
-        <KPI label="Total Exposure" value={`${(totalExposure / 1000).toFixed(2)}`} unit="AED bn" accent="#E4002B" sparkSeed={19} sparkAnchor={totalExposure / 1000} />
+        <KPI label="Total Exposure" value={`${(totalExposure / 1000).toFixed(2)}`} unit="AED bn" accent="#0B6E5B" sparkSeed={19} sparkAnchor={totalExposure / 1000} />
         <KPI label="Open Actions" value={myActions.length} sub={overdue > 0 ? `${overdue} overdue` : 'on track'} subColor={overdue > 0 ? '#FF3B3B' : '#22C55E'} accent="#2D9EFF" sparkSeed={33} />
         <KPI label="Linked KRIs" value={myKRIs.length} accent="#22C55E" sparkSeed={51} />
       </div>
 
-      <Section title="Top 5 Risks at this Subsidiary" subtitle="By residual exposure" accent="#E4002B" icon={<AlertTriangle size={14} />} cta={<Link href="/risk-register" style={ctaSmall}>All risks →</Link>}>
+      <Section title="Top 5 Risks at this Subsidiary" subtitle="By residual exposure" accent="#0B6E5B" icon={<AlertTriangle size={14} />} cta={<Link href="/risk-register" style={ctaSmall}>All risks →</Link>}>
         {top5.length === 0 ? (
           <Empty>No engine risks tagged to {entity?.shortName ?? 'this subsidiary'} in the seed register.</Empty>
         ) : (

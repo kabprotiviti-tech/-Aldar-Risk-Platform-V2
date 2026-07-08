@@ -192,13 +192,13 @@ const STATUS_META: Record<PolicyStatus, { color: string; label: string }> = {
 
 const CATEGORY_COLOR: Record<PolicyCategory, string> = {
   'Code of conduct': '#A855F7',
-  Financial: '#E4002B',
+  Financial: '#0B6E5B',
   Operational: '#2D9EFF',
   HSE: '#FF3B3B',
   'IT & data': '#22C55E',
   Compliance: '#F5C518',
   'HR & talent': '#A855F7',
-  Governance: '#E4002B',
+  Governance: '#0B6E5B',
 }
 
 export default function PolicyAndProcedurePage() {

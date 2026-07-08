@@ -25,7 +25,7 @@ export default function RootRedirect() {
     <div
       style={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0d0f14 0%, #1a1f2e 55%, #16100c 100%)',
+        background: 'linear-gradient(135deg, #0E1417 0%, #131A1E 55%, #0B2E27 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -39,13 +39,13 @@ export default function RootRedirect() {
           width: 56,
           height: 56,
           borderRadius: 12,
-          background: 'linear-gradient(135deg, #E4002B 0%, #B8001F 100%)',
+          background: 'linear-gradient(135deg, #2FB89C 0%, #0B6E5B 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           fontSize: 24,
           fontWeight: 700,
-          boxShadow: '0 10px 28px rgba(228,0,43,0.45)',
+          boxShadow: '0 10px 28px rgba(47,184,156,0.45)',
         }}
       >
         A

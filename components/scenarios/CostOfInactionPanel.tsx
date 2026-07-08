@@ -37,7 +37,7 @@ export function CostOfInactionPanel() {
       style={{
         background: 'var(--bg-secondary)',
         border: '1px solid var(--border-color)',
-        borderLeft: '3px solid var(--risk-high, #B8001F)',
+        borderLeft: '3px solid var(--risk-high, #C2410C)',
         borderRadius: 10,
         padding: 16,
         display: 'flex',
@@ -47,7 +47,7 @@ export function CostOfInactionPanel() {
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
         <div>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--risk-high, #B8001F)', textTransform: 'uppercase', letterSpacing: 0.8, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--risk-high, #C2410C)', textTransform: 'uppercase', letterSpacing: 0.8, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
             <AlertTriangle size={12} /> Cost of inaction
           </div>
           <div style={{ fontSize: 'clamp(28px, 3vw, 36px)', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.02em', lineHeight: 1.1, marginTop: 6, fontVariantNumeric: 'tabular-nums' }}>
@@ -85,7 +85,7 @@ export function CostOfInactionPanel() {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 8 }}>
           <Tier title="Immediate" icon={<Zap size={11} />} color="var(--risk-critical, #FF3B3B)" actions={actionsByTier('immediate')} />
-          <Tier title="Within 30 days" icon={<Calendar size={11} />} color="var(--risk-high, #B8001F)" actions={actionsByTier('30day')} />
+          <Tier title="Within 30 days" icon={<Calendar size={11} />} color="var(--risk-high, #C2410C)" actions={actionsByTier('30day')} />
           <Tier title="Within 90 days" icon={<Calendar size={11} />} color="var(--state-warning, #F5C518)" actions={actionsByTier('90day')} />
           <Tier title="Board decision" icon={<Crown size={11} />} color="var(--accent-primary)" actions={actionsByTier('board')} />
         </div>

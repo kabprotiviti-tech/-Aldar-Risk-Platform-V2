@@ -179,7 +179,7 @@ function ChampionInner() {
           gap: 10,
         }}
       >
-        <KPI label="My Drafts" value={myDrafts.length} accent="#E4002B" href="/risk-register" sparkSeed={7} />
+        <KPI label="My Drafts" value={myDrafts.length} accent="#0B6E5B" href="/risk-register" sparkSeed={7} />
         <KPI
           label="My Open Actions"
           value={myActions.length}
@@ -261,7 +261,7 @@ function ChampionInner() {
       <Section
         title={`${entity?.shortName ?? 'My'} Risk Snapshot`}
         subtitle={`${myRisks.length} engine risks tagged to this subsidiary (sorted by inherent)`}
-        accent="#E4002B"
+        accent="#0B6E5B"
         icon={<AlertTriangle size={14} />}
         cta={
           <Link href="/portfolio-tower" style={ctaSmall}>

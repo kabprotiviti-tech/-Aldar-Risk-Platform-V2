@@ -40,9 +40,9 @@ const COLORS = {
   text: '#111827',
   muted: '#6b7280',
   faint: '#e5e7eb',
-  accent: '#E4002B',
+  accent: '#0B6E5B',
   critical: '#FF3B3B',
-  high: '#B8001F',
+  high: '#C2410C',
   medium: '#F5C518',
   low: '#22C55E',
 }

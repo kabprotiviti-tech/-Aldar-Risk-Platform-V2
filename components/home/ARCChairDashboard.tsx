@@ -138,7 +138,7 @@ function Inner() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 8 }}>
           <DeltaTile label="Audit events" value={recentEvents.length} accent="#F5C518" sparkSeed={9} />
           <DeltaTile label="Red KRIs" value={kriRed} accent="#FF3B3B" sparkSeed={25} />
-          <DeltaTile label="Overdue mitigations" value={overdue} accent="#B8001F" sparkSeed={39} />
+          <DeltaTile label="Overdue mitigations" value={overdue} accent="#C2410C" sparkSeed={39} />
           <DeltaTile label="Pending escalations" value={pendingEsc.length} accent="#A855F7" sparkSeed={53} />
         </div>
       </Section>
@@ -175,7 +175,7 @@ function Inner() {
           )}
         </Section>
 
-        <Section title="Pending Escalations" subtitle="Operational escalations awaiting Group / Board direction" accent="#B8001F" icon={<ArrowUp size={14} />} cta={<Link href="/portfolio-tower" style={ctaSmall}>Portfolio Tower →</Link>}>
+        <Section title="Pending Escalations" subtitle="Operational escalations awaiting Group / Board direction" accent="#C2410C" icon={<ArrowUp size={14} />} cta={<Link href="/portfolio-tower" style={ctaSmall}>Portfolio Tower →</Link>}>
           {pendingEsc.length === 0 ? (
             <Empty>No pending escalations. Risk Champions raise these from /risk-register.</Empty>
           ) : (
@@ -256,7 +256,7 @@ function ConfidentialPanel() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8, marginBottom: 12 }}>
         <SevTile label="High severity" value={sev.high} color="#FF3B3B" />
-        <SevTile label="Medium severity" value={sev.medium} color="#B8001F" />
+        <SevTile label="Medium severity" value={sev.medium} color="#CA8504" />
         <SevTile label="Low severity" value={sev.low} color="#22C55E" />
         <SevTile label="Total open" value={sev.total} color="#A855F7" />
       </div>
@@ -265,7 +265,7 @@ function ConfidentialPanel() {
         {CONFIDENTIAL_ITEMS.map((item) => {
           const cat = CONFIDENTIAL_CAT_META[item.category]
           const sevColor =
-            item.severity === 'high' ? '#FF3B3B' : item.severity === 'medium' ? '#B8001F' : '#22C55E'
+            item.severity === 'high' ? '#FF3B3B' : item.severity === 'medium' ? '#CA8504' : '#22C55E'
           return (
             <div
               key={item.id}

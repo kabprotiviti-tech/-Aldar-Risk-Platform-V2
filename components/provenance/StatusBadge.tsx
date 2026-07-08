@@ -46,7 +46,7 @@ const TIER_META: Record<
   PREVIEW: {
     label: '🟠 PREVIEW',
     bg: 'rgba(255,140,0,0.18)',
-    fg: '#B8001F',
+    fg: '#0A5F4F',
     tooltip:
       'PREVIEW — UI shell only. Full functionality scoped for pilot phase post-contract.',
   },

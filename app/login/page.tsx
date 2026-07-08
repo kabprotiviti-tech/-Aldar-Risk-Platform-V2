@@ -45,7 +45,7 @@ const PERSONA_ICONS: Record<PersonaId, LucideIcon> = {
 }
 
 const PERSONA_ACCENT: Record<PersonaId, string> = {
-  'group-cro': '#E4002B',
+  'group-cro': '#0B6E5B',
   'risk-champion': '#2D9EFF',
   'subsidiary-ceo': '#A855F7',
   'arc-chair': '#F5C518',
@@ -221,7 +221,7 @@ function BrandPane() {
           height: 460,
           borderRadius: '50%',
           background:
-            'radial-gradient(circle, rgba(228,0,43,0.12) 0%, rgba(228,0,43,0) 60%)',
+            'radial-gradient(circle, rgba(11, 110, 91,0.12) 0%, rgba(11, 110, 91,0) 60%)',
           filter: 'blur(40px)',
         }}
       />
@@ -257,11 +257,11 @@ function BrandPane() {
             width: 44,
             height: 44,
             borderRadius: 10,
-            background: 'linear-gradient(135deg, #E4002B 0%, #B8001F 100%)',
+            background: 'linear-gradient(135deg, #0B6E5B 0%, #0A5F4F 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 8px 24px rgba(228,0,43,0.45)',
+            boxShadow: '0 8px 24px rgba(11, 110, 91,0.45)',
           }}
         >
           <Shield size={22} color="#fff" />
@@ -284,7 +284,7 @@ function BrandPane() {
 
       {/* Middle — pitch + live product glimpse */}
       <div style={{ position: 'relative', zIndex: 1, maxWidth: 500 }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, marginBottom: 18, padding: '5px 12px', borderRadius: 999, background: 'rgba(228,0,43,0.06)', border: '1px solid var(--border-accent)' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, marginBottom: 18, padding: '5px 12px', borderRadius: 999, background: 'rgba(11, 110, 91,0.06)', border: '1px solid var(--border-accent)' }}>
           <Sparkles size={12} style={{ color: 'var(--accent-primary)' }} />
           <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-secondary)', letterSpacing: 0.3 }}>AI-enabled Enterprise Risk &amp; Control</span>
         </div>
@@ -295,7 +295,7 @@ function BrandPane() {
             fontWeight: 800,
             margin: 0,
             letterSpacing: '-0.025em',
-            background: 'linear-gradient(118deg, #0F1729 0%, #2A3550 60%, #E4002B 125%)',
+            background: 'linear-gradient(118deg, #0F1729 0%, #2A3550 60%, #0B6E5B 125%)',
             WebkitBackgroundClip: 'text',
             backgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
@@ -621,7 +621,7 @@ function CredentialsStep({
         type="submit"
         style={{
           marginTop: 2,
-          background: 'linear-gradient(135deg, #E4002B 0%, #B8001F 100%)',
+          background: 'linear-gradient(135deg, #0B6E5B 0%, #0A5F4F 100%)',
           color: 'var(--on-accent)',
           border: 'none',
           padding: '12px 18px',
@@ -635,7 +635,7 @@ function CredentialsStep({
           alignItems: 'center',
           justifyContent: 'center',
           gap: 8,
-          boxShadow: '0 10px 24px rgba(228,0,43,0.35)',
+          boxShadow: '0 10px 24px rgba(11, 110, 91,0.35)',
         }}
       >
         Continue

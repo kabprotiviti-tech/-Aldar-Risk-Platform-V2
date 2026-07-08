@@ -352,7 +352,7 @@ export function Sidebar() {
                       borderRadius: '9px',
                       textDecoration: 'none',
                       backgroundColor: isActive ? 'var(--accent-primary)' : 'transparent',
-                      boxShadow: isActive ? '0 2px 8px rgba(228,0,43,0.28)' : 'none',
+                      boxShadow: isActive ? '0 2px 8px rgba(11, 110, 91,0.28)' : 'none',
                       transition: 'background-color 0.15s ease, box-shadow 0.15s ease',
                     }}
                     onMouseEnter={(e) => {

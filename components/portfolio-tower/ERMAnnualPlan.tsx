@@ -39,7 +39,7 @@ const CATEGORY_META: Record<
   review: { label: 'Review', color: '#2D9EFF', bg: 'rgba(45,158,255,0.20)', border: 'rgba(45,158,255,0.55)' },
   training: { label: 'Training', color: '#22C55E', bg: 'rgba(34,197,94,0.20)', border: 'rgba(34,197,94,0.55)' },
   monitoring: { label: 'Monitoring', color: '#F5C518', bg: 'rgba(245,197,24,0.20)', border: 'rgba(245,197,24,0.55)' },
-  reporting: { label: 'Reporting', color: '#E4002B', bg: 'rgba(228,0,43,0.20)', border: 'rgba(228,0,43,0.55)' },
+  reporting: { label: 'Reporting', color: '#0B6E5B', bg: 'rgba(11, 110, 91,0.20)', border: 'rgba(11, 110, 91,0.55)' },
 }
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -56,7 +56,7 @@ const STATE_META: Record<
   { label: string; color: string; bg: string; border: string; Icon: LucideIcon }
 > = {
   completed: { label: 'Completed', color: '#22C55E', bg: 'rgba(34,197,94,0.16)', border: 'rgba(34,197,94,0.5)', Icon: Check },
-  overdue: { label: 'Overdue', color: '#E4002B', bg: 'rgba(228,0,43,0.16)', border: 'rgba(228,0,43,0.5)', Icon: AlertTriangle },
+  overdue: { label: 'Overdue', color: '#C2410C', bg: 'rgba(194,65,12,0.16)', border: 'rgba(194,65,12,0.5)', Icon: AlertTriangle },
   in_progress: { label: 'In Progress', color: '#2D9EFF', bg: 'rgba(45,158,255,0.16)', border: 'rgba(45,158,255,0.5)', Icon: Clock },
   due: { label: 'Due', color: '#B8860B', bg: 'rgba(245,197,24,0.20)', border: 'rgba(245,197,24,0.6)', Icon: Clock },
   planned: { label: 'Planned', color: 'var(--text-tertiary)', bg: 'var(--bg-primary)', border: 'var(--border-color)', Icon: Circle },
@@ -271,9 +271,9 @@ export function ERMAnnualPlan() {
                           <span
                             style={{
                               marginLeft: 6,
-                              background: 'rgba(228,0,43,0.16)',
+                              background: 'rgba(11, 110, 91,0.16)',
                               color: 'var(--accent-primary)',
-                              border: '1px solid rgba(228,0,43,0.4)',
+                              border: '1px solid rgba(11, 110, 91,0.4)',
                               padding: '1px 5px',
                               borderRadius: 3,
                               fontSize: 8,

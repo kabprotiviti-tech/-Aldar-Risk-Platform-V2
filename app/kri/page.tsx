@@ -597,7 +597,7 @@ function KRIRow({
                   fontWeight: 700,
                   background: 'var(--bg-primary)',
                   color: 'var(--accent-primary)',
-                  border: '1px solid rgba(228,0,43,0.4)',
+                  border: '1px solid rgba(11, 110, 91,0.4)',
                   padding: '1px 5px',
                   borderRadius: 3,
                   fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
@@ -620,7 +620,7 @@ function KRIRow({
 const TIER_META = {
   verified: { label: 'Verified', color: '#22C55E' },
   illustrative: { label: 'Illustrative', color: '#F5C518' },
-  placeholder: { label: 'Placeholder', color: '#B8001F' },
+  placeholder: { label: 'Placeholder', color: '#0A5F4F' },
   ai_hypothesis: { label: 'AI Hypothesis', color: '#A855F7' },
 } as const
 
