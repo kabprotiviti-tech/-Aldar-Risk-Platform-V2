@@ -70,7 +70,7 @@ export const PERSONAS: Persona[] = [
   },
   {
     id: 'subsidiary-ceo',
-    title: 'Subsidiary CEO',
+    title: 'Subsidiary Management',
     subtitle: 'Accountable for subsidiary risk profile · Sign-off on appetite breach',
     line: '1st line',
     landing: '/my-dashboard',
@@ -81,8 +81,8 @@ export const PERSONAS: Persona[] = [
   },
   {
     id: 'arc-chair',
-    title: 'ARC Chair',
-    subtitle: 'Board oversight · Quarterly pack · Independent NED',
+    title: 'ARC Members',
+    subtitle: 'Board oversight · Quarterly pack · Independent NEDs',
     line: 'governing',
     landing: '/my-dashboard',
     requiresSubsidiary: false,
