@@ -25,14 +25,16 @@
  * AED.
  */
 
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import Link from 'next/link'
+import { CRITICAL_HIGH_RISKS } from '@/lib/data/topRiskBreakdown'
 import {
   AlertCircle,
   Plus,
   ShieldCheck,
   Crown,
   ChevronRight,
+  X,
 } from 'lucide-react'
 import { SimulationProvider, useSimulation } from '@/lib/context/SimulationContext'
 import { RiskDraftProvider, useRiskDrafts } from '@/lib/context/RiskDraftContext'
@@ -295,8 +297,6 @@ function MyDashboardContent() {
 
         {/* Reconciliation — the headline numbers add up, in one auditable line */}
         <ReconStrip
-          total={BASELINE_RISK_POSTURE.totalRisks}
-          criticalHigh={headlineCriticalHigh}
           critical={criticalCount}
           high={highCount}
           gross={BASELINE_RISK_POSTURE.totalFinancialExposure}
@@ -848,16 +848,12 @@ function PostureBullet({
 
 /** One auditable line proving the headline numbers reconcile. */
 function ReconStrip({
-  total,
-  criticalHigh,
   critical,
   high,
   gross,
   hedged,
   net,
 }: {
-  total: number
-  criticalHigh: number
   critical: number
   high: number
   gross: number
@@ -872,10 +868,107 @@ function ReconStrip({
   )
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-      <Chip value={`${criticalHigh} / ${total}`} label={`Critical or High · ${critical}C ${high}H`} />
+      <CriticalHighTile critical={critical} high={high} />
       <Chip value={aedShort(gross)} label="Gross exposure" />
       <Chip value={aedShort(hedged)} label="Hedged" />
       <Chip value={aedShort(net)} label="Net unhedged vs appetite" color={DANGER} />
+    </div>
+  )
+}
+
+/** Clickable "Critical & High" tile → drill-down drawer naming the risks.
+ *  Tile counts and the drawer list read the SAME curated source
+ *  (CRITICAL_HIGH_RISKS), so they can never disagree. */
+function CriticalHighTile({ critical, high }: { critical: number; high: number }) {
+  const [open, setOpen] = useState(false)
+  const total = CRITICAL_HIGH_RISKS.length
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        title="See the critical & high risks"
+        style={{
+          flex: '1 1 150px', minWidth: 130, textAlign: 'left', cursor: 'pointer',
+          background: 'var(--bg-card)', border: '1px solid var(--border-color)',
+          borderRadius: 'var(--radius-md, 10px)', padding: '11px 15px', boxShadow: 'var(--shadow-sm)',
+          display: 'flex', flexDirection: 'column', gap: 4,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
+          <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums', lineHeight: 1.05 }}>{total}</span>
+          <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--accent-primary)', display: 'inline-flex', alignItems: 'center', gap: 2 }}>View <ChevronRight size={12} /></span>
+        </div>
+        <div style={{ fontSize: 10.5, fontWeight: 600, color: 'var(--text-tertiary)' }}>
+          Critical &amp; High · {critical} critical, {high} high
+        </div>
+      </button>
+      {open && <CriticalHighDrawer onClose={() => setOpen(false)} critical={critical} high={high} />}
+    </>
+  )
+}
+
+function CriticalHighDrawer({ onClose, critical, high }: { onClose: () => void; critical: number; high: number }) {
+  const ratingColor = (r: string) => (r === 'Critical' ? DANGER : '#C2410C')
+  return (
+    <div
+      onClick={onClose}
+      style={{ position: 'fixed', inset: 0, zIndex: 90, background: 'rgba(10,14,20,0.45)', display: 'flex', justifyContent: 'flex-end' }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: 'min(560px, 94vw)', height: '100%', background: 'var(--bg-secondary)',
+          borderLeft: '1px solid var(--border-color)', boxShadow: 'var(--shadow-lg)',
+          display: 'flex', flexDirection: 'column', overflow: 'hidden',
+        }}
+      >
+        {/* header */}
+        <div style={{ padding: '20px 22px', borderBottom: '1px solid var(--border-color)' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--accent-primary)', marginBottom: 6 }}>
+                Critical &amp; High risks
+              </div>
+              <h2 className="ui-display" style={{ fontSize: 24, margin: 0, color: 'var(--text-primary)' }}>
+                The {CRITICAL_HIGH_RISKS.length} risks above the line
+              </h2>
+              <div style={{ fontSize: 12.5, color: 'var(--text-tertiary)', marginTop: 6 }}>
+                {critical} critical · {high} high · ranked by residual score. <span style={{ fontStyle: 'italic' }}>Illustrative.</span>
+              </div>
+            </div>
+            <button onClick={onClose} title="Close" style={{ background: 'transparent', border: '1px solid var(--border-color)', borderRadius: 8, padding: 6, cursor: 'pointer', color: 'var(--text-secondary)', flexShrink: 0 }}>
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+        {/* list */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '10px 14px' }}>
+          {CRITICAL_HIGH_RISKS.map((r) => (
+            <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 8px', borderBottom: '1px solid var(--border-color)' }}>
+              <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: ratingColor(r.rating), background: `${ratingColor(r.rating)}18`, border: `1px solid ${ratingColor(r.rating)}55`, padding: '3px 8px', borderRadius: 4, flexShrink: 0, minWidth: 62, textAlign: 'center' }}>
+                {r.rating}
+              </span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--text-primary)' }}>
+                  <span style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: 11, color: 'var(--text-tertiary)', marginRight: 8 }}>{r.id}</span>
+                  {r.name}
+                </div>
+                <div style={{ fontSize: 11.5, color: 'var(--text-tertiary)', marginTop: 2 }}>{r.owner} · {r.entity}</div>
+              </div>
+              <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 800, color: ratingColor(r.rating), fontVariantNumeric: 'tabular-nums' }}>{r.residual.toFixed(1)}<span style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600 }}>/25</span></div>
+                <div style={{ fontSize: 10.5, color: 'var(--text-tertiary)' }}>AED {r.exposureAedMn}M</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* footer */}
+        <div style={{ padding: '14px 22px', borderTop: '1px solid var(--border-color)' }}>
+          <Link href="/risk-register" onClick={onClose} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700, color: 'var(--accent-primary)', textDecoration: 'none' }}>
+            Open the full Risk Register <ChevronRight size={14} />
+          </Link>
+        </div>
+      </div>
     </div>
   )
 }
