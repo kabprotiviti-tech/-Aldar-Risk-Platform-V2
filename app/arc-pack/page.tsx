@@ -25,8 +25,7 @@ import { Printer, FileText, FileDown, Loader2 } from 'lucide-react'
 import { SimulationProvider, useSimulation } from '@/lib/context/SimulationContext'
 import { KRIThresholdsProvider } from '@/lib/context/KRIThresholdsContext'
 import { KRIEntriesProvider } from '@/lib/context/KRIEntriesContext'
-import { MitigationActionsProvider } from '@/lib/context/MitigationActionsContext'
-import { ACTIONS } from '@/lib/engine/seedData'
+import { MitigationActionsProvider, useMitigationActions } from '@/lib/context/MitigationActionsContext'
 import { StatusBadge } from '@/components/provenance/StatusBadge'
 import { NumericValue } from '@/components/provenance/NumericValue'
 import {
@@ -288,6 +287,12 @@ function ARCPackContent() {
     }
   }, [])
 
+  // Live state — the SAME sources the on-screen sections read from
+  // (RiskContentSection / ARCFinalSections), so the exported PDF can never
+  // show different risks or mitigations than what's on screen.
+  const { risks } = useSimulation()
+  const { actions, isOverdue } = useMitigationActions()
+
   const [exporting, setExporting] = useState(false)
   const handleExportPDF = useCallback(async () => {
     if (exporting) return
@@ -297,22 +302,26 @@ function ARCPackContent() {
       const { downloadARCPackPDF } = await import(
         '@/components/arc-pack/ARCPackPDFDocument'
       )
-      // Rank ACTIONS by expectedReductionPct desc — surfaces the highest-impact
-      // levers in the printed pack.
-      const top = [...ACTIONS].sort(
-        (a, b) => b.expectedReductionPct - a.expectedReductionPct,
-      )
-      await downloadARCPackPDF(top)
+      // Same sort as RiskContentSection: top-10 by residual descending.
+      const topRisks = [...risks].sort((a, b) => b.newResidual - a.newResidual).slice(0, 10)
+      // Same filter+sort as ARCFinalSections' MitigationActionsSection:
+      // open actions, overdue first, then earliest due date.
+      const openActions = actions
+        .filter((a) => a.status !== 'closed')
+        .sort((a, b) => {
+          const ao = isOverdue(a) ? 0 : 1
+          const bo = isOverdue(b) ? 0 : 1
+          if (ao !== bo) return ao - bo
+          return (a.dueDate || '').localeCompare(b.dueDate || '')
+        })
+      await downloadARCPackPDF(topRisks, openActions)
     } catch (err) {
       console.error('PDF export failed', err)
       alert('PDF export failed — see console for details.')
     } finally {
       setExporting(false)
     }
-  }, [exporting])
-
-  // Pull risks just to show the count in the header (real content lands in E7)
-  const { risks } = useSimulation()
+  }, [exporting, risks, actions, isOverdue])
 
   return (
     <div

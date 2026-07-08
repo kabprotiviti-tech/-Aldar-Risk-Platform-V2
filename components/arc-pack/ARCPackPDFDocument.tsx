@@ -29,10 +29,11 @@ import {
   ABC_FY25_NET_PROFIT_AFTER_TAX,
   ABC_Q1_26_BACKLOG,
 } from '@/lib/data/aldar-financials'
-import { RISKS, type ActionDef } from '@/lib/engine/seedData'
 import { KRI_DEFINITIONS } from '@/lib/data/kri-definitions'
 import { entityForRisk } from '@/lib/data/risk-entity-mapping'
 import { getEntity } from '@/lib/entities/hierarchy'
+import type { RiskState } from '@/lib/engine/types'
+import type { MitigationAction } from '@/lib/context/MitigationActionsContext'
 
 const COLORS = {
   bg: '#ffffff',
@@ -169,25 +170,31 @@ function fmt(n: number, unit: string): string {
   return `${n.toLocaleString()} ${unit}`
 }
 
-function ratingColor(score: number): string {
-  if (score >= 16) return COLORS.critical
-  if (score >= 12) return COLORS.high
-  if (score >= 8) return COLORS.medium
-  return COLORS.low
-}
-
-function ratingLabel(score: number): string {
-  if (score >= 16) return 'Critical'
-  if (score >= 12) return 'High'
-  if (score >= 8) return 'Medium'
-  return 'Low'
+// Same rating -> color mapping as the on-screen RiskContentSection.tsx,
+// keyed by the engine's own rating string (ratingTo) rather than
+// re-deriving bands from a raw score — so the PDF can't disagree with
+// the screen on which band a risk falls in.
+function ratingColorByLabel(rating: RiskState['ratingTo']): string {
+  switch (rating) {
+    case 'Critical': return COLORS.critical
+    case 'High': return COLORS.high
+    case 'Medium': return COLORS.medium
+    case 'Low':
+    default: return COLORS.low
+  }
 }
 
 interface ARCPDFProps {
-  topMitigations: ActionDef[]
+  /** Top-10 risks, live simulation state — same source + sort as the
+   * on-screen "Top Risks & Heatmap" section (RiskContentSection.tsx), so
+   * the PDF can never show different risks/scores than the screen. */
+  topRisks: RiskState[]
+  /** Open mitigation actions, live + user-edited state — same
+   * filter/sort as the on-screen ARCFinalSections.tsx. */
+  topMitigations: MitigationAction[]
 }
 
-export function ARCPackPDFDocument({ topMitigations }: ARCPDFProps) {
+export function ARCPackPDFDocument({ topRisks, topMitigations }: ARCPDFProps) {
   const today = new Date().toLocaleDateString('en-AE', {
     timeZone: 'Asia/Dubai',
     year: 'numeric',
@@ -195,12 +202,7 @@ export function ARCPackPDFDocument({ topMitigations }: ARCPDFProps) {
     day: 'numeric',
   })
 
-  const sortedRisks = [...RISKS]
-    .map((r) => ({
-      ...r,
-      inherent: r.baseLikelihood * r.baseImpact,
-    }))
-    .sort((a, b) => b.inherent - a.inherent)
+  const sortedRisks = topRisks
 
   return (
     <Document
@@ -270,7 +272,7 @@ export function ARCPackPDFDocument({ topMitigations }: ARCPDFProps) {
           {sortedRisks.length} active engine risks across {' '}
           {new Set(sortedRisks.map((r) => entityForRisk(r.id))).size} entities.
           Top residual risk: {sortedRisks[0]?.id} {sortedRisks[0]?.name},
-          inherent {sortedRisks[0]?.inherent}/25, owner {sortedRisks[0]?.owner}.
+          residual {sortedRisks[0]?.newResidual.toFixed(1)}/25, owner {sortedRisks[0]?.owner}.
         </Text>
 
         <View style={s.table}>
@@ -278,28 +280,30 @@ export function ARCPackPDFDocument({ topMitigations }: ARCPDFProps) {
             <Text style={[s.thCell, { width: 22 }]}>#</Text>
             <Text style={[s.thCell, { width: 36 }]}>ID</Text>
             <Text style={[s.thCell, { flex: 2 }]}>Risk</Text>
-            <Text style={[s.thCell, { flex: 1.4 }]}>Entity</Text>
-            <Text style={[s.thCell, { width: 50, textAlign: 'right' }]}>Inherent</Text>
+            <Text style={[s.thCell, { flex: 1.2 }]}>Entity</Text>
+            <Text style={[s.thCell, { width: 44, textAlign: 'right' }]}>Inherent</Text>
+            <Text style={[s.thCell, { width: 44, textAlign: 'right' }]}>Residual</Text>
             <Text style={[s.thCell, { flex: 1 }]}>Rating</Text>
           </View>
-          {sortedRisks.slice(0, 10).map((r, i) => {
+          {sortedRisks.map((r, i) => {
             const e = getEntity(entityForRisk(r.id))
-            const c = ratingColor(r.inherent)
+            const c = ratingColorByLabel(r.ratingTo)
             return (
               <View key={r.id} style={s.tr}>
                 <Text style={[s.tdCell, { width: 22, color: COLORS.muted }]}>{i + 1}</Text>
                 <Text style={[s.tdCell, { width: 36 }]}>{r.id}</Text>
                 <Text style={[s.tdCell, { flex: 2 }]}>{r.name}</Text>
-                <Text style={[s.tdCell, { flex: 1.4, color: COLORS.muted }]}>{e?.shortName ?? '—'}</Text>
-                <Text style={[s.tdCell, { width: 50, textAlign: 'right' }]}>{r.inherent}/25</Text>
-                <Text style={[s.tdCell, { flex: 1, color: c, fontFamily: 'Helvetica-Bold' }]}>{ratingLabel(r.inherent)}</Text>
+                <Text style={[s.tdCell, { flex: 1.2, color: COLORS.muted }]}>{e?.shortName ?? '—'}</Text>
+                <Text style={[s.tdCell, { width: 44, textAlign: 'right' }]}>{r.newInherent.toFixed(1)}</Text>
+                <Text style={[s.tdCell, { width: 44, textAlign: 'right' }]}>{r.newResidual.toFixed(1)}</Text>
+                <Text style={[s.tdCell, { flex: 1, color: c, fontFamily: 'Helvetica-Bold' }]}>{r.ratingTo}</Text>
               </View>
             )
           })}
         </View>
 
         <Text style={[s.muted, { marginTop: 12 }]}>
-          Rating bands: Critical &gt;= 16, High 12-15, Medium 8-11, Low &lt; 8.
+          Scores from the live simulation engine — identical to the on-screen Top Risks &amp; Heatmap section.
         </Text>
 
         <Text style={s.footerBar} fixed>
@@ -372,29 +376,31 @@ export function ARCPackPDFDocument({ topMitigations }: ARCPDFProps) {
         <View style={s.divider} />
 
         <Text style={s.sectionLabel}>Section 5 — Outstanding Mitigation Actions</Text>
-        <Text style={s.h2}>Top Mitigation Levers</Text>
-        <View style={s.table}>
-          <View style={s.th}>
-            <Text style={[s.thCell, { width: 50 }]}>ID</Text>
-            <Text style={[s.thCell, { flex: 2 }]}>Action</Text>
-            <Text style={[s.thCell, { flex: 1.4 }]}>Owner</Text>
-            <Text style={[s.thCell, { width: 70 }]}>Effort</Text>
-            <Text style={[s.thCell, { width: 50, textAlign: 'right' }]}>Reduction</Text>
-          </View>
-          {topMitigations.slice(0, 8).map((a) => (
-            <View key={a.id} style={s.tr}>
-              <Text style={[s.tdCell, { width: 50 }]}>{a.id}</Text>
-              <Text style={[s.tdCell, { flex: 2 }]}>{a.name}</Text>
-              <Text style={[s.tdCell, { flex: 1.4, color: COLORS.muted }]}>{a.ownerRole}</Text>
-              <Text style={[s.tdCell, { width: 70, color: COLORS.muted }]}>
-                {a.effort} · {a.horizon}
-              </Text>
-              <Text style={[s.tdCell, { width: 50, textAlign: 'right' }]}>
-                -{a.expectedReductionPct}%
-              </Text>
+        <Text style={s.h2}>Open Actions (priority order)</Text>
+        {topMitigations.length === 0 ? (
+          <Text style={[s.body, { color: COLORS.muted }]}>
+            No open mitigation actions in the register at the moment.
+          </Text>
+        ) : (
+          <View style={s.table}>
+            <View style={s.th}>
+              <Text style={[s.thCell, { width: 44 }]}>Risk</Text>
+              <Text style={[s.thCell, { flex: 2 }]}>Action</Text>
+              <Text style={[s.thCell, { flex: 1.2 }]}>Owner</Text>
+              <Text style={[s.thCell, { width: 60 }]}>Due</Text>
+              <Text style={[s.thCell, { width: 60 }]}>Status</Text>
             </View>
-          ))}
-        </View>
+            {topMitigations.slice(0, 8).map((a) => (
+              <View key={a.id} style={s.tr}>
+                <Text style={[s.tdCell, { width: 44 }]}>{a.riskId}</Text>
+                <Text style={[s.tdCell, { flex: 2 }]}>{a.name}</Text>
+                <Text style={[s.tdCell, { flex: 1.2, color: COLORS.muted }]}>{a.owner}</Text>
+                <Text style={[s.tdCell, { width: 60, color: COLORS.muted }]}>{a.dueDate}</Text>
+                <Text style={[s.tdCell, { width: 60, color: COLORS.high, fontFamily: 'Helvetica-Bold' }]}>{a.status}</Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         <Text style={s.footerBar} fixed>
           ABC ARC Pack · {today} · Page 4 of 5
@@ -444,13 +450,14 @@ export function ARCPackPDFDocument({ topMitigations }: ARCPDFProps) {
 }
 
 /**
- * Trigger a browser download of the ARC Pack PDF. Caller passes the
- * mitigation actions (lifted from MitigationActionsContext + engine
- * ACTIONS) so the function stays pure.
+ * Trigger a browser download of the ARC Pack PDF. Caller passes the SAME
+ * live risks (SimulationContext) and open mitigation actions
+ * (MitigationActionsContext) that the on-screen sections render, already
+ * sorted the same way — so the PDF and the screen can never disagree.
  */
-export async function downloadARCPackPDF(topMitigations: ActionDef[]) {
+export async function downloadARCPackPDF(topRisks: RiskState[], topMitigations: MitigationAction[]) {
   const blob = await pdf(
-    <ARCPackPDFDocument topMitigations={topMitigations} />,
+    <ARCPackPDFDocument topRisks={topRisks} topMitigations={topMitigations} />,
   ).toBlob()
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
