@@ -343,34 +343,16 @@ function ARCPackContent() {
           flexWrap: 'wrap',
         }}
       >
-        <div>
-          <h1
-            style={{
-              fontSize: 22,
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              margin: 0,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-            }}
-          >
-            <FileText size={20} style={{ color: 'var(--accent-primary)' }} />
-            ARC Pack Builder
-          </h1>
-          <p
-            style={{
-              fontSize: 12,
-              color: 'var(--text-secondary)',
-              margin: '4px 0 0',
-              maxWidth: 720,
-              lineHeight: 1.5,
-            }}
-          >
-            Print-friendly Audit &amp; Risk Committee deliverable.
-            Review on screen, then click Print / Save as PDF for a
-            board-ready document. {risks.length} engine risks in current scope.
-            All 6 sections live.
+        <div style={{ minWidth: 0 }}>
+          <div className="ui-eyebrow">
+            <FileText size={12} />
+            Audit &amp; Risk Committee
+          </div>
+          <h1 className="ui-page-title">ARC Pack Builder</h1>
+          <p className="ui-page-subtitle">
+            Print-friendly Audit &amp; Risk Committee deliverable. Review on screen,
+            then click Print / Save as PDF for a board-ready document.
+            {' '}{risks.length} engine risks in current scope. All 6 sections live.
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>

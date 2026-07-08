@@ -476,29 +476,17 @@ function ControlCommandCenterInner() {
     <div className="space-y-6">
       <IllustrativeDataBanner />
       {/* ── SECTION 1: Page header ─────────────────────────────────────────── */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Shield size={16} style={{ color: 'var(--accent-primary)' }} />
-          <h2 style={{ color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 700, margin: 0 }}>
-            Internal Control Command Center
-          </h2>
-          <span
-            style={{
-              padding: '2px 9px',
-              borderRadius: '20px',
-              fontSize: '0.62rem',
-              fontWeight: 700,
-              color: '#F5C518',
-              backgroundColor: 'rgba(245,197,24,0.08)',
-              border: '1px solid rgba(245,197,24,0.2)',
-            }}
-          >
+      <div className="ui-page-header">
+        <div style={{ minWidth: 0 }}>
+          <div className="ui-eyebrow">
+            <Shield size={12} />
             ICOFR · Integration Pending
-          </span>
+          </div>
+          <h1 className="ui-page-title">Internal Control Command Center</h1>
+          <p className="ui-page-subtitle">
+            Click any metric to filter · click any control row to open its drill-down.
+          </p>
         </div>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>
-          Click any metric to filter · Click any control row to open drill-down
-        </p>
       </div>
 
       {/* ── Global Filter Indicator ────────────────────────────────────────── */}
