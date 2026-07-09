@@ -46,6 +46,7 @@ import {
   CalendarDays,
   ArrowRight,
   Settings,
+  Library,
   type LucideIcon,
 } from 'lucide-react'
 import { usePersona } from '@/lib/context/PersonaContext'
@@ -135,6 +136,15 @@ const NAV_GROUPS: NavGroup[] = [
       { href: '/executive-brief', label: 'Executive Brief', icon: FileBarChart, description: 'AI board summary', personas: ['group-cro', 'arc-chair', 'subsidiary-ceo'] },
       { href: '/documents', label: 'Documents', icon: FileText, description: 'Document intelligence', personas: ['group-cro', 'risk-champion'] },
       { href: '/audit-trail', label: 'Audit Trail', icon: ShieldCheck, description: 'Append-only event log', personas: ['group-cro', 'arc-chair', 'subsidiary-ceo'] },
+    ],
+  },
+  {
+    // Reference & governance shelf — standing documents, records and
+    // frameworks the group reviews rather than operates day to day.
+    id: 'reference',
+    label: 'Governance & Reference',
+    icon: Library,
+    items: [
       { href: '/governance-records', label: 'Governance Records', icon: ClipboardList, description: 'Incidents · acceptances · lessons', personas: ALL },
       { href: '/risk-review', label: 'Risk Review & History', icon: CalendarClock, description: 'Review cycles · movement · promotion', personas: ['group-cro', 'risk-champion', 'arc-chair'] },
       { href: '/erm-plan', label: 'ERM Annual Plan', icon: CalendarDays, description: '12-month cycle · status · Due/Overdue', personas: ALL },
@@ -199,9 +209,10 @@ export function Sidebar() {
     // Active route's group always opens, even if user collapsed it earlier.
     if (hasActiveItem) return true
     const saved = groupOpen[groupId]
-    // The narrative spine ("story") leads; "Depth on demand" starts folded so
-    // the eye lands on the 7-beat story, not the 12-item reference shelf.
-    if (saved === undefined) return groupId !== 'depth'
+    // The narrative spine ("story") leads; "Depth on demand" and the
+    // "Governance & Reference" shelf both start folded so the eye lands on
+    // the 7-beat story, not the reference shelves.
+    if (saved === undefined) return groupId !== 'depth' && groupId !== 'reference'
     return saved
   }
 
