@@ -32,6 +32,9 @@ import { useKRIThresholds } from '@/lib/context/KRIThresholdsContext'
 import { useKRIEntries } from '@/lib/context/KRIEntriesContext'
 import { KRI_DEFINITIONS } from '@/lib/data/kri-definitions'
 import { computeKRIStatus, type KRIStatus } from '@/lib/data/kri-status'
+import { BASELINE_RISK_POSTURE } from '@/lib/data/baselineRiskPosture'
+
+const NET_UNMITIGATED_MN = BASELINE_RISK_POSTURE.netUnhedgedExposure / 1e6 // 900 — Group source of truth
 
 export function ERMScorecard() {
   const { risks } = useSimulation()
@@ -135,6 +138,11 @@ export function ERMScorecard() {
           Group-level KPI summary. Each tile derives from engine output ×
           user-entered mitigations × KRI entries.
         </div>
+        {/* Exposure bridge — makes the 900 (Group anchor) reconcile with the finer 323 */}
+        <div style={{ fontSize: 10.5, color: 'var(--text-secondary)', marginTop: 6, lineHeight: 1.5 }}>
+          <strong style={{ color: 'var(--text-primary)' }}>Exposure basis:</strong>{' '}
+          gross AED 2.35Bn → <strong style={{ color: 'var(--text-primary)' }}>net unmitigated AED {NET_UNMITIGATED_MN.toFixed(0)}mn</strong> (Group anchor, matches the dashboard) → residual after controls AED {totalExposure.toFixed(0)}mn (per-risk detail below).
+        </div>
       </div>
 
       <div
@@ -150,7 +158,7 @@ export function ERMScorecard() {
           value={`${totalExposure.toFixed(0)}`}
           unit="AED mn"
           accent="var(--accent-primary)"
-          hint={`post-control, ${risks.length} risks · gross is AED 2.35Bn`}
+          hint={`after controls, ${risks.length} risks · net unmitigated is AED ${NET_UNMITIGATED_MN.toFixed(0)}mn`}
         />
         <Tile
           icon={<AlertTriangle size={14} />}
