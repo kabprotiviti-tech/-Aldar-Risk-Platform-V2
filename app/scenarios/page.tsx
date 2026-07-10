@@ -24,7 +24,9 @@ import { Card, CardBody } from '@/components/ui/Card'
 import { Modal } from '@/components/ui/Modal'
 import { SavedScenariosProvider, useSavedScenarios } from '@/lib/context/SavedScenariosContext'
 import { CostOfInactionPanel } from '@/components/scenarios/CostOfInactionPanel'
+import { DecisionIntelligencePanel } from '@/components/scenarios/DecisionIntelligencePanel'
 import { ExposureClimax } from '@/components/scenarios/ExposureClimax'
+import { recordAiSuggestion } from '@/lib/context/AuditTrailContext'
 import { SimulationWorkbench } from '@/components/simulation/SimulationWorkbench'
 import { BaselineComparisonPanel } from '@/components/scenarios/BaselineComparisonPanel'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -147,6 +149,18 @@ function DriverScenarioBuilder() {
     setRan(false)
   }
   const reset = () => { setValues({}); setActivePreset(null); setActiveSaved(null); setRan(false) }
+
+  const handleRun = () => {
+    setRan(true)
+    const drivers = SCENARIO_DRIVERS.filter((d) => (values[d.key] || 0) > 0)
+    if (drivers.length > 0) {
+      recordAiSuggestion({
+        feature: 'Scenario Analysis · Decision Intelligence',
+        summary: `Surfaced response options for a ${drivers.length}-driver scenario (${drivers.map((d) => d.label).join(', ')}).`,
+        details: { drivers: drivers.map((d) => ({ key: d.key, move: values[d.key] })) },
+      })
+    }
+  }
 
   const handleSave = (name: string) => {
     const s = saveScenario(name, values)
@@ -271,7 +285,7 @@ function DriverScenarioBuilder() {
             >
               <Save size={14} /> Save scenario
             </button>
-            <button onClick={() => setRan(true)} disabled={active.length === 0} className="btn-primary flex items-center gap-2" style={{ opacity: active.length === 0 ? 0.5 : 1, cursor: active.length === 0 ? 'not-allowed' : 'pointer' }}>
+            <button onClick={handleRun} disabled={active.length === 0} className="btn-primary flex items-center gap-2" style={{ opacity: active.length === 0 ? 0.5 : 1, cursor: active.length === 0 ? 'not-allowed' : 'pointer' }}>
               <Play size={15} /> Run scenario
             </button>
           </div>
@@ -339,6 +353,17 @@ function DriverScenarioBuilder() {
                     </motion.div>
                   )}
                 </AnimatePresence>
+              </div>
+
+              {/* Decision intelligence — response options for this scenario */}
+              <div style={{ marginTop: 4 }}>
+                <SectionLabel title="What can we do about it?" hint="Response options mapped to your drivers, ranked by return on effort" />
+                <div style={{ marginTop: 12 }}>
+                  <DecisionIntelligencePanel
+                    driverContribM={Object.fromEntries(perDriver.map(({ d, contrib }) => [d.key, contrib]))}
+                    totalStressM={totalM}
+                  />
+                </div>
               </div>
             </motion.div>
           )}
